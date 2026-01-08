@@ -1,96 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Primary Colors - RVL Week Brand */
+    --primary-purple: 263 84% 58%;
+    --primary-orange: 36 96% 51%;
+    --secondary-yellow: 45 95% 67%;
+    --accent-orange-dark: 25 95% 53%;
+    
+    /* Backgrounds */
+    --bg-light: 43 100% 89%;
+    --bg-cream: 48 100% 95%;
+    
+    /* Semantic Colors */
+    --background: 48 100% 95%;
+    --foreground: 222 47% 11%;
+    
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 222 47% 11%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 263 84% 58%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 36 96% 51%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 43 30% 90%;
+    --muted-foreground: 220 9% 46%;
+    
+    --accent: 45 95% 67%;
+    --accent-foreground: 222 47% 11%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    --border: 36 30% 80%;
+    --input: 36 30% 85%;
+    --ring: 263 84% 58%;
+    
+    --radius: 1rem;
+    
+    /* Custom Shadows */
+    --shadow-cartoon: 6px 6px 0px 0px hsl(222 47% 11% / 0.15);
+    --shadow-cartoon-hover: 8px 8px 0px 0px hsl(222 47% 11% / 0.2);
+    --shadow-cartoon-sm: 4px 4px 0px 0px hsl(222 47% 11% / 0.1);
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(36 96% 51%) 0%, hsl(45 95% 67%) 100%);
+    --gradient-purple: linear-gradient(135deg, hsl(263 84% 58%) 0%, hsl(280 84% 65%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 60% 50%) 100%);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 222 47% 11%;
+    --foreground: 48 100% 95%;
+    
+    --card: 222 40% 15%;
+    --card-foreground: 48 100% 95%;
+    
+    --popover: 222 40% 15%;
+    --popover-foreground: 48 100% 95%;
+    
+    --primary: 263 84% 65%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 36 96% 55%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 222 30% 20%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 45 95% 60%;
+    --accent-foreground: 222 47% 11%;
+    
+    --border: 222 30% 25%;
+    --input: 222 30% 25%;
+    --ring: 263 84% 65%;
   }
 }
 
@@ -100,6 +95,113 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-secondary text-secondary-foreground font-display font-bold px-8 py-4 rounded-2xl;
+    @apply shadow-cartoon transition-all duration-200 ease-out;
+    @apply hover:-translate-y-1 hover:shadow-cartoon-hover;
+    @apply active:translate-y-0 active:shadow-cartoon-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-primary text-primary-foreground font-display font-bold px-8 py-4 rounded-2xl;
+    @apply shadow-cartoon transition-all duration-200 ease-out;
+    @apply hover:-translate-y-1 hover:shadow-cartoon-hover;
+    @apply active:translate-y-0 active:shadow-cartoon-sm;
+  }
+
+  .btn-outline {
+    @apply border-3 border-secondary text-secondary font-display font-bold px-8 py-4 rounded-2xl;
+    @apply bg-transparent transition-all duration-200 ease-out;
+    @apply hover:bg-secondary hover:text-secondary-foreground;
+  }
+
+  .card-cartoon {
+    @apply bg-card rounded-2xl border-3 border-foreground/10;
+    @apply shadow-cartoon transition-all duration-200 ease-out;
+    @apply hover:-translate-y-1 hover:shadow-cartoon-hover;
+  }
+
+  .card-highlight {
+    @apply bg-card rounded-2xl border-3 border-secondary;
+    @apply shadow-cartoon transition-all duration-200 ease-out;
+    @apply hover:-translate-y-1 hover:shadow-cartoon-hover;
+  }
+
+  .input-styled {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-border bg-card;
+    @apply font-body text-foreground placeholder:text-muted-foreground;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+    @apply transition-all duration-200;
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-purple {
+    background: var(--gradient-purple);
+  }
+
+  .text-shadow-cartoon {
+    text-shadow: 4px 4px 0px hsl(222 47% 11% / 0.2);
+  }
+
+  .triangle-pattern {
+    background-image: 
+      linear-gradient(135deg, hsl(45 95% 67% / 0.6) 25%, transparent 25%),
+      linear-gradient(225deg, hsl(45 95% 67% / 0.6) 25%, transparent 25%);
+    background-size: 100px 100px;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'Fredoka', sans-serif;
+  }
+
+  .font-body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .border-3 {
+    border-width: 3px;
+  }
+
+  .shadow-cartoon {
+    box-shadow: var(--shadow-cartoon);
+  }
+
+  .shadow-cartoon-hover {
+    box-shadow: var(--shadow-cartoon-hover);
+  }
+
+  .shadow-cartoon-sm {
+    box-shadow: var(--shadow-cartoon-sm);
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 }
