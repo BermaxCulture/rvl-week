@@ -4,13 +4,13 @@ interface ProgressBarProps {
   current: number;
   total: number;
   showLabel?: boolean;
-  color?: "orange" | "purple" | "green";
+  color?: "purple" | "gold" | "green";
   size?: "sm" | "md" | "lg";
 }
 
 const colorClasses = {
-  orange: "bg-secondary",
   purple: "bg-primary",
+  gold: "bg-accent",
   green: "bg-success",
 };
 
@@ -24,7 +24,7 @@ export function ProgressBar({
   current,
   total,
   showLabel = false,
-  color = "orange",
+  color = "purple",
   size = "md",
 }: ProgressBarProps) {
   const percentage = Math.min((current / total) * 100, 100);

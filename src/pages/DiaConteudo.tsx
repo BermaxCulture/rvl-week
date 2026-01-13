@@ -48,7 +48,7 @@ export default function DiaConteudo() {
 
   const handleWatchVideo = async (type: "main" | "pastor") => {
     const activityKey = type === "main" ? "videoWatched" : "pastorVideoWatched";
-    
+
     if (day.activities[activityKey]) {
       toast.info("Você já assistiu este vídeo");
       return;
@@ -106,7 +106,7 @@ export default function DiaConteudo() {
 
   const handleShare = () => {
     const text = `Completei o Dia ${dayNum} da RVL Week! 🔥 #RVLWeek #LinkChurch`;
-    
+
     if (navigator.share) {
       navigator.share({
         title: "RVL Week",
@@ -162,11 +162,11 @@ export default function DiaConteudo() {
               >
                 <polygon
                   points="0,100 30,30 60,100"
-                  fill="rgba(252, 217, 91, 0.5)"
+                  fill="rgba(190, 243, 7, 0.4)"
                 />
                 <polygon
                   points="40,100 70,50 100,100"
-                  fill="rgba(252, 217, 91, 0.4)"
+                  fill="rgba(91, 0, 163, 0.3)"
                 />
               </svg>
             </div>
@@ -425,7 +425,7 @@ export default function DiaConteudo() {
                 </div>
               </div>
 
-              <ProgressBar current={totalEarned} total={totalPossible} showLabel color="orange" size="lg" />
+              <ProgressBar current={totalEarned} total={totalPossible} showLabel color="purple" size="lg" />
 
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 {day.status !== "completed" && (
