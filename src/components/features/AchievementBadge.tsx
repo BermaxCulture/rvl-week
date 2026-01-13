@@ -80,7 +80,7 @@ export function AchievementBadge({ achievement, size = "md" }: AchievementBadgeP
         <ProgressBar
           current={achievement.progress}
           total={achievement.total}
-          color={isUnlocked ? "orange" : "purple"}
+          color={isUnlocked ? "purple" : "purple"}
           size="sm"
         />
         <p className="text-xs text-muted-foreground mt-1">

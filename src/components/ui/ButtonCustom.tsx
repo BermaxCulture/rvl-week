@@ -16,10 +16,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const variantClasses = {
   primary: `
     text-white font-heading font-bold uppercase tracking-wider
-    bg-gradient-to-r from-orange-500 to-orange-600
-    hover:from-orange-600 hover:to-orange-700
-    shadow-[0_8px_24px_hsl(30_97%_61%/0.4)]
-    hover:shadow-[0_12px_32px_hsl(30_97%_61%/0.5),0_0_20px_hsl(30_97%_61%/0.3)]
+    bg-gradient-to-r from-[#5b00a3] to-[#4C1D95]
+    hover:from-[#4C1D95] hover:to-[#3d017a]
+    shadow-[0_8px_24px_rgba(91,0,163,0.4)]
+    hover:shadow-[0_12px_32px_rgba(91,0,163,0.5),0_0_20px_rgba(91,0,163,0.3)]
     hover:-translate-y-0.5
     active:translate-y-0
   `,
@@ -34,16 +34,16 @@ const variantClasses = {
   `,
   outline: `
     font-heading font-bold uppercase tracking-wider
-    border-2 border-orange-500 text-orange-500 bg-transparent
+    border-2 border-[#5b00a3] text-[#5b00a3] bg-transparent
     backdrop-blur-sm
-    hover:bg-orange-500 hover:text-white
+    hover:bg-[#5b00a3] hover:text-white
     hover:-translate-y-0.5
     active:translate-y-0
   `,
   ghost: `
     text-foreground font-heading font-medium
     hover:bg-white/10
-    hover:text-orange-400
+    hover:text-[#fcd95b]
   `,
 };
 
