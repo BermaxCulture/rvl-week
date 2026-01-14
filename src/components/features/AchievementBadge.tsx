@@ -38,7 +38,7 @@ export function AchievementBadge({ achievement, size = "md" }: AchievementBadgeP
       animate={{ opacity: 1, scale: 1 }}
       whileHover={{ scale: 1.02 }}
       className={cn(
-        "relative rounded-2xl text-center transition-all duration-200",
+        "relative rounded-2xl text-center transition-all duration-200 h-full flex flex-col",
         sizeClasses[size],
         isUnlocked
           ? "bg-gradient-to-br from-secondary/20 to-accent/20 border-2 border-secondary shadow-cartoon"
@@ -53,7 +53,7 @@ export function AchievementBadge({ achievement, size = "md" }: AchievementBadgeP
 
       <div
         className={cn(
-          "flex items-center justify-center w-12 h-12 mx-auto mb-3 rounded-full",
+          "flex items-center justify-center w-12 h-12 mx-auto mb-3 rounded-full flex-shrink-0",
           isUnlocked
             ? "bg-gradient-to-br from-secondary to-accent"
             : "bg-muted"
@@ -67,16 +67,18 @@ export function AchievementBadge({ achievement, size = "md" }: AchievementBadgeP
         />
       </div>
 
-      <h4
-        className={cn(
-          "font-display font-bold text-sm",
-          isUnlocked ? "text-foreground" : "text-muted-foreground"
-        )}
-      >
-        {achievement.name}
-      </h4>
+      <div className="flex-1 flex items-center justify-center min-h-[2.5rem] mb-2">
+        <h4
+          className={cn(
+            "font-display font-bold text-sm leading-tight",
+            isUnlocked ? "text-foreground" : "text-muted-foreground"
+          )}
+        >
+          {achievement.name}
+        </h4>
+      </div>
 
-      <div className="mt-3">
+      <div className="mt-auto w-full">
         <ProgressBar
           current={achievement.progress}
           total={achievement.total}

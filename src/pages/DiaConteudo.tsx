@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -15,6 +15,7 @@ import {
   PartyPopper,
   Zap,
   Sparkles,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -24,17 +25,38 @@ import { Card } from "@/components/ui/CardCustom";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Quiz } from "@/components/features/Quiz";
 import { useStore } from "@/store/useStore";
+import { Footer } from "@/components/layout/Footer";
+import { cn } from "@/lib/utils";
 
 export default function DiaConteudo() {
   const { dayNumber } = useParams();
   const navigate = useNavigate();
   const { user, days, markVideoWatched, completeQuiz, markDayComplete } = useStore();
 
+  const [searchParams] = useSearchParams();
+  const isPreview = searchParams.get('preview') === 'true';
+
   const [isLoadingVideo, setIsLoadingVideo] = useState(false);
   const [isLoadingPastorVideo, setIsLoadingPastorVideo] = useState(false);
+  const [showMainVideo, setShowMainVideo] = useState(false);
+  const [showPastorVideo, setShowPastorVideo] = useState(false);
+
+  const getYouTubeId = (url: string) => {
+    if (!url) return "";
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : url;
+  };
 
   const dayNum = parseInt(dayNumber || "1");
   const day = days.find((d) => d.dayNumber === dayNum);
+
+  useEffect(() => {
+    if (day && day.status === 'locked' && user?.role !== 'admin') {
+      toast.error("Dia ainda bloqueado");
+      navigate("/jornada");
+    }
+  }, [day, user, navigate]);
 
   if (!day || !user) {
     return (
@@ -45,7 +67,8 @@ export default function DiaConteudo() {
   }
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00");
+    if (!dateStr) return "";
+    const date = new Date(dateStr + "T12:00:00"); // Use noon to avoid timezone issues
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "long",
@@ -62,33 +85,47 @@ export default function DiaConteudo() {
 
     if (type === "main") {
       setIsLoadingVideo(true);
+      setShowMainVideo(true);
     } else {
       setIsLoadingPastorVideo(true);
+      setShowPastorVideo(true);
     }
 
     // Simular carregamento do vídeo
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    markVideoWatched(dayNum, type);
+    if (!isPreview) {
+      markVideoWatched(dayNum, type);
+    }
 
     if (type === "main") {
       setIsLoadingVideo(false);
-      toast.success("Vídeo assistido! +30 pts", {
+      toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +30 pts", {
         icon: <Zap className="w-5 h-5 text-secondary fill-secondary" />
       });
     } else {
       setIsLoadingPastorVideo(false);
-      toast.success("Vídeo assistido! +20 pts", {
+      toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +20 pts", {
         icon: <Zap className="w-5 h-5 text-primary fill-primary" />
       });
     }
   };
 
   const handleQuizComplete = (score: number) => {
-    completeQuiz(dayNum, score);
+    if (!isPreview) {
+      completeQuiz(dayNum, score);
+    } else {
+      toast.info(`Quiz concluído (Modo Preview). Pontuação: ${score}/3`);
+    }
   };
 
   const handleMarkComplete = async () => {
+    if (day.status === "completed" || isPreview) {
+      if (isPreview) {
+        toast.info("Ação desabilitada no Modo Preview");
+      }
+      return;
+    }
     const allComplete =
       day.activities.qrScanned &&
       day.activities.videoWatched &&
@@ -142,21 +179,44 @@ export default function DiaConteudo() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-20 pb-12">
+      {isPreview && (
+        <div className="fixed top-24 left-0 right-0 z-40 px-4">
+          <div className="container mx-auto">
+            <div className="bg-primary text-primary-foreground px-6 py-2 rounded-full shadow-lg flex items-center justify-center gap-2 font-bold text-sm animate-pulse">
+              <Sparkles className="w-4 h-4" />
+              MODO PREVIEW: NENHUM PROGRESSO SERÁ SALVO
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className={cn("pt-24 pb-12", isPreview && "pt-32")}>
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Back Button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="mb-6"
+            className="mt-8 mb-12"
           >
-            <Link
-              to="/jornada"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Voltar</span>
-            </Link>
+            <div className="flex items-center justify-between">
+              <Link
+                to="/jornada"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="font-medium">Voltar</span>
+              </Link>
+
+              {user?.role === 'admin' && (
+                <Link
+                  to={`/jornada/dia/${dayNumber}/editar`}
+                  className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full hover:bg-primary/20 transition-all font-bold text-sm shadow-sm border border-primary/20"
+                >
+                  <Save className="w-4 h-4" />
+                  EDITAR DIA
+                </Link>
+              )}
+            </div>
           </motion.div>
 
           {/* Hero Section */}
@@ -256,18 +316,22 @@ export default function DiaConteudo() {
               Assista ao culto completo
             </h2>
 
-            <Card variant="outlined" className="relative overflow-hidden">
-              <div className="aspect-video bg-muted rounded-xl flex items-center justify-center relative">
+            <Card variant="outlined" className="relative overflow-hidden p-0">
+              <div className="aspect-video bg-muted flex items-center justify-center relative">
                 {isLoadingVideo ? (
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-12 h-12 border-4 border-secondary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-muted-foreground">Carregando vídeo...</p>
+                    <p className="text-muted-foreground">Preparando player...</p>
                   </div>
-                ) : day.activities.videoWatched ? (
-                  <div className="flex flex-col items-center gap-3 text-success">
-                    <CheckCircle className="w-16 h-16" />
-                    <p className="font-semibold">Assistido ✓</p>
-                  </div>
+                ) : (day.activities.videoWatched || showMainVideo) ? (
+                  <iframe
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${getYouTubeId(day.content.videoUrl)}?autoplay=1`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
                 ) : (
                   <button
                     onClick={() => handleWatchVideo("main")}
@@ -281,16 +345,21 @@ export default function DiaConteudo() {
                 )}
 
                 {!day.activities.videoWatched && (
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm font-bold">
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm font-bold z-10 shadow-lg">
                     +30 pts
                   </div>
                 )}
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Duração: ~45 min</p>
+              <div className="p-4 flex items-center justify-between bg-card/50 border-t border-border/5">
+                <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-secondary"></span>
+                  Duração: ~45 min
+                </p>
                 {day.activities.videoWatched && (
-                  <span className="text-success text-sm font-semibold">+30 pts conquistados</span>
+                  <span className="text-success text-sm font-bold flex items-center gap-1">
+                    <CheckCircle className="w-4 h-4" /> +30 pts conquistados
+                  </span>
                 )}
               </div>
             </Card>
@@ -308,18 +377,22 @@ export default function DiaConteudo() {
               Preparação para o próximo dia
             </h2>
 
-            <Card className="relative overflow-hidden">
-              <div className="aspect-video bg-muted rounded-xl flex items-center justify-center relative">
+            <Card className="relative overflow-hidden p-0">
+              <div className="aspect-video bg-muted flex items-center justify-center relative">
                 {isLoadingPastorVideo ? (
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-muted-foreground">Carregando vídeo...</p>
+                    <p className="text-muted-foreground">Preparando player...</p>
                   </div>
-                ) : day.activities.pastorVideoWatched ? (
-                  <div className="flex flex-col items-center gap-3 text-success">
-                    <CheckCircle className="w-16 h-16" />
-                    <p className="font-semibold">Assistido ✓</p>
-                  </div>
+                ) : (day.activities.pastorVideoWatched || showPastorVideo) ? (
+                  <iframe
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${getYouTubeId(day.content.pastorVideoUrl)}?autoplay=1`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
                 ) : (
                   <button
                     onClick={() => handleWatchVideo("pastor")}
@@ -333,16 +406,21 @@ export default function DiaConteudo() {
                 )}
 
                 {!day.activities.pastorVideoWatched && (
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold">
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold z-10 shadow-lg">
                     +20 pts
                   </div>
                 )}
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Duração: ~2 min</p>
+              <div className="p-4 flex items-center justify-between bg-card/50 border-t border-border/5">
+                <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary"></span>
+                  Duração: ~2 min
+                </p>
                 {day.activities.pastorVideoWatched && (
-                  <span className="text-success text-sm font-semibold">+20 pts conquistados</span>
+                  <span className="text-success text-sm font-bold flex items-center gap-1">
+                    <CheckCircle className="w-4 h-4" /> +20 pts conquistados
+                  </span>
                 )}
               </div>
             </Card>
@@ -478,6 +556,7 @@ export default function DiaConteudo() {
           </motion.section>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

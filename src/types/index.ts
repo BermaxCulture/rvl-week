@@ -3,9 +3,11 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  imageUrl?: string;
   totalPoints: number;
   completedDays: number[];
   achievements: string[];
+  role: 'usuario' | 'admin';
   createdAt: string;
 }
 

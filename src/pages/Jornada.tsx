@@ -14,23 +14,31 @@ import {
   ChevronRight,
   User,
   PartyPopper,
+  Camera,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { DayCard } from "@/components/features/DayCard";
 import { AchievementBadge } from "@/components/features/AchievementBadge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Button } from "@/components/ui/ButtonCustom";
+import { Quiz } from "@/components/features/Quiz";
 import { useStore } from "@/store/useStore";
+import { Footer } from "@/components/layout/Footer";
+import { QRScanner } from "@/components/features/QRScanner";
+import { AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function Jornada() {
   const navigate = useNavigate();
   const { user, days, achievements, unlockDay } = useStore();
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [qrCode, setQrCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingDay, setPendingDay] = useState<number | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<string | null>(null);
 
   const completedDays = days.filter((d) => d.status === "completed").length;
 
@@ -40,29 +48,32 @@ export default function Jornada() {
     setShowQRModal(true);
   };
 
-  const handleValidateQR = async () => {
-    if (qrCode.length < 5) {
+  const handleValidateQR = async (codeToValidate?: string) => {
+    const code = codeToValidate || qrCode;
+    if (code.length < 5) {
       toast.error("Código inválido");
       return;
     }
 
     setIsValidating(true);
 
-    // Simular validação
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
     if (selectedDay) {
-      unlockDay(selectedDay, "qrcode");
+      const result = await unlockDay(selectedDay, "qrcode", code);
 
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
+      if (result.success) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
 
-      toast.success(`✅ Dia ${selectedDay} desbloqueado! +100 pts`);
-      setShowQRModal(false);
-      navigate(`/jornada/dia/${selectedDay}`);
+        toast.success(result.message);
+        setShowQRModal(false);
+        setShowScanner(false);
+        navigate(`/jornada/dia/${selectedDay}`);
+      } else {
+        toast.error(result.message);
+      }
     }
 
     setIsValidating(false);
@@ -73,11 +84,15 @@ export default function Jornada() {
     setShowConfirmModal(true);
   };
 
-  const confirmManualUnlock = () => {
+  const confirmManualUnlock = async () => {
     if (pendingDay) {
-      unlockDay(pendingDay, "manual");
-      toast.success(`Dia ${pendingDay} desbloqueado`);
-      navigate(`/jornada/dia/${pendingDay}`);
+      const result = await unlockDay(pendingDay, "manual");
+      if (result.success) {
+        toast.success(result.message);
+        navigate(`/jornada/dia/${pendingDay}`);
+      } else {
+        toast.error(result.message);
+      }
     }
     setShowConfirmModal(false);
   };
@@ -128,7 +143,7 @@ export default function Jornada() {
                 </h1>
 
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="inline-flex items-center gap-2 px-6 py-2 bg-white/10 backdrop-blur-md rounded-full font-display font-bold text-xl text-accent shadow-glow-sm">
+                  <span className="inline-flex items-center gap-2 px-6 py-2 bg-white/10 backdrop-blur-md rounded-full font-display font-bold text-xl text-accent">
                     <Zap className="w-5 h-5 fill-accent" /> {user.totalPoints} pontos
                   </span>
                 </div>
@@ -179,18 +194,55 @@ export default function Jornada() {
               <Award className="w-7 h-7 text-secondary" /> Suas Conquistas
             </h2>
 
+            {/* Mobile-First Instruction Panel */}
+            <AnimatePresence mode="wait">
+              {selectedAchievement && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-4 overflow-hidden"
+                >
+                  <div className="bg-secondary/10 border-2 border-secondary/20 rounded-2xl p-4 flex items-start gap-3">
+                    <div className="bg-secondary/20 p-2 rounded-xl">
+                      <Sparkles className="w-5 h-5 text-secondary" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-foreground text-sm">
+                        {achievements.find(a => a.id === selectedAchievement)?.name}
+                      </p>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        {achievements.find(a => a.id === selectedAchievement)?.description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {achievements.map((achievement, index) => (
                 <motion.div
                   key={achievement.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
+                  whileTap={{ scale: 0.95 }}
                   transition={{ delay: index * 0.1 }}
+                  onClick={() => setSelectedAchievement(achievement.id === selectedAchievement ? null : achievement.id)}
+                  className={cn(
+                    "cursor-pointer transition-all rounded-2xl h-full",
+                    selectedAchievement === achievement.id && "ring-4 ring-secondary/30"
+                  )}
                 >
                   <AchievementBadge achievement={achievement} />
                 </motion.div>
               ))}
             </div>
+            {!selectedAchievement && (
+              <p className="text-center text-xs text-muted-foreground mt-4">
+                Toque em uma conquista para ver como ganhá-la ✨
+              </p>
+            )}
           </section>
         </div>
       </main>
@@ -208,20 +260,31 @@ export default function Jornada() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             className="bg-card border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl"
           >
-            <h3 className="font-display font-bold text-xl text-center mb-2">
-              Escanear QR Code
-            </h3>
-            <p className="text-muted-foreground text-center mb-6">
-              Cole o código que aparece no telão
-            </p>
-
-            <input
-              type="text"
-              value={qrCode}
-              onChange={(e) => setQrCode(e.target.value.toUpperCase())}
-              placeholder="Ex: RVL2025D1ABC"
-              className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-            />
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="primary"
+                onClick={() => setShowScanner(true)}
+                icon={Camera}
+                fullWidth
+              >
+                Abrir Câmera
+              </Button>
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border"></span>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Ou digite o código</span>
+                </div>
+              </div>
+              <input
+                type="text"
+                value={qrCode}
+                onChange={(e) => setQrCode(e.target.value.toUpperCase())}
+                placeholder="Ex: RVL2025D1ABC"
+                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+              />
+            </div>
 
             <div className="mt-6 flex gap-3">
               <Button
@@ -233,7 +296,7 @@ export default function Jornada() {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleValidateQR}
+                onClick={() => handleValidateQR()}
                 isLoading={isValidating}
                 className="flex-1"
               >
@@ -243,6 +306,16 @@ export default function Jornada() {
           </motion.div>
         </motion.div>
       )}
+
+      {/* QR Scanner Component */}
+      <AnimatePresence>
+        {showScanner && (
+          <QRScanner
+            onScan={(text) => handleValidateQR(text)}
+            onClose={() => setShowScanner(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Manual Unlock Confirmation Modal */}
       {showConfirmModal && (
@@ -288,6 +361,7 @@ export default function Jornada() {
           </motion.div>
         </motion.div>
       )}
+      <Footer />
     </div>
   );
 }

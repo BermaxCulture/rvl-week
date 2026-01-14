@@ -15,6 +15,7 @@ interface StoreState {
 
   // Achievements
   achievements: Achievement[];
+  pendingUnlockDay: number | null;
 
   // Auth Actions
   login: (email: string, password: string) => Promise<boolean>;
@@ -24,7 +25,9 @@ interface StoreState {
   fetchDays: () => Promise<void>;
 
   // Day Actions
-  unlockDay: (dayNumber: number, method: "qrcode" | "manual") => void;
+  setPendingUnlock: (dayNumber: number) => void;
+  unlockDay: (dayNumber: number, method: "qrcode" | "manual", code?: string) => Promise<{ success: boolean; message: string }>;
+  updateDay: (dayNumber: number, data: Partial<Day>) => Promise<boolean>;
   markVideoWatched: (dayNumber: number, type: "main" | "pastor") => void;
   completeQuiz: (dayNumber: number, score: number) => void;
   markDayComplete: (dayNumber: number) => void;
@@ -48,6 +51,7 @@ export const useStore = create<StoreState>()(
       isLoading: true,
       days: mockDays,
       achievements: mockAchievements,
+      pendingUnlockDay: null as number | null,
 
       // Auth Actions
       login: async (email: string, password: string) => {
@@ -62,26 +66,41 @@ export const useStore = create<StoreState>()(
           return false;
         }
 
-        // Fetch user profile or point data if needed
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, role, phone_number, image_url')
+          .eq('id', data.user.id)
+          .single();
+
         const user: User = {
           id: data.user.id,
-          name: data.user.user_metadata.name || data.user.email?.split("@")[0],
+          name: profile?.full_name || data.user.user_metadata.name || data.user.email?.split("@")[0],
           email: data.user.email || "",
-          phone: data.user.user_metadata.phone || "",
-          totalPoints: 0, // Should fetch from a profile table in a real scenario
+          phone: profile?.phone_number || data.user.user_metadata.phone || "",
+          imageUrl: profile?.image_url,
+          totalPoints: 0,
           completedDays: [],
           achievements: [],
+          role: (profile?.role as any) || 'usuario',
           createdAt: data.user.created_at,
         };
 
         set({ user, isAuthenticated: true, isLoading: false });
         await get().fetchDays();
+
+        // Execute pending unlock if any
+        const { pendingUnlockDay } = get();
+        if (pendingUnlockDay) {
+          await get().unlockDay(pendingUnlockDay, "qrcode");
+          set({ pendingUnlockDay: null } as any);
+        }
+
         return true;
       },
 
       register: async (data: RegisterData) => {
         set({ isLoading: true });
-        const { data: authData, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
           options: {
@@ -92,25 +111,95 @@ export const useStore = create<StoreState>()(
           }
         });
 
-        if (error || !authData.user) {
-          set({ isLoading: false });
+        set({ isLoading: false });
+        if (error) {
+          toast.error(error.message);
           return false;
         }
 
+        return true;
+      },
+
+      verifyEmail: async (email: string, token: string) => {
+        set({ isLoading: true });
+        const { data, error } = await supabase.auth.verifyOtp({
+          email,
+          token,
+          type: 'signup'
+        });
+
+        if (error || !data.user) {
+          set({ isLoading: false });
+          toast.error(error?.message || "Código inválido ou expirado");
+          return false;
+        }
+
+        // Profile is handled by trigger, but we need to fetch it to update store
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, phone_number, role, image_url')
+          .eq('id', data.user.id)
+          .single();
+
         const user: User = {
-          id: authData.user.id,
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
+          id: data.user.id,
+          name: profile?.full_name || data.user.user_metadata.name,
+          email: data.user.email!,
+          phone: profile?.phone_number || data.user.user_metadata.phone,
+          imageUrl: profile?.image_url,
           totalPoints: 0,
           completedDays: [],
           achievements: [],
-          createdAt: authData.user.created_at,
+          role: profile?.role || 'usuario',
+          createdAt: data.user.created_at,
         };
 
         set({ user, isAuthenticated: true, isLoading: false });
         await get().fetchDays();
+
+        // Execute pending unlock if any
+        const { pendingUnlockDay } = get();
+        if (pendingUnlockDay) {
+          await get().unlockDay(pendingUnlockDay, "qrcode");
+          set({ pendingUnlockDay: null } as any);
+        }
+
         return true;
+      },
+
+      resendOTP: async (email: string) => {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email,
+        });
+
+        if (error) {
+          toast.error("Erro ao reenviar código: " + error.message);
+          return false;
+        }
+
+        toast.success("Novo código enviado para seu email!");
+        return true;
+      },
+
+      updateProfile: async (updateData: Partial<User>) => {
+        const { user } = get();
+        if (!user) return false;
+
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            full_name: updateData.name,
+            phone_number: updateData.phone,
+            image_url: updateData.imageUrl,
+          })
+          .eq('id', user.id);
+
+        if (!error) {
+          set({ user: { ...user, ...updateData } });
+          return true;
+        }
+        return false;
       },
 
       logout: async () => {
@@ -121,18 +210,33 @@ export const useStore = create<StoreState>()(
       checkAuth: async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, full_name, phone_number, image_url')
+            .eq('id', session.user.id)
+            .single();
+
           const user: User = {
             id: session.user.id,
-            name: session.user.user_metadata.name || session.user.email?.split("@")[0],
+            name: profile?.full_name || session.user.user_metadata.name || session.user.email?.split("@")[0],
             email: session.user.email || "",
-            phone: session.user.user_metadata.phone || "",
+            phone: profile?.phone_number || session.user.user_metadata.phone || "",
+            imageUrl: profile?.image_url,
             totalPoints: 0,
             completedDays: [],
             achievements: [],
+            role: (profile?.role as any) || 'usuario',
             createdAt: session.user.created_at,
           };
           set({ user, isAuthenticated: true, isLoading: false });
           await get().fetchDays();
+
+          // Execute pending unlock if any
+          const { pendingUnlockDay } = get();
+          if (pendingUnlockDay) {
+            await get().unlockDay(pendingUnlockDay, "qrcode");
+            set({ pendingUnlockDay: null } as any);
+          }
         } else {
           set({ isAuthenticated: false, isLoading: false });
         }
@@ -151,6 +255,7 @@ export const useStore = create<StoreState>()(
 
         const { user } = get();
         let progressMap: Record<string, any> = {};
+        let totalEarned = 0;
 
         if (user) {
           const { data: progress } = await supabase
@@ -159,7 +264,10 @@ export const useStore = create<StoreState>()(
             .eq('user_id', user.id);
 
           if (progress) {
-            progress.forEach(p => progressMap[p.jornada_id] = p);
+            progress.forEach(p => {
+              progressMap[p.jornada_id] = p;
+              totalEarned += p.pontos_acumulados || 0;
+            });
           }
         }
 
@@ -167,7 +275,7 @@ export const useStore = create<StoreState>()(
           const p = progressMap[j.id] || {};
           return {
             dayNumber: j.dia_number,
-            date: j.dia_label.split(' • ')[1] || '',
+            date: j.data_real || '',
             pastor: j.preletor,
             church: j.igreja_preletor,
             theme: j.titulo,
@@ -206,25 +314,43 @@ export const useStore = create<StoreState>()(
           };
         });
 
-        set({ days: mappedDays });
+        if (user) {
+          set({
+            user: { ...user, totalPoints: totalEarned },
+            days: mappedDays
+          });
+        } else {
+          set({ days: mappedDays });
+        }
       },
 
       // Day Actions
-      unlockDay: async (dayNumber: number, method: "qrcode" | "manual") => {
+      setPendingUnlock: (dayNumber: number) => {
+        set({ pendingUnlockDay: dayNumber });
+      },
+
+      unlockDay: async (dayNumber: number, method: "qrcode" | "manual", code?: string) => {
         const { user } = get();
-        if (!user) return;
+        if (!user) return { success: false, message: "Usuário não autenticado" };
 
         const dayToUnlock = get().days.find(d => d.dayNumber === dayNumber);
-        if (!dayToUnlock) return;
+        if (!dayToUnlock) return { success: false, message: "Dia não encontrado" };
 
         // Fetch original journey UUID
-        const { data: journey } = await supabase
+        const { data: journey, error: journeyError } = await supabase
           .from('jornadas')
-          .select('id')
+          .select('id, qr_code_secret')
           .eq('dia_number', dayNumber)
           .single();
 
-        if (!journey) return;
+        if (journeyError || !journey) return { success: false, message: "Erro ao buscar dados do dia" };
+
+        // Real code validation if using QR Code
+        if (method === "qrcode") {
+          if (!code || code.trim().toUpperCase() !== journey.qr_code_secret?.toUpperCase()) {
+            return { success: false, message: "Código QR inválido para este dia" };
+          }
+        }
 
         const points = method === "qrcode" ? 100 : 0;
 
@@ -241,7 +367,45 @@ export const useStore = create<StoreState>()(
         if (!error) {
           await get().fetchDays();
           get().checkAchievements();
+          return { success: true, message: method === "qrcode" ? "Dia desbloqueado com sucesso! +100 pts" : "Dia desbloqueado" };
+        } else {
+          return { success: false, message: "Erro ao atualizar progresso no banco" };
         }
+      },
+
+      updateDay: async (dayNumber: number, updateData: Partial<Day>) => {
+        const { user } = get();
+        if (user?.role !== 'admin') return false;
+
+        const { data: journey } = await supabase
+          .from('jornadas')
+          .select('id')
+          .eq('dia_number', dayNumber)
+          .single();
+
+        if (!journey) return false;
+
+        const { error } = await supabase
+          .from('jornadas')
+          .update({
+            titulo: updateData.theme,
+            preletor: updateData.pastor,
+            igreja_preletor: updateData.church,
+            versiculo_texto: updateData.verse,
+            versiculo_referencia: updateData.verseReference,
+            ensinamentos: updateData.content?.mainPoints,
+            video_url_principal: updateData.content?.videoUrl,
+            video_url_proximo_dia: updateData.content?.pastorVideoUrl,
+            data_real: updateData.date,
+            dia_label: `DIA ${dayNumber} • ${new Date(updateData.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}`
+          })
+          .eq('id', journey.id);
+
+        if (!error) {
+          await get().fetchDays();
+          return true;
+        }
+        return false;
       },
 
       markVideoWatched: async (dayNumber: number, type: "main" | "pastor") => {
@@ -412,6 +576,7 @@ export const useStore = create<StoreState>()(
         isAuthenticated: state.isAuthenticated,
         days: state.days,
         achievements: state.achievements,
+        pendingUnlockDay: state.pendingUnlockDay,
       }),
     }
   )

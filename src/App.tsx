@@ -8,6 +8,9 @@ import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
 import Jornada from "./pages/Jornada";
 import DiaConteudo from "./pages/DiaConteudo";
+import AdminEditDia from "./pages/AdminEditDia";
+import Perfil from "./pages/Perfil";
+import VerifyEmail from "./pages/VerifyEmail";
 import NotFound from "./pages/NotFound";
 
 import { useEffect } from "react";
@@ -16,11 +19,28 @@ import { useStore } from "@/store/useStore";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const checkAuth = useStore((state) => state.checkAuth);
+  const { checkAuth, isAuthenticated, setPendingUnlock } = useStore();
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+
+    // Check for QR Code scan in URL
+    const params = new URLSearchParams(window.location.search);
+    const dayToUnlock = params.get("unlock");
+    if (dayToUnlock) {
+      const dayNum = parseInt(dayToUnlock);
+      if (isAuthenticated) {
+        // Unlocks immediately if already logged in
+        useStore.getState().unlockDay(dayNum, "qrcode");
+      } else {
+        // Saves for later and user will be prompted to login/register
+        setPendingUnlock(dayNum);
+      }
+      // Clean up URL
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [checkAuth, setPendingUnlock]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -34,6 +54,9 @@ const App = () => {
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/jornada" element={<Jornada />} />
             <Route path="/jornada/dia/:dayNumber" element={<DiaConteudo />} />
+            <Route path="/jornada/dia/:dayNumber/editar" element={<AdminEditDia />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/verificar-email" element={<VerifyEmail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

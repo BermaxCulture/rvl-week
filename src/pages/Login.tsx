@@ -7,6 +7,7 @@ import { Logo } from "@/components/ui/Logo";
 import { Input } from "@/components/ui/InputCustom";
 import { Button } from "@/components/ui/ButtonCustom";
 import { useStore } from "@/store/useStore";
+import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -32,58 +33,42 @@ export default function Login() {
         toast.success("Bem-vindo de volta! 🔥");
         navigate("/jornada");
       } else {
-        toast.error("Erro ao fazer login");
+        toast.error("Credenciais inválidas ou erro no servidor");
       }
-    } catch (error) {
-      toast.error("Ocorreu um erro. Tente novamente.");
+    } catch (error: any) {
+      toast.error(error.message || "Ocorreu um erro. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center p-4">
-      {/* Triangle Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <svg
-          className="absolute inset-0 w-full h-full"
-          preserveAspectRatio="none"
-          viewBox="0 0 100 100"
-        >
-          <polygon
-            points="0,100 50,20 100,100"
-            fill="rgba(252, 217, 91, 0.3)"
-          />
-          <polygon
-            points="0,100 25,50 50,100"
-            fill="rgba(252, 217, 91, 0.2)"
-          />
-          <polygon
-            points="50,100 75,40 100,100"
-            fill="rgba(252, 217, 91, 0.25)"
-          />
-        </svg>
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
+      <AnimatedGradientBackground
+        Breathing={true}
+        gradientColors={["#020617", "#2e1065", "#581c87", "#7e22ce", "#fcd95b", "#fbbf24", "#7e22ce"]}
+        gradientStops={[35, 50, 60, 70, 85, 95, 100]}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-md"
+        className="relative w-full max-w-sm"
       >
-        <div className="bg-card rounded-3xl p-8 shadow-cartoon-lg border-3 border-foreground/10">
-          <div className="text-center mb-8">
+        <div className="bg-card/95 backdrop-blur-sm rounded-3xl p-5 shadow-cartoon-lg border-3 border-foreground/10">
+          <div className="text-center mb-4">
             <Link to="/">
-              <Logo size="lg" className="mx-auto mb-6" />
+              <Logo size="md" className="mx-auto mb-3" />
             </Link>
-            <h1 className="font-display font-bold text-2xl text-primary mb-2">
+            <h1 className="font-display font-bold text-xl text-primary mb-1">
               Entre na sua jornada
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Continue de onde você parou
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <Input
               label="Email"
               type="email"
@@ -91,6 +76,7 @@ export default function Login() {
               placeholder="seu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="py-2.5"
             />
 
             <Input
@@ -100,6 +86,7 @@ export default function Login() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="py-2.5"
             />
 
             <div className="text-right">
@@ -114,15 +101,16 @@ export default function Login() {
             <Button
               type="submit"
               variant="primary"
-              size="lg"
+              size="md"
               fullWidth
               isLoading={isLoading}
+              className="mt-2"
             >
               ENTRAR
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="text-muted-foreground">
               Não tem conta?{" "}
               <Link

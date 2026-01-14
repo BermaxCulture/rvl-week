@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Flame,
   Heart,
@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/ButtonCustom";
-import { Logo } from "@/components/ui/Logo";
+import { Quiz } from "@/components/features/Quiz";
 import { useStore } from "@/store/useStore";
+import { Footer } from "@/components/layout/Footer";
+import { Logo } from "@/components/ui/Logo";
 import { ScheduleCarousel } from "@/components/sections/ScheduleCarousel";
 import { mockDays } from "@/mocks/days.mock";
 
@@ -47,7 +49,7 @@ export default function LandingPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20">
+      <section className="relative min-h-screen flex items-center justify-center">
         {/* Background Gradient - Clean & Simple */}
         <div className="absolute inset-0 gradient-hero opacity-95" />
 
@@ -59,7 +61,7 @@ export default function LandingPage() {
         {/* Dark overlay for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
-        <div className="container relative z-10 mx-auto px-4 py-20">
+        <div className="container relative z-10 mx-auto px-4 pt-12 pb-20">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -261,7 +263,7 @@ export default function LandingPage() {
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 className="bg-black/30 backdrop-blur-md border border-white/10 p-8 rounded-[24px] group cursor-pointer shadow-xl"
               >
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-6 shadow-glow-sm group-hover:shadow-glow transition-shadow duration-300`}>
+                <div className={`w - 16 h - 16 rounded - 2xl bg - gradient - to - br ${item.gradient} flex items - center justify - center mb - 6 shadow - glow - sm group - hover: shadow - glow transition - shadow duration - 300`}>
                   <item.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="font-heading font-bold text-xl text-white mb-3">{item.title}</h3>
@@ -458,15 +460,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-background border-t border-border">
-        <div className="container mx-auto px-4 text-center">
-          <Logo size="sm" className="mx-auto mb-6 opacity-60" />
-          <p className="text-sm text-muted-foreground font-heading">
-            © 2025 Link Church. Todos os direitos reservados.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
