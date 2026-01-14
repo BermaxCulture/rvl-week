@@ -385,14 +385,25 @@ export default function DiaConteudo() {
                     <p className="text-muted-foreground">Preparando player...</p>
                   </div>
                 ) : (day.activities.pastorVideoWatched || showPastorVideo) ? (
-                  <iframe
-                    className="w-full h-full"
-                    src={`https://www.youtube.com/embed/${getYouTubeId(day.content.pastorVideoUrl)}?autoplay=1`}
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  ></iframe>
+                  // Check if it's a direct video link (Supabase Storage) or YouTube
+                  day.content.pastorVideoUrl.match(/\.(mp4|webm|ogg|mov)$|^https:\/\/.*\.supabase\..*\/storage\/v1\/object\/public\//) ? (
+                    <video
+                      className="w-full h-full object-contain bg-black"
+                      src={day.content.pastorVideoUrl}
+                      controls
+                      autoPlay
+                      playsInline
+                    />
+                  ) : (
+                    <iframe
+                      className="w-full h-full"
+                      src={`https://www.youtube.com/embed/${getYouTubeId(day.content.pastorVideoUrl)}?autoplay=1`}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
+                  )
                 ) : (
                   <button
                     onClick={() => handleWatchVideo("pastor")}

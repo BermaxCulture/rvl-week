@@ -61,19 +61,18 @@ export default function LandingPage() {
         {/* Dark overlay for text contrast */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
 
-        <div className="container relative z-10 mx-auto px-4 pt-12 pb-20">
+        <div className="container relative z-10 mx-auto px-4 pt-20 pb-20 md:pt-32">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-center"
+            className="text-center scale-[0.85] md:scale-100 origin-top"
           >
-            {/* Logo */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mb-10"
+              className="mb-8 mt-10 md:mt-0"
             >
               <Logo size="lg" className="mx-auto" />
             </motion.div>
@@ -81,14 +80,15 @@ export default function LandingPage() {
             {/* Main Title - CreateHack Style: Giant Bold Sans-Serif */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.8 }}
               className="font-display text-white mb-6"
               style={{
-                fontSize: 'clamp(2.4rem, 9.6vw, 7.2rem)',
+                fontSize: 'clamp(2.8rem, 9.6vw, 7.2rem)',
                 fontWeight: 900,
                 letterSpacing: '-0.03em',
-                lineHeight: 0.9,
+                lineHeight: 0.85,
                 textTransform: 'uppercase'
               }}
             >
@@ -137,14 +137,14 @@ export default function LandingPage() {
             >
               {isAuthenticated ? (
                 <Link to="/jornada">
-                  <Button variant="secondary" size="xl" icon={ArrowRight} iconPosition="right" glow>
+                  <Button variant="secondary" size="xl" icon={ArrowRight} iconPosition="right">
                     ACESSAR MINHA JORNADA
                   </Button>
                 </Link>
               ) : (
                 <>
                   <Link to="/cadastro">
-                    <Button variant="secondary" size="xl" icon={ArrowRight} iconPosition="right" glow>
+                    <Button variant="secondary" size="xl" icon={ArrowRight} iconPosition="right">
                       COMEÇAR MINHA JORNADA
                     </Button>
                   </Link>
@@ -176,22 +176,23 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* O Que É Section */}
-      <section className="section-padding relative overflow-hidden">
+      < section className="section-padding relative overflow-hidden" >
         {/* Gradient Background */}
-        <div className="absolute inset-0 gradient-purple" />
+        < div className="absolute inset-0 gradient-purple" />
 
         {/* Geometric shapes from CTA Final */}
-        <div
+        < div
           className="absolute top-0 right-0 w-80 h-80 opacity-30"
           style={{
             background: '#fcd95b',
             clipPath: 'polygon(100% 0, 0% 100%, 100% 100%)',
-          }}
+          }
+          }
         />
-        <div
+        < div
           className="absolute bottom-0 left-0 w-60 h-60 opacity-20"
           style={{
             background: '#5b00a3',
@@ -199,7 +200,7 @@ export default function LandingPage() {
           }}
         />
 
-        <div className="container relative mx-auto px-4">
+        < div className="container relative mx-auto px-4" >
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -273,13 +274,13 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </motion.div>
-        </div>
-      </section>
+        </div >
+      </section >
 
       {/* Como Funciona Section */}
-      <section className="section-padding bg-card relative overflow-hidden">
+      < section className="section-padding bg-card relative overflow-hidden" >
         {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#5b00a3]/5 rounded-full blur-3xl" />
+        < div className="absolute top-0 right-0 w-96 h-96 bg-[#5b00a3]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#fcd95b]/5 rounded-full blur-3xl" />
 
         <div className="container relative mx-auto px-4">
@@ -361,13 +362,13 @@ export default function LandingPage() {
             ))}
           </motion.div>
         </div>
-      </section>
+      </section >
 
       {/* Programação Section */}
-      <ScheduleCarousel />
+      < ScheduleCarousel />
 
       {/* Info Section */}
-      <section className="section-padding bg-card">
+      < section className="section-padding bg-card" >
         <div className="container mx-auto px-4">
           <motion.div
             variants={containerVariants}
@@ -396,22 +397,22 @@ export default function LandingPage() {
             ))}
           </motion.div>
         </div>
-      </section>
+      </section >
 
       {/* CTA Final */}
-      <section className="section-padding relative overflow-hidden">
+      < section className="section-padding relative overflow-hidden" >
         {/* Gradient Background */}
-        <div className="absolute inset-0 gradient-purple" />
+        < div className="absolute inset-0 gradient-purple" />
 
         {/* Geometric shapes */}
-        <div
+        < div
           className="absolute top-0 right-0 w-80 h-80 opacity-30"
           style={{
             background: '#fcd95b',
             clipPath: 'polygon(100% 0, 0% 100%, 100% 100%)',
           }}
         />
-        <div
+        < div
           className="absolute bottom-0 left-0 w-60 h-60 opacity-20"
           style={{
             background: '#5b00a3',
@@ -419,7 +420,7 @@ export default function LandingPage() {
           }}
         />
 
-        <div className="container relative z-10 mx-auto px-4 text-center">
+        < div className="container relative z-10 mx-auto px-4 text-center" >
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -457,10 +458,10 @@ export default function LandingPage() {
               )}
             </div>
           </motion.div>
-        </div>
-      </section>
+        </div >
+      </section >
 
       <Footer />
-    </div>
+    </div >
   );
 }

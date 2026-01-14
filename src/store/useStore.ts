@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { User, Day, Achievement, RegisterData } from "@/types";
 import { mockDays, mockAchievements } from "@/mocks/days.mock";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface StoreState {
   // Auth

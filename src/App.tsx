@@ -12,6 +12,7 @@ import AdminEditDia from "./pages/AdminEditDia";
 import Perfil from "./pages/Perfil";
 import VerifyEmail from "./pages/VerifyEmail";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/utils/ScrollToTop";
 
 import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
@@ -48,6 +49,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />

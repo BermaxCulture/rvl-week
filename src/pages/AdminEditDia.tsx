@@ -137,7 +137,7 @@ export default function AdminEditDia() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col text-left">
             <Header />
 
             <main className="flex-1 pt-28 pb-12">
@@ -250,7 +250,7 @@ export default function AdminEditDia() {
                                 </h2>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Vídeo do Culto</label>
+                                    <label className="text-sm font-semibold">Vídeo do Culto (YouTube)</label>
                                     <input
                                         type="text"
                                         value={formData.videoUrl}
@@ -260,55 +260,90 @@ export default function AdminEditDia() {
                                     />
                                 </div>
 
+                                {formData.pastorVideoUrl && (
+                                    <div className="mt-4 rounded-xl overflow-hidden border-2 border-border aspect-video bg-black">
+                                        {formData.pastorVideoUrl.includes('supabase') || formData.pastorVideoUrl.match(/\.(mp4|webm|mov|ogg)$/) ? (
+                                            <video
+                                                src={formData.pastorVideoUrl}
+                                                className="w-full h-full object-contain"
+                                                controls
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs p-4 text-center">
+                                                Link externo detectado. O player nativo suporta apenas arquivos hospedados ou diretos.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div className="space-y-4">
                                     <label className="text-sm font-semibold block">Vídeo Próximo Dia (Pastor)</label>
 
-                                    {formData.pastorVideoUrl ? (
-                                        <div className="flex items-center gap-4 bg-muted/50 p-4 rounded-xl border-2 border-border border-dashed">
-                                            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                                <FileVideo className="w-6 h-6 text-primary" />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-medium text-muted-foreground truncate">Vídeo atual:</p>
-                                                <p className="text-sm font-bold truncate">{formData.pastorVideoUrl}</p>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormData({ ...formData, pastorVideoUrl: "" })}
-                                                className="p-2 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-lg transition-colors"
-                                            >
-                                                <XCircle className="w-6 h-6" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="relative group">
+                                    <div className="space-y-4 bg-muted/20 p-4 rounded-xl border border-border">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Link Direto (Opcional)</label>
                                             <input
-                                                type="file"
-                                                accept="video/*"
-                                                onChange={handleVideoUpload}
-                                                disabled={isUploading}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
+                                                type="text"
+                                                value={formData.pastorVideoUrl}
+                                                onChange={(e) => setFormData({ ...formData, pastorVideoUrl: e.target.value })}
+                                                placeholder="Cole o link aqui ou suba um arquivo abaixo..."
+                                                className="w-full bg-background border-2 border-border rounded-xl px-4 py-2 focus:border-primary outline-none transition-all text-sm"
                                             />
-                                            <div className="border-2 border-dashed border-border group-hover:border-primary/50 group-hover:bg-primary/5 rounded-xl p-8 transition-all text-center space-y-3">
-                                                {isUploading ? (
-                                                    <div className="flex flex-col items-center gap-2">
-                                                        <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                                                        <p className="text-sm font-bold">Enviando vídeo...</p>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto">
-                                                            <Upload className="w-6 h-6 text-muted-foreground" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-bold text-sm">Clique para enviar um vídeo</p>
-                                                            <p className="text-xs text-muted-foreground mt-1">MP4, MOV ou WebM (Máx 50MB)</p>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
                                         </div>
-                                    )}
+
+                                        <div className="relative flex items-center gap-4 py-1">
+                                            <div className="h-px bg-border flex-1" />
+                                            <span className="text-[10px] uppercase font-bold text-muted-foreground">OU</span>
+                                            <div className="h-px bg-border flex-1" />
+                                        </div>
+
+                                        {formData.pastorVideoUrl && !formData.pastorVideoUrl.includes('blob:') && !isUploading ? (
+                                            <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-xl border-2 border-primary/20">
+                                                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                                                    <FileVideo className="w-6 h-6 text-primary" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-medium text-muted-foreground truncate">Vídeo definido:</p>
+                                                    <p className="text-sm font-bold truncate">{formData.pastorVideoUrl}</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setFormData({ ...formData, pastorVideoUrl: "" })}
+                                                    className="p-2 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-lg transition-colors"
+                                                >
+                                                    <XCircle className="w-6 h-6" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="relative group">
+                                                <input
+                                                    type="file"
+                                                    accept="video/*"
+                                                    onChange={handleVideoUpload}
+                                                    disabled={isUploading}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
+                                                />
+                                                <div className="border-2 border-dashed border-border group-hover:border-primary/50 group-hover:bg-primary/5 rounded-xl p-8 transition-all text-center space-y-3">
+                                                    {isUploading ? (
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                                                            <p className="text-sm font-bold">Enviando vídeo...</p>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto">
+                                                                <Upload className="w-6 h-6 text-muted-foreground" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-sm">Clique para subir arquivo</p>
+                                                                <p className="text-xs text-muted-foreground mt-1">MP4, MOV ou WebM (Máx 50MB)</p>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </Card>
 
