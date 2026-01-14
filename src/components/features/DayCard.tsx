@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Lock, Star, CheckCircle, QrCode, Unlock } from "lucide-react";
+import { Lock, Star, CheckCircle, QrCode, Unlock, Sparkles, CheckCircle2 } from "lucide-react";
 import { Day } from "@/types";
 import { Button } from "@/components/ui/ButtonCustom";
 import { cn } from "@/lib/utils";
@@ -52,9 +52,9 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
               DIA {day.dayNumber}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">{formatDate(day.date)}</p>
-            <div className="mt-4 px-3 py-2 bg-secondary/10 rounded-lg">
-              <p className="text-sm text-secondary font-semibold flex items-center justify-center gap-2">
-                🎯 Pronto para começar
+            <div className="mt-4 px-3 py-2 bg-accent/15 rounded-lg border border-accent/20">
+              <p className="text-sm text-accent font-bold flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4 fill-accent/30" /> Pronto para começar
               </p>
             </div>
             <p className="mt-3 text-sm font-semibold text-foreground">{day.pastor}</p>
@@ -99,7 +99,7 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
             <p className="text-sm text-muted-foreground mt-1">{formatDate(day.date)}</p>
             <div className="mt-4 px-3 py-2 bg-success/10 rounded-lg">
               <p className="text-sm text-success font-semibold flex items-center justify-center gap-2">
-                ⭐ Concluído!
+                <CheckCircle2 className="w-4 h-4" /> Concluído!
               </p>
               <p className="text-xs text-success mt-1">
                 {day.points.earned}/{day.points.total} pts

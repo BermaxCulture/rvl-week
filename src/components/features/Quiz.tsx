@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, ArrowRight, RotateCcw } from "lucide-react";
+import { CheckCircle, XCircle, ArrowRight, RotateCcw, PartyPopper, FileText } from "lucide-react";
 import { QuizQuestion } from "@/types";
 import { Button } from "@/components/ui/ButtonCustom";
 import { cn } from "@/lib/utils";
@@ -43,7 +43,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
     } else {
       const correctCount = [...userAnswers].filter(Boolean).length + (answerState === "correct" ? 1 : 0);
       setShowResults(true);
-      
+
       if (correctCount === questions.length) {
         confetti({
           particleCount: 150,
@@ -51,7 +51,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
           origin: { y: 0.6 },
         });
       }
-      
+
       onComplete(correctCount);
     }
   };
@@ -75,7 +75,15 @@ export function Quiz({ questions, onComplete }: QuizProps) {
         animate={{ opacity: 1, scale: 1 }}
         className="text-center p-8 bg-card rounded-2xl border-3 border-primary shadow-cartoon"
       >
-        <div className="text-6xl mb-4">{isPerfect ? "🎉" : "📝"}</div>
+        <div className="flex justify-center mb-6">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
+            {isPerfect ? (
+              <PartyPopper className="w-10 h-10 text-primary" />
+            ) : (
+              <FileText className="w-10 h-10 text-primary" />
+            )}
+          </div>
+        </div>
         <h3 className="font-display font-bold text-2xl mb-2">
           {isPerfect ? "Perfeito!" : "Quiz Concluído!"}
         </h3>

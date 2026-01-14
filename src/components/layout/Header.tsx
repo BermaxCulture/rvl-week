@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, User, Trophy } from "lucide-react";
+import { Menu, X, LogOut, User, Trophy, Zap } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/ButtonCustom";
 import { useStore } from "@/store/useStore";
@@ -39,7 +39,9 @@ export function Header() {
                   Minha Jornada
                 </Link>
                 <div className="flex items-center gap-2 px-4 py-2 bg-black/10 rounded-full">
-                  <span className="text-purple-900 font-bold text-sm">🔥 {user?.totalPoints || 0} pts</span>
+                  <span className="text-purple-900 font-bold text-sm flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5 fill-purple-900" /> {user?.totalPoints || 0} pts
+                  </span>
                 </div>
                 <button
                   onClick={handleLogout}
@@ -90,8 +92,8 @@ export function Header() {
                     <div className="flex items-center gap-2 px-4 py-3 bg-secondary/10 rounded-xl">
                       <User className="w-5 h-5 text-primary" />
                       <span className="font-semibold">{user?.name}</span>
-                      <span className="ml-auto text-secondary font-bold">
-                        🔥 {user?.totalPoints || 0} pts
+                      <span className="ml-auto text-secondary font-bold flex items-center gap-1">
+                        <Zap className="w-4 h-4 fill-secondary" /> {user?.totalPoints || 0} pts
                       </span>
                     </div>
                     <Link

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { User, Day, Achievement, RegisterData } from "@/types";
 import { mockDays, mockAchievements } from "@/mocks/days.mock";
+import { supabase } from "@/lib/supabase";
 
 interface StoreState {
   // Auth
@@ -19,7 +20,8 @@ interface StoreState {
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
   logout: () => void;
-  checkAuth: () => void;
+  checkAuth: () => Promise<void>;
+  fetchDays: () => Promise<void>;
 
   // Day Actions
   unlockDay: (dayNumber: number, method: "qrcode" | "manual") => void;
@@ -49,183 +51,292 @@ export const useStore = create<StoreState>()(
 
       // Auth Actions
       login: async (email: string, password: string) => {
-        await sleep(1000);
+        set({ isLoading: true });
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-        if (!email || !password) {
+        if (error || !data.user) {
+          set({ isLoading: false });
           return false;
         }
 
-        const existingUser = localStorage.getItem("rvl_user");
-        let user: User;
-
-        if (existingUser) {
-          user = JSON.parse(existingUser);
-        } else {
-          user = {
-            id: crypto.randomUUID(),
-            name: email.split("@")[0],
-            email,
-            phone: "91999999999",
-            totalPoints: 0,
-            completedDays: [],
-            achievements: [],
-            createdAt: new Date().toISOString(),
-          };
-        }
+        // Fetch user profile or point data if needed
+        const user: User = {
+          id: data.user.id,
+          name: data.user.user_metadata.name || data.user.email?.split("@")[0],
+          email: data.user.email || "",
+          phone: data.user.user_metadata.phone || "",
+          totalPoints: 0, // Should fetch from a profile table in a real scenario
+          completedDays: [],
+          achievements: [],
+          createdAt: data.user.created_at,
+        };
 
         set({ user, isAuthenticated: true, isLoading: false });
+        await get().fetchDays();
         return true;
       },
 
       register: async (data: RegisterData) => {
-        await sleep(1000);
+        set({ isLoading: true });
+        const { data: authData, error } = await supabase.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            data: {
+              name: data.name,
+              phone: data.phone,
+            }
+          }
+        });
 
-        if (data.password !== data.confirmPassword) {
+        if (error || !authData.user) {
+          set({ isLoading: false });
           return false;
         }
 
         const user: User = {
-          id: crypto.randomUUID(),
+          id: authData.user.id,
           name: data.name,
           email: data.email,
           phone: data.phone,
           totalPoints: 0,
           completedDays: [],
           achievements: [],
-          createdAt: new Date().toISOString(),
+          createdAt: authData.user.created_at,
         };
 
         set({ user, isAuthenticated: true, isLoading: false });
+        await get().fetchDays();
         return true;
       },
 
-      logout: () => {
+      logout: async () => {
+        await supabase.auth.signOut();
         set({ user: null, isAuthenticated: false, days: mockDays, achievements: mockAchievements });
-        localStorage.removeItem("rvl_user");
       },
 
-      checkAuth: () => {
+      checkAuth: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const user: User = {
+            id: session.user.id,
+            name: session.user.user_metadata.name || session.user.email?.split("@")[0],
+            email: session.user.email || "",
+            phone: session.user.user_metadata.phone || "",
+            totalPoints: 0,
+            completedDays: [],
+            achievements: [],
+            createdAt: session.user.created_at,
+          };
+          set({ user, isAuthenticated: true, isLoading: false });
+          await get().fetchDays();
+        } else {
+          set({ isAuthenticated: false, isLoading: false });
+        }
+      },
+
+      fetchDays: async () => {
+        const { data: jornadas, error } = await supabase
+          .from('jornadas')
+          .select(`
+            *,
+            perguntas_quiz (*)
+          `)
+          .order('dia_number', { ascending: true });
+
+        if (error || !jornadas) return;
+
         const { user } = get();
-        set({ isAuthenticated: !!user, isLoading: false });
+        let progressMap: Record<string, any> = {};
+
+        if (user) {
+          const { data: progress } = await supabase
+            .from('progresso_usuario')
+            .select('*')
+            .eq('user_id', user.id);
+
+          if (progress) {
+            progress.forEach(p => progressMap[p.jornada_id] = p);
+          }
+        }
+
+        const mappedDays: Day[] = jornadas.map(j => {
+          const p = progressMap[j.id] || {};
+          return {
+            dayNumber: j.dia_number,
+            date: j.dia_label.split(' • ')[1] || '',
+            pastor: j.preletor,
+            church: j.igreja_preletor,
+            theme: j.titulo,
+            verse: j.versiculo_texto,
+            verseReference: j.versiculo_referencia,
+            status: p.quiz_concluido ? 'completed' : (p.jornada_id ? 'available' : 'locked'),
+            points: {
+              qrcode: 100,
+              videoMain: 30,
+              videoPastor: 20,
+              quiz: 50,
+              completion: 50,
+              total: 250,
+              earned: p.pontos_acumulados || 0
+            },
+            activities: {
+              qrScanned: p.qr_code_escaneado || false,
+              videoWatched: p.video_principal_assistido || false,
+              pastorVideoWatched: p.video_preparacao_assistido || false,
+              quizCompleted: p.quiz_concluido || false,
+              quizScore: p.quiz_score || 0
+            },
+            content: {
+              mainPoints: j.ensinamentos || [],
+              videoUrl: j.video_url_principal || '',
+              videoThumbnail: '',
+              pastorVideoUrl: j.video_url_proximo_dia || '',
+              pastorVideoThumbnail: '',
+              quiz: j.perguntas_quiz.map((q: any) => ({
+                question: q.pergunta,
+                options: q.alternativas,
+                correct: q.resposta_correta,
+                explanation: q.explicacao
+              }))
+            }
+          };
+        });
+
+        set({ days: mappedDays });
       },
 
       // Day Actions
-      unlockDay: (dayNumber: number, method: "qrcode" | "manual") => {
-        const { days, user } = get();
+      unlockDay: async (dayNumber: number, method: "qrcode" | "manual") => {
+        const { user } = get();
+        if (!user) return;
+
+        const dayToUnlock = get().days.find(d => d.dayNumber === dayNumber);
+        if (!dayToUnlock) return;
+
+        // Fetch original journey UUID
+        const { data: journey } = await supabase
+          .from('jornadas')
+          .select('id')
+          .eq('dia_number', dayNumber)
+          .single();
+
+        if (!journey) return;
+
         const points = method === "qrcode" ? 100 : 0;
 
-        const updatedDays = days.map((day) =>
-          day.dayNumber === dayNumber
-            ? {
-                ...day,
-                status: "available" as const,
-                unlockedBy: method,
-                unlockedAt: new Date().toISOString(),
-                activities: {
-                  ...day.activities,
-                  qrScanned: method === "qrcode",
-                },
-                points: {
-                  ...day.points,
-                  earned: day.points.earned + points,
-                },
-              }
-            : day
-        );
+        const { error } = await supabase
+          .from('progresso_usuario')
+          .upsert({
+            user_id: user.id,
+            jornada_id: journey.id,
+            qr_code_escaneado: method === "qrcode",
+            metodo_desbloqueio: method === "qrcode" ? "QR Code" : "Manual",
+            pontos_acumulados: points
+          }, { onConflict: 'user_id,jornada_id' });
 
-        const updatedUser = user
-          ? { ...user, totalPoints: user.totalPoints + points }
-          : null;
-
-        set({ days: updatedDays, user: updatedUser });
-        get().checkAchievements();
+        if (!error) {
+          await get().fetchDays();
+          get().checkAchievements();
+        }
       },
 
-      markVideoWatched: (dayNumber: number, type: "main" | "pastor") => {
-        const { days, user } = get();
-        const points = type === "main" ? 30 : 20;
+      markVideoWatched: async (dayNumber: number, type: "main" | "pastor") => {
+        const { user, days } = get();
+        if (!user) return;
 
-        const updatedDays = days.map((day) =>
-          day.dayNumber === dayNumber
-            ? {
-                ...day,
-                activities: {
-                  ...day.activities,
-                  [type === "main" ? "videoWatched" : "pastorVideoWatched"]: true,
-                },
-                points: {
-                  ...day.points,
-                  earned: day.points.earned + points,
-                },
-              }
-            : day
-        );
+        const day = days.find(d => d.dayNumber === dayNumber);
+        if (!day) return;
 
-        const updatedUser = user
-          ? { ...user, totalPoints: user.totalPoints + points }
-          : null;
+        const { data: journey } = await supabase
+          .from('jornadas')
+          .select('id')
+          .eq('dia_number', dayNumber)
+          .single();
 
-        set({ days: updatedDays, user: updatedUser });
+        if (!journey) return;
+
+        const pointsToAdd = type === "main" ? 30 : 20;
+
+        const { error } = await supabase
+          .from('progresso_usuario')
+          .upsert({
+            user_id: user.id,
+            jornada_id: journey.id,
+            [type === "main" ? "video_principal_assistido" : "video_preparacao_assistido"]: true,
+            pontos_acumulados: (day.points.earned || 0) + pointsToAdd
+          }, { onConflict: 'user_id,jornada_id' });
+
+        if (!error) {
+          await get().fetchDays();
+        }
       },
 
-      completeQuiz: (dayNumber: number, score: number) => {
-        const { days, user } = get();
-        const points = score === 3 ? 50 : Math.floor((score / 3) * 50);
+      completeQuiz: async (dayNumber: number, score: number) => {
+        const { user, days } = get();
+        if (!user) return;
 
-        const updatedDays = days.map((day) =>
-          day.dayNumber === dayNumber
-            ? {
-                ...day,
-                activities: {
-                  ...day.activities,
-                  quizCompleted: true,
-                  quizScore: score,
-                },
-                points: {
-                  ...day.points,
-                  earned: day.points.earned + points,
-                },
-              }
-            : day
-        );
+        const day = days.find(d => d.dayNumber === dayNumber);
+        if (!day) return;
 
-        const updatedUser = user
-          ? { ...user, totalPoints: user.totalPoints + points }
-          : null;
+        const { data: journey } = await supabase
+          .from('jornadas')
+          .select('id')
+          .eq('dia_number', dayNumber)
+          .single();
 
-        set({ days: updatedDays, user: updatedUser });
-        get().checkAchievements();
+        if (!journey) return;
+
+        const quizPoints = score === 3 ? 50 : Math.floor((score / 3) * 50);
+
+        const { error } = await supabase
+          .from('progresso_usuario')
+          .upsert({
+            user_id: user.id,
+            jornada_id: journey.id,
+            quiz_concluido: true,
+            quiz_score: score,
+            pontos_acumulados: (day.points.earned || 0) + quizPoints
+          }, { onConflict: 'user_id,jornada_id' });
+
+        if (!error) {
+          await get().fetchDays();
+          get().checkAchievements();
+        }
       },
 
-      markDayComplete: (dayNumber: number) => {
-        const { days, user } = get();
+      markDayComplete: async (dayNumber: number) => {
+        const { user, days } = get();
+        if (!user) return;
+
+        const day = days.find(d => d.dayNumber === dayNumber);
+        if (!day) return;
+
+        const { data: journey } = await supabase
+          .from('jornadas')
+          .select('id')
+          .eq('dia_number', dayNumber)
+          .single();
+
+        if (!journey) return;
+
         const completionPoints = 50;
 
-        const updatedDays = days.map((day) =>
-          day.dayNumber === dayNumber
-            ? {
-                ...day,
-                status: "completed" as const,
-                completedAt: new Date().toISOString(),
-                points: {
-                  ...day.points,
-                  earned: day.points.earned + completionPoints,
-                },
-              }
-            : day
-        );
+        const { error } = await supabase
+          .from('progresso_usuario')
+          .upsert({
+            user_id: user.id,
+            jornada_id: journey.id,
+            pontos_acumulados: (day.points.earned || 0) + completionPoints
+          }, { onConflict: 'user_id,jornada_id' });
 
-        const completedDays = [...(user?.completedDays || []), dayNumber];
-        const updatedUser = user
-          ? {
-              ...user,
-              totalPoints: user.totalPoints + completionPoints,
-              completedDays,
-            }
-          : null;
-
-        set({ days: updatedDays, user: updatedUser });
-        get().checkAchievements();
+        if (!error) {
+          await get().fetchDays();
+          get().checkAchievements();
+        }
       },
 
       addPoints: (points: number) => {

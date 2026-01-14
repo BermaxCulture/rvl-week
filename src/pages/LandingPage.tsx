@@ -83,7 +83,7 @@ export default function LandingPage() {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="font-display text-white mb-6"
               style={{
-                fontSize: 'clamp(3rem, 12vw, 9rem)',
+                fontSize: 'clamp(2.4rem, 9.6vw, 7.2rem)',
                 fontWeight: 900,
                 letterSpacing: '-0.03em',
                 lineHeight: 0.9,
@@ -177,9 +177,25 @@ export default function LandingPage() {
       </section>
 
       {/* O Que É Section */}
-      <section className="section-padding bg-background relative">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#5b00a3]/5 to-transparent" />
+      <section className="section-padding relative overflow-hidden">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 gradient-purple" />
+
+        {/* Geometric shapes from CTA Final */}
+        <div
+          className="absolute top-0 right-0 w-80 h-80 opacity-30"
+          style={{
+            background: '#fcd95b',
+            clipPath: 'polygon(100% 0, 0% 100%, 100% 100%)',
+          }}
+        />
+        <div
+          className="absolute bottom-0 left-0 w-60 h-60 opacity-20"
+          style={{
+            background: '#5b00a3',
+            clipPath: 'polygon(0 0, 0% 100%, 100% 100%)',
+          }}
+        />
 
         <div className="container relative mx-auto px-4">
           <motion.div
@@ -191,7 +207,7 @@ export default function LandingPage() {
           >
             <motion.h2
               variants={itemVariants}
-              className="font-display text-foreground mb-6"
+              className="font-display text-white mb-6"
               style={{
                 fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
                 fontWeight: 900,
@@ -204,7 +220,7 @@ export default function LandingPage() {
             </motion.h2>
             <motion.p
               variants={itemVariants}
-              className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed"
+              className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed"
             >
               Uma semana especial de busca e comunhão com Deus, onde vamos adorar,
               interceder e receber direção através da Palavra. Cada dia é uma
@@ -243,13 +259,13 @@ export default function LandingPage() {
                 key={index}
                 variants={itemVariants}
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className="glass-card-orange p-8 group cursor-pointer"
+                className="bg-black/30 backdrop-blur-md border border-white/10 p-8 rounded-[24px] group cursor-pointer shadow-xl"
               >
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-6 shadow-glow-sm group-hover:shadow-glow transition-shadow duration-300`}>
                   <item.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-heading font-bold text-xl text-foreground mb-3">{item.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="font-heading font-bold text-xl text-white mb-3">{item.title}</h3>
+                <p className="text-white/70 leading-relaxed">
                   {item.description}
                 </p>
               </motion.div>

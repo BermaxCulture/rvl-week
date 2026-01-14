@@ -9,6 +9,12 @@ import {
   Video,
   MessageCircle,
   Share2,
+  Lightbulb,
+  Brain,
+  HandHelping,
+  PartyPopper,
+  Zap,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -67,10 +73,14 @@ export default function DiaConteudo() {
 
     if (type === "main") {
       setIsLoadingVideo(false);
-      toast.success("✅ Vídeo assistido! +30 pts");
+      toast.success("Vídeo assistido! +30 pts", {
+        icon: <Zap className="w-5 h-5 text-secondary fill-secondary" />
+      });
     } else {
       setIsLoadingPastorVideo(false);
-      toast.success("✅ Vídeo assistido! +20 pts");
+      toast.success("Vídeo assistido! +20 pts", {
+        icon: <Zap className="w-5 h-5 text-primary fill-primary" />
+      });
     }
   };
 
@@ -98,7 +108,9 @@ export default function DiaConteudo() {
       origin: { y: 0.6 },
     });
 
-    toast.success("🎉 Dia concluído! +50 pts de conclusão");
+    toast.success("Dia concluído! +50 pts de conclusão", {
+      icon: <PartyPopper className="w-5 h-5 text-success" />,
+    });
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     navigate("/jornada");
@@ -216,8 +228,14 @@ export default function DiaConteudo() {
                     variant={index === 0 ? "outlined" : index === 1 ? "highlight" : "default"}
                     className="h-full"
                   >
-                    <div className="text-3xl mb-3">
-                      {index === 0 ? "💡" : index === 1 ? "📖" : "🙏"}
+                    <div className="flex items-center justify-center w-12 h-12 mb-3 rounded-xl bg-primary/10">
+                      {index === 0 ? (
+                        <Lightbulb className="w-6 h-6 text-primary" />
+                      ) : index === 1 ? (
+                        <BookOpen className="w-6 h-6 text-primary" />
+                      ) : (
+                        <HandHelping className="w-6 h-6 text-primary" />
+                      )}
                     </div>
                     <p className="text-foreground">{point}</p>
                   </Card>
@@ -337,7 +355,9 @@ export default function DiaConteudo() {
             transition={{ delay: 0.4 }}
             className="mb-8"
           >
-            <h2 className="font-display font-bold text-xl mb-4">🧠 Quiz do Versículo</h2>
+            <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-500" /> Quiz do Versículo
+            </h2>
 
             {day.activities.quizCompleted ? (
               <Card variant="highlight" className="text-center py-8">
