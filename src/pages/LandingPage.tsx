@@ -165,7 +165,7 @@ export default function LandingPage() {
             <div className="ticker-content">
               {[...Array(2)].map((_, i) => (
                 <div key={i} className="flex items-center gap-8 px-4">
-                  {["VIMOS", "WE SAW", "PROVAMOS", "WE TASTED", "ADORAMOS", "WE WORSHIP", "INTERCEDEMOS", "WE INTERCEDE", "BUSCAMOS", "WE SEEK", "RECEBEMOS", "WE RECEIVE"].map((word, idx) => (
+                  {["VIMOS", "WE SAW", "PROVAMOS", "WE WITNESSED", "ADORAMOS", "WE WORSHIP", "INTERCEDEMOS", "WE INTERCEDE", "BUSCAMOS", "WE SEEK", "RECEBEMOS", "WE RECEIVE"].map((word, idx) => (
                     <span key={idx} className="flex items-center gap-4">
                       <Sparkles className="w-5 h-5 text-black/60" />
                       <span className="font-heading text-xl text-black tracking-widest font-black">{word}</span>
