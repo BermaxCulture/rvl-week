@@ -4,14 +4,21 @@ import { ChevronLeft, ChevronRight, ArrowRight, Clock, MapPin, Calendar, Sparkle
 import { mockDays } from "@/mocks/days.mock";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+import franciscoVasco from "@/assets/speakers/francisco-vasco.jpg";
+import helvecioCoimbra from "@/assets/speakers/helvecio-coimbra.jpg";
+import pedroLucasRios from "@/assets/speakers/pedro-lucas-rios.jpg";
+import vitorLedo from "@/assets/speakers/vitor-ledo.jpg";
+import renanAmaral from "@/assets/speakers/renan-amaral.jpg";
+import lucasUrrutty from "@/assets/speakers/lucas-urrutty.jpg";
+
 const speakerImages = [
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1544717297-fa154da09f5b?auto=format&fit=crop&q=80&w=800",
-    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=800",
+    franciscoVasco,
+    helvecioCoimbra,
+    pedroLucasRios,
+    vitorLedo,
+    renanAmaral,
+    lucasUrrutty,
+    vitorLedo, // 7th speaker (Wrap up)
 ];
 
 export function ScheduleCarousel() {
@@ -65,7 +72,7 @@ export function ScheduleCarousel() {
 
                     {/* 3D Stacked Carousel */}
                     <div className="relative w-full flex justify-center perspective-1000 py-6">
-                        <div className="relative w-full max-w-[320px] md:max-w-[380px] aspect-[1/1.2] preserve-3d">
+                        <div className="relative w-full max-w-[450px] md:max-w-[700px] aspect-[1.2/1] preserve-3d">
                             <AnimatePresence mode="popLayout" initial={false}>
                                 {[...Array(4)].map((_, i) => {
                                     const slideIndex = (currentIndex + i) % mockDays.length;
@@ -113,6 +120,11 @@ export function ScheduleCarousel() {
                                                             <h3 className="font-display text-3xl md:text-5xl text-white uppercase italic font-black leading-[0.85] tracking-tighter">
                                                                 {mockDays[slideIndex].pastor}
                                                             </h3>
+                                                            {mockDays[slideIndex].church && (
+                                                                <p className="text-white/60 font-heading text-[10px] md:text-sm uppercase tracking-wide">
+                                                                    {mockDays[slideIndex].church}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
