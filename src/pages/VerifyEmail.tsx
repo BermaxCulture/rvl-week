@@ -5,7 +5,7 @@ import { Mail, ArrowRight, RefreshCw, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/ButtonCustom";
-import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 
 export default function VerifyEmail() {
@@ -14,7 +14,7 @@ export default function VerifyEmail() {
     const [timer, setTimer] = useState(60);
     const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const { verifyEmail, resendOTP } = useStore();
+    const { verifyEmail, resendOTP } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const email = location.state?.email;

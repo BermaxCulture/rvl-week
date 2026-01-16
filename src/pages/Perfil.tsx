@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
     User as UserIcon,
@@ -12,8 +12,14 @@ import {
     CheckCircle,
     Clock,
     ChevronRight,
+    Key,
+    Target,
+    Lock,
+    X,
     Shield,
-    Key
+    AlertCircle,
+    Eye,
+    EyeOff
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/layout/Header";
@@ -21,19 +27,34 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/ButtonCustom";
 import { Card } from "@/components/ui/CardCustom";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 
 export default function Perfil() {
-    const { user, days, updateProfile } = useStore();
+    const { user, updateProfile } = useAuth();
+    const { days } = useStore();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [journeyDetails, setJourneyDetails] = useState<any[]>([]);
+    const [loadingJourney, setLoadingJourney] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         phone: "",
         imageUrl: ""
     });
+
+    const [modalData, setModalData] = useState({
+        newEmail: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+
+    const [showPasswords, setShowPasswords] = useState(false);
+    const [emailStep, setEmailStep] = useState<"request" | "verify">("request");
+    const [otpCode, setOtpCode] = useState("");
+    const [activeModal, setActiveModal] = useState<"none" | "email" | "password">("none");
 
     useEffect(() => {
         if (user) {
@@ -43,8 +64,25 @@ export default function Perfil() {
                 phone: user.phone,
                 imageUrl: user.imageUrl || ""
             });
+            fetchJourneyDetails();
         }
     }, [user]);
+
+    const fetchJourneyDetails = async () => {
+        if (!user) return;
+        setLoadingJourney(true);
+        try {
+            const { data, error } = await supabase.rpc("get_user_journey_details", {
+                target_user_id: user.id,
+            });
+            if (error) throw error;
+            setJourneyDetails(data || []);
+        } catch (err) {
+            console.error("Erro ao buscar rastro da jornada:", err);
+        } finally {
+            setLoadingJourney(false);
+        }
+    };
 
     if (!user) return null;
 
@@ -63,6 +101,59 @@ export default function Perfil() {
             setIsEditing(false);
         } else {
             toast.error("Erro ao atualizar perfil");
+        }
+        setIsLoading(false);
+    };
+
+    const handleUpdateEmail = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (modalData.newEmail === user.email) {
+            toast.error("O novo email deve ser diferente do atual.");
+            return;
+        }
+        setIsLoading(true);
+        const { updateEmail } = useAuth.getState();
+        const success = await updateEmail(modalData.newEmail);
+        if (success) {
+            setEmailStep("verify");
+        }
+        setIsLoading(false);
+    };
+
+    const handleVerifyEmailChange = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (otpCode.length !== 6) {
+            toast.error("O código deve ter 6 dígitos.");
+            return;
+        }
+        setIsLoading(true);
+        const { confirmEmailChange } = useAuth.getState();
+        const success = await confirmEmailChange(modalData.newEmail, otpCode);
+        if (success) {
+            setActiveModal("none");
+            setEmailStep("request");
+            setOtpCode("");
+            setModalData(prev => ({ ...prev, newEmail: "" }));
+        }
+        setIsLoading(false);
+    };
+
+    const handleUpdatePassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (modalData.newPassword !== modalData.confirmPassword) {
+            toast.error("As senhas não coincidem.");
+            return;
+        }
+        if (modalData.newPassword.length < 6) {
+            toast.error("A senha deve ter pelo menos 6 caracteres.");
+            return;
+        }
+        setIsLoading(true);
+        const { updatePassword } = useAuth.getState();
+        const success = await updatePassword(modalData.newPassword);
+        if (success) {
+            setActiveModal("none");
+            setModalData(prev => ({ ...prev, newPassword: "", confirmPassword: "" }));
         }
         setIsLoading(false);
     };
@@ -110,7 +201,7 @@ export default function Perfil() {
 
                         {/* Sidebar: Profile Summary */}
                         <div className="lg:col-span-1 space-y-6">
-                            <Card className="p-8 text-center relative overflow-hidden">
+                            <Card className="p-6 sm:p-8 text-center relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-secondary" />
 
                                 <div className="relative inline-block mb-4">
@@ -220,19 +311,6 @@ export default function Perfil() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-muted-foreground" /> E-mail
-                                        </label>
-                                        <input
-                                            type="email"
-                                            value={formData.email}
-                                            disabled
-                                            className="w-full bg-muted/10 border-2 border-border/50 rounded-xl px-4 py-2.5 outline-none cursor-not-allowed text-muted-foreground italic"
-                                        />
-                                        <p className="text-[10px] text-muted-foreground">O e-mail não pode ser alterado.</p>
-                                    </div>
-
                                     {isEditing && (
                                         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                                             <Button type="submit" variant="primary" className="flex-1 order-1 sm:order-2" disabled={isLoading}>
@@ -247,23 +325,49 @@ export default function Perfil() {
                                 </form>
 
                                 {!isEditing && (
-                                    <div className="mt-8 pt-8 border-t">
-                                        <h4 className="font-bold mb-4 flex items-center gap-2 text-sm">
-                                            <Key className="w-4 h-4" /> Segurança
+                                    <div className="mt-8 pt-8 border-t space-y-4">
+                                        <h4 className="font-bold flex items-center gap-2 text-sm text-muted-foreground uppercase tracking-widest">
+                                            <Key className="w-4 h-4" /> Conta e Segurança
                                         </h4>
-                                        <button
-                                            onClick={() => toast.info("Funcionalidade de troca de senha em breve!")}
-                                            className="flex items-center justify-between w-full p-4 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all"
-                                        >
-                                            <span className="text-sm font-medium">Alterar Senha</span>
-                                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                                        </button>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    setModalData(prev => ({ ...prev, newEmail: user.email }));
+                                                    setActiveModal("email");
+                                                }}
+                                                className="flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all border border-transparent hover:border-primary/20 group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <Mail className="w-5 h-5 text-primary" />
+                                                    <div className="text-left">
+                                                        <p className="text-sm font-bold">Alterar E-mail</p>
+                                                        <p className="text-[10px] text-muted-foreground uppercase font-black">Email atual ativo</p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                                            </button>
+
+                                            <button
+                                                onClick={() => setActiveModal("password")}
+                                                className="flex items-center justify-between p-4 bg-muted/20 hover:bg-muted/40 rounded-xl transition-all border border-transparent hover:border-primary/20 group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <Lock className="w-5 h-5 text-secondary" />
+                                                    <div className="text-left">
+                                                        <p className="text-sm font-bold">Trocar Senha</p>
+                                                        <p className="text-[10px] text-muted-foreground uppercase font-black">Segurança da conta</p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </Card>
 
                             {/* Progress Summary */}
-                            <Card className="p-8">
+                            <Card className="p-6 sm:p-8">
                                 <h3 className="text-xl font-display font-bold mb-6">Seu Progresso de Fé</h3>
 
                                 <div className="space-y-6">
@@ -281,41 +385,46 @@ export default function Perfil() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
-                                            <div className="bg-primary/20 w-8 h-8 rounded-lg flex items-center justify-center mb-3">
-                                                <CheckCircle className="w-4 h-4 text-primary" />
-                                            </div>
-                                            <p className="text-lg font-bold">{completedDaysCount} / 7</p>
-                                            <p className="text-xs text-muted-foreground">Dias de jornada concluídos</p>
-                                        </div>
-                                        <div className="p-4 bg-secondary/5 rounded-2xl border border-secondary/10">
-                                            <div className="bg-secondary/20 w-8 h-8 rounded-lg flex items-center justify-center mb-3">
-                                                <Zap className="w-4 h-4 text-secondary" />
-                                            </div>
-                                            <p className="text-lg font-bold">{user.totalPoints}</p>
-                                            <p className="text-xs text-muted-foreground">Pontos totais acumulados</p>
-                                        </div>
-                                    </div>
+                                    <div className="pt-4">
+                                        <h3 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-2">
+                                            <Target className="w-5 h-5 text-primary" /> Rastro da Jornada
+                                        </h3>
 
-                                    <div className="bg-muted/20 p-4 rounded-2xl flex items-center gap-4">
-                                        <div className="bg-background w-12 h-12 rounded-full flex items-center justify-center shadow-sm">
-                                            <Clock className="w-6 h-6 text-muted-foreground" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold">Membro desde</p>
-                                            <p className="text-xs text-muted-foreground">
-                                                {new Date(user.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
-                                            </p>
-                                        </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="ml-auto"
-                                            onClick={() => navigate('/jornada')}
-                                        >
-                                            Ver Jornada
-                                        </Button>
+                                        {loadingJourney ? (
+                                            <div className="flex items-center justify-center py-10">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+                                            </div>
+                                        ) : (
+                                            <div className="grid gap-3">
+                                                {journeyDetails.map((day) => (
+                                                    <div
+                                                        key={day.day_number}
+                                                        className={`
+                                                            flex items-center gap-4 p-4 rounded-2xl border-2 transition-all
+                                                            ${day.completed ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/10 opacity-60"}
+                                                        `}
+                                                    >
+                                                        <div className={`
+                                                            w-10 h-10 rounded-xl flex items-center justify-center font-display font-black flex-shrink-0
+                                                            ${day.completed ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}
+                                                        `}>
+                                                            {day.day_number}
+                                                        </div>
+                                                        <div className="flex-1 text-left">
+                                                            <h4 className="font-bold text-sm leading-tight uppercase font-display">{day.title}</h4>
+                                                            <p className="text-[10px] uppercase font-black tracking-widest mt-1 opacity-60">
+                                                                {day.completed ? `+${day.points_earned} PTS` : "Não concluído"}
+                                                            </p>
+                                                        </div>
+                                                        {day.completed ? (
+                                                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                                                        ) : (
+                                                            <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0 opacity-40" />
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
@@ -325,6 +434,141 @@ export default function Perfil() {
                 </div>
             </main>
             <Footer />
+
+            {/* Modais de Segurança */}
+            <AnimatePresence>
+                {activeModal !== "none" && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setActiveModal("none")}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-md bg-card border-2 border-border p-6 rounded-3xl shadow-2xl overflow-hidden"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-display font-bold flex items-center gap-2">
+                                    {activeModal === "email" ? <Mail className="w-5 h-5 text-primary" /> : <Lock className="w-5 h-5 text-secondary" />}
+                                    {activeModal === "email" ? "Alterar E-mail" : "Alterar Senha"}
+                                </h3>
+                                <button onClick={() => setActiveModal("none")} className="p-2 hover:bg-muted rounded-full transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {activeModal === "email" ? (
+                                emailStep === "request" ? (
+                                    <form onSubmit={handleUpdateEmail} className="space-y-4">
+                                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex gap-3 mb-4">
+                                            <AlertCircle className="w-5 h-5 text-primary shrink-0" />
+                                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                                Enviaremos um código de 6 dígitos para o seu novo e-mail para validar a alteração.
+                                            </p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Novo E-mail</label>
+                                            <input
+                                                type="email"
+                                                value={modalData.newEmail}
+                                                onChange={(e) => setModalData(prev => ({ ...prev, newEmail: e.target.value }))}
+                                                placeholder="exemplo@email.com"
+                                                className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-3 focus:border-primary outline-none transition-all"
+                                                required
+                                            />
+                                        </div>
+                                        <Button type="submit" variant="primary" fullWidth disabled={isLoading} className="h-12">
+                                            {isLoading ? "Enviando..." : "Receber Código"}
+                                        </Button>
+                                    </form>
+                                ) : (
+                                    <form onSubmit={handleVerifyEmailChange} className="space-y-4">
+                                        <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex flex-col gap-2 mb-4 text-center">
+                                            <p className="text-xs text-muted-foreground">O código foi enviado para:</p>
+                                            <p className="text-sm font-bold text-primary">{modalData.newEmail}</p>
+                                        </div>
+                                        <div className="space-y-2 text-center">
+                                            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Código de 6 dígitos</label>
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                maxLength={6}
+                                                value={otpCode}
+                                                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                                                placeholder="000000"
+                                                className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-4 text-center text-3xl font-black tracking-[12px] focus:border-primary outline-none transition-all"
+                                                required
+                                                autoFocus
+                                            />
+                                        </div>
+                                        <Button type="submit" variant="primary" fullWidth disabled={isLoading} className="h-12">
+                                            {isLoading ? "Validando..." : "Confirmar Alteração"}
+                                        </Button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setEmailStep("request")}
+                                            className="w-full text-xs text-muted-foreground hover:text-primary transition-colors py-2"
+                                        >
+                                            Deseja usar outro e-mail? Voltar
+                                        </button>
+                                    </form>
+                                )
+                            ) : (
+                                <form onSubmit={handleUpdatePassword} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Nova Senha</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPasswords ? "text" : "password"}
+                                                value={modalData.newPassword}
+                                                onChange={(e) => setModalData(prev => ({ ...prev, newPassword: e.target.value }))}
+                                                placeholder="Mínimo 6 caracteres"
+                                                className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-3 pr-12 focus:border-primary outline-none transition-all"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPasswords(!showPasswords)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-primary transition-colors"
+                                            >
+                                                {showPasswords ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Confirmar Nova Senha</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPasswords ? "text" : "password"}
+                                                value={modalData.confirmPassword}
+                                                onChange={(e) => setModalData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                                placeholder="Repita a nova senha"
+                                                className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-3 pr-12 focus:border-primary outline-none transition-all"
+                                                required
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPasswords(!showPasswords)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-muted-foreground hover:text-primary transition-colors"
+                                            >
+                                                {showPasswords ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <Button type="submit" variant="primary" fullWidth disabled={isLoading} className="h-12">
+                                        {isLoading ? "Salvando..." : "Atualizar Senha"}
+                                    </Button>
+                                </form>
+                            )}
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

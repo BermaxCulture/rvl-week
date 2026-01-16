@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     ArrowLeft,
     Save,
@@ -14,24 +14,40 @@ import {
     Upload,
     XCircle,
     FileVideo,
-    Loader2
+    Loader2,
+    Brain,
+    Plus,
+    Trash2,
+    Maximize2,
+    X,
+    Edit3
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/ButtonCustom";
 import { Card } from "@/components/ui/CardCustom";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminEditDia() {
     const { dayNumber } = useParams();
     const navigate = useNavigate();
-    const { user, days, updateDay } = useStore();
+    const { days, updateDay } = useStore();
+    const { user } = useAuth();
 
     const [formData, setFormData] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const quizEndRef = useRef<HTMLDivElement>(null);
+
+    // Estado para o modal de expansão
+    const [expandedField, setExpandedField] = useState<{
+        title: string;
+        value: string;
+        field: string;
+        qIdx?: number;
+    } | null>(null);
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -53,7 +69,8 @@ export default function AdminEditDia() {
                 verseReference: day.verseReference,
                 videoUrl: day.content.videoUrl,
                 pastorVideoUrl: day.content.pastorVideoUrl,
-                mainPoints: day.content.mainPoints || ["", "", ""]
+                mainPoints: day.content.mainPoints || ["", "", ""],
+                quiz: day.content.quiz || []
             });
         }
     }, [dayNumber, days, user, navigate]);
@@ -75,7 +92,8 @@ export default function AdminEditDia() {
                 ...days.find(d => d.dayNumber === parseInt(dayNumber!))?.content,
                 videoUrl: formData.videoUrl,
                 pastorVideoUrl: formData.pastorVideoUrl,
-                mainPoints: formData.mainPoints
+                mainPoints: formData.mainPoints,
+                quiz: formData.quiz
             }
         });
 
@@ -94,11 +112,61 @@ export default function AdminEditDia() {
         setFormData({ ...formData, mainPoints: newPoints });
     };
 
+    const updateQuizQuestion = (qIndex: number, field: string, value: any) => {
+        const newQuiz = [...formData.quiz];
+        newQuiz[qIndex] = { ...newQuiz[qIndex], [field]: value };
+        setFormData({ ...formData, quiz: newQuiz });
+    };
+
+    const updateQuizOption = (qIndex: number, oIndex: number, value: string) => {
+        const newQuiz = [...formData.quiz];
+        const newOptions = [...newQuiz[qIndex].options];
+        newOptions[oIndex] = value;
+        newQuiz[qIndex] = { ...newQuiz[qIndex], options: newOptions };
+        setFormData({ ...formData, quiz: newQuiz });
+    };
+
+    const addQuizQuestion = () => {
+        const newQuestion = {
+            question: "",
+            options: ["", "", "", ""],
+            correct: 0,
+            explanation: ""
+        };
+        setFormData({ ...formData, quiz: [...formData.quiz, newQuestion] });
+
+        // Rolar para a nova pergunta
+        setTimeout(() => {
+            quizEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    };
+
+    const removeQuizQuestion = (index: number) => {
+        const newQuiz = formData.quiz.filter((_: any, i: number) => i !== index);
+        setFormData({ ...formData, quiz: newQuiz });
+    };
+
+    const handleSaveExpanded = () => {
+        if (!expandedField) return;
+
+        if (expandedField.field === 'verse') {
+            setFormData({ ...formData, verse: expandedField.value });
+        } else if (expandedField.field === 'question' && expandedField.qIdx !== undefined) {
+            updateQuizQuestion(expandedField.qIdx, 'question', expandedField.value);
+        } else if (expandedField.field === 'explanation' && expandedField.qIdx !== undefined) {
+            updateQuizQuestion(expandedField.qIdx, 'explanation', expandedField.value);
+        } else if (expandedField.field.startsWith('mainPoint-')) {
+            const idx = parseInt(expandedField.field.split('-')[1]);
+            updateMainPoint(idx, expandedField.value);
+        }
+
+        setExpandedField(null);
+    };
+
     const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Validar tamanho (50MB)
         const fileSizeInMB = file.size / (1024 * 1024);
         if (fileSizeInMB > 50) {
             toast.error("O vídeo deve ter no máximo 50MB");
@@ -106,14 +174,13 @@ export default function AdminEditDia() {
         }
 
         setIsUploading(true);
-        setUploadProgress(0);
 
         try {
             const fileExt = file.name.split('.').pop();
             const fileName = `${dayNumber}_pastor_video_${Date.now()}.${fileExt}`;
             const filePath = `${fileName}`;
 
-            const { data, error } = await supabase.storage
+            const { error } = await supabase.storage
                 .from('videos')
                 .upload(filePath, file, {
                     cacheControl: '3600',
@@ -159,7 +226,7 @@ export default function AdminEditDia() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <h1 className="text-3xl font-display font-bold mb-8">Editar Dia {dayNumber}</h1>
+                        <h1 className="text-3xl font-display font-bold mb-8 text-foreground">Editar Dia {dayNumber}</h1>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <Card className="p-6 space-y-4">
@@ -223,7 +290,16 @@ export default function AdminEditDia() {
                                 </h2>
 
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Texto do Versículo</label>
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm font-semibold">Texto do Versículo</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => setExpandedField({ title: "Versículo do Dia", value: formData.verse, field: "verse" })}
+                                            className="text-primary hover:text-primary/80 p-1"
+                                        >
+                                            <Maximize2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                     <textarea
                                         value={formData.verse}
                                         onChange={(e) => setFormData({ ...formData, verse: e.target.value })}
@@ -354,7 +430,16 @@ export default function AdminEditDia() {
 
                                 {[0, 1, 2].map(i => (
                                     <div key={i} className="space-y-2">
-                                        <label className="text-sm font-semibold">Card {i + 1}</label>
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-sm font-semibold">Card {i + 1}</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setExpandedField({ title: `Card ${i + 1}`, value: formData.mainPoints[i] || "", field: `mainPoint-${i}` })}
+                                                className="text-primary hover:text-primary/80 p-1"
+                                            >
+                                                <Maximize2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                         <input
                                             type="text"
                                             value={formData.mainPoints[i] || ""}
@@ -366,22 +451,128 @@ export default function AdminEditDia() {
                                 ))}
                             </Card>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <Card className="p-6 space-y-6">
+                                <div className="flex items-center justify-between border-b pb-2 mb-4">
+                                    <h2 className="text-lg font-bold flex items-center gap-2">
+                                        <Brain className="w-5 h-5 text-purple-500" /> Quiz do Dia
+                                    </h2>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={addQuizQuestion}
+                                        className="gap-1 sm:gap-2 px-2 sm:px-3 h-8 sm:h-9 text-[10px] sm:text-xs"
+                                    >
+                                        <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                                        <span className="inline-flex">Add Pergunta</span>
+                                    </Button>
+                                </div>
+
+                                <div className="space-y-8">
+                                    {formData.quiz.map((q: any, qIdx: number) => (
+                                        <div key={qIdx} className="p-4 bg-card border-2 border-border rounded-2xl relative space-y-4 shadow-sm">
+                                            <button
+                                                type="button"
+                                                onClick={() => removeQuizQuestion(qIdx)}
+                                                className="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg z-10"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Pergunta {qIdx + 1}</label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setExpandedField({ title: `Pergunta ${qIdx + 1}`, value: q.question, field: "question", qIdx })}
+                                                        className="text-purple-500 hover:text-purple-600 p-1"
+                                                    >
+                                                        <Maximize2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <textarea
+                                                    value={q.question}
+                                                    onChange={(e) => updateQuizQuestion(qIdx, "question", e.target.value)}
+                                                    placeholder="Digite a pergunta..."
+                                                    className="w-full bg-muted/10 border-2 border-border rounded-xl px-4 py-2 focus:border-purple-500 outline-none transition-all font-bold text-sm h-20 resize-none"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {q.options.map((opt: string, oIdx: number) => (
+                                                    <div key={oIdx} className="space-y-1">
+                                                        <div className="flex items-center justify-between px-1">
+                                                            <label className="text-[10px] font-black uppercase text-muted-foreground">Opção {oIdx + 1}</label>
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Correta</span>
+                                                                <input
+                                                                    type="radio"
+                                                                    name={`correct-${qIdx}`}
+                                                                    checked={q.correct === oIdx}
+                                                                    onChange={() => updateQuizQuestion(qIdx, "correct", oIdx)}
+                                                                    className="w-4 h-4 accent-purple-500"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            value={opt}
+                                                            onChange={(e) => updateQuizOption(qIdx, oIdx, e.target.value)}
+                                                            placeholder={`Opção ${oIdx + 1}`}
+                                                            className={`w-full bg-muted/10 border-2 rounded-xl px-4 py-2 outline-none transition-all text-sm ${q.correct === oIdx ? 'border-purple-500/50 bg-purple-500/5' : 'border-border'}`}
+                                                            required
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-[10px] font-black uppercase text-muted-foreground">Explicação da resposta</label>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setExpandedField({ title: `Explicação (Q${qIdx + 1})`, value: q.explanation, field: "explanation", qIdx })}
+                                                        className="text-purple-500 hover:text-purple-600 p-1"
+                                                    >
+                                                        <Maximize2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <textarea
+                                                    value={q.explanation}
+                                                    onChange={(e) => updateQuizQuestion(qIdx, "explanation", e.target.value)}
+                                                    placeholder="Explique por que esta é a resposta correta..."
+                                                    className="w-full bg-muted/10 border-2 border-border rounded-xl px-4 py-2 focus:border-purple-500 outline-none transition-all text-sm h-20 resize-none italic"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {formData.quiz.length === 0 && (
+                                        <div className="text-center py-10 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
+                                            Nenhuma pergunta cadastrada para este dia.
+                                        </div>
+                                    )}
+                                    <div ref={quizEndRef} />
+                                </div>
+                            </Card>
+
+                            <div className="flex flex-col sm:flex-row gap-4 pt-6">
                                 <Button
                                     type="submit"
                                     variant="primary"
                                     size="lg"
-                                    className="w-full sm:flex-1"
+                                    className="w-full sm:flex-1 h-14 text-lg font-bold"
                                     disabled={isSaving}
                                 >
-                                    <Save className="w-5 h-5 mr-1.5" />
+                                    <Save className="w-5 h-5 mr-2" />
                                     {isSaving ? "Salvando..." : "Salvar Alterações"}
                                 </Button>
                                 <Button
                                     type="button"
                                     variant="outline"
                                     size="lg"
-                                    className="w-full sm:w-auto min-w-[140px]"
+                                    className="w-full sm:w-auto min-w-[140px] h-14"
                                     onClick={() => navigate(`/jornada/dia/${dayNumber}`)}
                                 >
                                     Cancelar
@@ -398,6 +589,60 @@ export default function AdminEditDia() {
                     </motion.div>
                 </div>
             </main>
+
+            {/* Modal de Edição Expandida */}
+            <AnimatePresence>
+                {expandedField && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="w-full max-w-2xl bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between bg-muted/20">
+                                <h3 className="text-lg sm:text-xl font-display font-bold flex items-center gap-2 truncate pr-2">
+                                    <Edit3 className="w-5 h-5 text-primary flex-shrink-0" />
+                                    <span className="truncate">{expandedField.title}</span>
+                                </h3>
+                                <button
+                                    onClick={() => setExpandedField(null)}
+                                    className="p-2 hover:bg-muted rounded-full transition-colors flex-shrink-0"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            <div className="p-4 sm:p-6 flex-1 overflow-auto">
+                                <textarea
+                                    value={expandedField.value}
+                                    onChange={(e) => setExpandedField({ ...expandedField, value: e.target.value })}
+                                    className="w-full h-full min-h-[250px] sm:min-h-[300px] bg-muted/10 border-2 border-border rounded-2xl p-4 sm:p-6 focus:border-primary outline-none transition-all text-base sm:text-lg leading-relaxed resize-none"
+                                    autoFocus
+                                    placeholder="Digite o texto aqui..."
+                                />
+                            </div>
+
+                            <div className="p-4 sm:p-6 border-t border-border bg-muted/20 flex flex-col sm:flex-row gap-3">
+                                <Button
+                                    onClick={handleSaveExpanded}
+                                    variant="primary"
+                                    className="w-full sm:flex-1 h-12 sm:h-14 text-base sm:text-lg font-bold order-1 sm:order-1"
+                                >
+                                    Confirmar Alteração
+                                </Button>
+                                <Button
+                                    onClick={() => setExpandedField(null)}
+                                    variant="outline"
+                                    className="w-full sm:w-auto px-8 h-12 sm:h-14 order-2 sm:order-2"
+                                >
+                                    Cancelar
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

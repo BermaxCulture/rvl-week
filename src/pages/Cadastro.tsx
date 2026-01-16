@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Logo } from "@/components/ui/Logo";
 import { Input } from "@/components/ui/InputCustom";
 import { Button } from "@/components/ui/ButtonCustom";
-import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 
 export default function Cadastro() {
@@ -19,7 +19,7 @@ export default function Cadastro() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useStore();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const formatPhone = (value: string) => {

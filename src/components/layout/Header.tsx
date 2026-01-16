@@ -5,10 +5,11 @@ import { Menu, X, LogOut, User, Trophy, Zap, ChevronRight } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/ButtonCustom";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated, user, logout } = useStore();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,6 +48,16 @@ export function Header() {
                     )}
                   </div>
                 </Link>
+
+                <Link
+                  to="/ranking"
+                  className="flex items-center gap-2 px-4 py-2 bg-black/5 hover:bg-black/10 rounded-full transition-all group active:scale-95 border border-black/5"
+                  title="Ranking Global"
+                >
+                  <Trophy className="w-4 h-4 text-purple-900" />
+                  <span className="text-purple-900 font-bold text-sm tracking-tight hidden lg:inline">Ranking</span>
+                </Link>
+
                 <div className="flex items-center gap-2 px-4 py-2 bg-black/10 rounded-full">
                   <span className="text-purple-900 font-bold text-sm flex items-center gap-1">
                     <Zap className="w-3.5 h-3.5 fill-purple-900" /> {user?.totalPoints || 0}
@@ -123,8 +134,17 @@ export function Header() {
                         onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-black/10 transition-colors"
                       >
-                        <Trophy className="w-5 h-5 text-black" />
+                        <Zap className="w-5 h-5 text-black" />
                         <span className="font-heading font-bold text-black uppercase text-sm">Minha Jornada</span>
+                      </Link>
+
+                      <Link
+                        to="/ranking"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-black/10 transition-colors"
+                      >
+                        <Trophy className="w-5 h-5 text-black" />
+                        <span className="font-heading font-bold text-black uppercase text-sm">Ranking Global</span>
                       </Link>
 
                       <button

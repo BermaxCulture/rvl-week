@@ -60,6 +60,7 @@ export interface Day {
   points: DayPoints;
   activities: DayActivities;
   content: DayContent;
+  qrCodeUrl?: string;
 }
 
 export interface Achievement {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock } from "lucide-react";
@@ -6,15 +6,18 @@ import { toast } from "sonner";
 import { Logo } from "@/components/ui/Logo";
 import { Input } from "@/components/ui/InputCustom";
 import { Button } from "@/components/ui/ButtonCustom";
-import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "react-router-dom";
 import AnimatedGradientBackground from "@/components/ui/animated-gradient-background";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useStore();
+  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from || "/jornada";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,23 +27,18 @@ export default function Login() {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      const success = await login(email, password);
-
-      if (success) {
-        toast.success("Bem-vindo de volta! 🔥");
-        navigate("/jornada");
-      } else {
-        toast.error("Credenciais inválidas ou erro no servidor");
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Ocorreu um erro. Tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
+    await login(email, password);
+    // Note: useAuth.login handles its own success toast and isLoading
+    // We navigate based on isAuthenticated in a useEffect or here if we know it succeeded
   };
+
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">

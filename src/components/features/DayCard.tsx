@@ -3,7 +3,7 @@ import { Lock, Star, CheckCircle, QrCode, Unlock, Sparkles, CheckCircle2, Eye, E
 import { Day } from "@/types";
 import { Button } from "@/components/ui/ButtonCustom";
 import { cn } from "@/lib/utils";
-import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 
 interface DayCardProps {
@@ -14,7 +14,7 @@ interface DayCardProps {
 }
 
 export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardProps) {
-  const { user } = useStore();
+  const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + "T00:00:00");

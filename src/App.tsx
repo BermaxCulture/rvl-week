@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as Sonner, toast } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -10,38 +10,76 @@ import Jornada from "./pages/Jornada";
 import DiaConteudo from "./pages/DiaConteudo";
 import AdminEditDia from "./pages/AdminEditDia";
 import Perfil from "./pages/Perfil";
+import RankingPage from "./pages/RankingPage";
 import VerifyEmail from "./pages/VerifyEmail";
+import UnlockPage from "./pages/UnlockPage";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/utils/ScrollToTop";
 
 import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const { checkAuth, isAuthenticated, setPendingUnlock } = useStore();
+  const { checkAuth, isAuthenticated } = useAuth();
+  const { setPendingUnlock, unlockDay } = useStore();
 
   useEffect(() => {
     checkAuth();
 
-    // Check for QR Code scan in URL
+    // Check for Auth Errors in URL (hash)
+    const hash = window.location.hash;
+    if (hash.includes("error=access_denied") && hash.includes("otp_expired")) {
+      toast.error("O link de confirmação expirou ou já foi usado.", {
+        description: "Lembre-se: o Supabase pode exigir que você confirme a alteração tanto no e-mail antigo quanto no novo. Verifique ambas as caixas de entrada!",
+        duration: 8000
+      });
+      // Clean up hash
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
+    // Check for QR Code scan in URL (Legacy fallback if needed)
     const params = new URLSearchParams(window.location.search);
     const dayToUnlock = params.get("unlock");
     if (dayToUnlock) {
       const dayNum = parseInt(dayToUnlock);
       if (isAuthenticated) {
-        // Unlocks immediately if already logged in
-        useStore.getState().unlockDay(dayNum, "qrcode");
+        unlockDay(dayNum, "qrcode");
       } else {
-        // Saves for later and user will be prompted to login/register
         setPendingUnlock(dayNum);
       }
-      // Clean up URL
       const newUrl = window.location.pathname;
       window.history.replaceState({}, "", newUrl);
     }
-  }, [checkAuth, setPendingUnlock]);
+  }, [checkAuth, isAuthenticated, setPendingUnlock, unlockDay]);
+
+  useEffect(() => {
+    // Process pending QR unlock from qrcodeService flow after login
+    // Don't process if we are currently on the unlock page, to let the page handle it
+    if (isAuthenticated && window.location.pathname !== '/unlock') {
+      const pending = localStorage.getItem('pending_qr_unlock');
+      if (pending) {
+        const { day, token } = JSON.parse(pending);
+        localStorage.removeItem('pending_qr_unlock'); // Clear early to avoid race conditions
+
+        const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_PRODUCTION_URL || window.location.origin) : window.location.origin;
+        import('@/services/qrcode.service').then(({ qrcodeService }) => {
+          qrcodeService.unlockDay(`${baseUrl}/unlock?day=${day}&token=${token}`)
+            .then((result: any) => {
+              if (result.points > 0) {
+                toast.success(`Dia ${result.day} desbloqueado! +${result.points} pts`);
+              }
+            })
+            .catch(() => {
+              // Ignore errors on background processing
+            });
+        });
+      }
+    }
+  }, [isAuthenticated]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -51,14 +89,55 @@ const App = () => {
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
-            <Route path="/jornada" element={<Jornada />} />
-            <Route path="/jornada/dia/:dayNumber" element={<DiaConteudo />} />
-            <Route path="/jornada/dia/:dayNumber/editar" element={<AdminEditDia />} />
-            <Route path="/perfil" element={<Perfil />} />
             <Route path="/verificar-email" element={<VerifyEmail />} />
+            <Route path="/unlock" element={<UnlockPage />} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/jornada"
+              element={
+                <ProtectedRoute>
+                  <Jornada />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jornada/dia/:dayNumber"
+              element={
+                <ProtectedRoute>
+                  <DiaConteudo />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jornada/dia/:dayNumber/editar"
+              element={
+                <ProtectedRoute>
+                  <AdminEditDia />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/perfil"
+              element={
+                <ProtectedRoute>
+                  <Perfil />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ranking"
+              element={
+                <ProtectedRoute>
+                  <RankingPage />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

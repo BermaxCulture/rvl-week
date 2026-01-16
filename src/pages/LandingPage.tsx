@@ -18,7 +18,7 @@ import {
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/ButtonCustom";
 import { Quiz } from "@/components/features/Quiz";
-import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
 import { Logo } from "@/components/ui/Logo";
 import { ScheduleCarousel } from "@/components/sections/ScheduleCarousel";
@@ -42,7 +42,7 @@ const itemVariants = {
 };
 
 export default function LandingPage() {
-  const { isAuthenticated } = useStore();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">

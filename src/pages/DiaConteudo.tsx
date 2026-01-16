@@ -8,7 +8,6 @@ import {
   BookOpen,
   Video,
   MessageCircle,
-  Share2,
   Lightbulb,
   Brain,
   HandHelping,
@@ -16,6 +15,8 @@ import {
   Zap,
   Sparkles,
   Save,
+  Copy,
+  ExternalLink
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -25,13 +26,15 @@ import { Card } from "@/components/ui/CardCustom";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Quiz } from "@/components/features/Quiz";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
 import { cn } from "@/lib/utils";
 
 export default function DiaConteudo() {
   const { dayNumber } = useParams();
   const navigate = useNavigate();
-  const { user, days, markVideoWatched, completeQuiz, markDayComplete } = useStore();
+  const { days, markVideoWatched, completeQuiz, markDayComplete } = useStore();
+  const { user } = useAuth();
 
   const [searchParams] = useSearchParams();
   const isPreview = searchParams.get('preview') === 'true';
@@ -153,20 +156,6 @@ export default function DiaConteudo() {
     navigate("/jornada");
   };
 
-  const handleShare = () => {
-    const text = `Completei o Dia ${dayNum} da RVL Week! 🔥 #RVLWeek #LinkChurch`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: "RVL Week",
-        text,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(text);
-      toast.success("Texto copiado para a área de transferência!");
-    }
-  };
 
   const totalEarned = day.points.earned;
   const totalPossible = day.points.total;
@@ -264,6 +253,60 @@ export default function DiaConteudo() {
             </div>
           </motion.div>
 
+          {/* Admin QR Code Info */}
+          {user.role === "admin" && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-3xl p-6 relative overflow-hidden">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                      <Sparkles className="w-6 h-6 text-black" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-display font-bold text-lg text-amber-500">
+                        Painel do Administrador
+                      </h3>
+                      <p className="text-xs text-muted-foreground uppercase font-black tracking-widest">
+                        Gerenciamento de QR Code
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 max-w-xl items-center gap-2 bg-black/20 rounded-xl p-2 border border-white/5 overflow-hidden">
+                    <code className="flex-1 text-[10px] md:text-xs font-mono text-amber-200/70 truncate px-2">
+                      {(() => {
+                        const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_PRODUCTION_URL || window.location.origin) : window.location.origin;
+                        return `${baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
+                      })()}
+                    </code>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-black border-none whitespace-nowrap"
+                      onClick={() => {
+                        const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_PRODUCTION_URL || window.location.origin) : window.location.origin;
+                        const qrUrl = `${baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
+                        navigator.clipboard.writeText(qrUrl);
+                        toast.success("URL copiada com sucesso!");
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-2" /> Copiar URL
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-amber-500/10 flex items-center gap-2 text-xs text-amber-500/60 italic">
+                  <ExternalLink className="w-3 h-3" />
+                  Dica: URL dinâmica para o ambiente de {import.meta.env.PROD ? "Produção" : "Desenvolvimento"}.
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Main Points */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
@@ -326,7 +369,7 @@ export default function DiaConteudo() {
                 ) : (day.activities.videoWatched || showMainVideo) ? (
                   <iframe
                     className="w-full h-full"
-                    src={`https://www.youtube.com/embed/${getYouTubeId(day.content.videoUrl)}?autoplay=1`}
+                    src={`https://www.youtube.com/embed/${getYouTubeId(day.content.videoUrl)}${showMainVideo ? '?autoplay=1' : ''}`}
                     title="YouTube video player"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -391,13 +434,13 @@ export default function DiaConteudo() {
                       className="w-full h-full object-contain bg-black"
                       src={day.content.pastorVideoUrl}
                       controls
-                      autoPlay
+                      autoPlay={showPastorVideo}
                       playsInline
                     />
                   ) : (
                     <iframe
                       className="w-full h-full"
-                      src={`https://www.youtube.com/embed/${getYouTubeId(day.content.pastorVideoUrl)}?autoplay=1`}
+                      src={`https://www.youtube.com/embed/${getYouTubeId(day.content.pastorVideoUrl)}${showPastorVideo ? '?autoplay=1' : ''}`}
                       title="YouTube video player"
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -553,15 +596,6 @@ export default function DiaConteudo() {
                   </Button>
                 )}
 
-                <Button
-                  variant="outline"
-                  size="lg"
-                  icon={Share2}
-                  onClick={handleShare}
-                  fullWidth={day.status === "completed"}
-                >
-                  Compartilhar
-                </Button>
               </div>
             </Card>
           </motion.section>

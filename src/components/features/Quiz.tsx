@@ -28,11 +28,11 @@ export function Quiz({ questions, onComplete }: QuizProps) {
   };
 
   const handleSubmitAnswer = () => {
-    if (selectedAnswer === null) return;
+    if (selectedAnswer === null || answerState !== "unanswered") return;
 
     const isCorrect = selectedAnswer === question.correct;
     setAnswerState(isCorrect ? "correct" : "incorrect");
-    setUserAnswers([...userAnswers, isCorrect]);
+    setUserAnswers(prev => [...prev, isCorrect]);
   };
 
   const handleNextQuestion = () => {
@@ -41,7 +41,8 @@ export function Quiz({ questions, onComplete }: QuizProps) {
       setSelectedAnswer(null);
       setAnswerState("unanswered");
     } else {
-      const correctCount = [...userAnswers].filter(Boolean).length + (answerState === "correct" ? 1 : 0);
+      // O userAnswers já contém o resultado da pergunta atual, pois foi adicionado no handleSubmitAnswer
+      const correctCount = userAnswers.filter(Boolean).length;
       setShowResults(true);
 
       if (correctCount === questions.length) {
@@ -66,7 +67,6 @@ export function Quiz({ questions, onComplete }: QuizProps) {
 
   if (showResults) {
     const correctCount = userAnswers.filter(Boolean).length;
-    const percentage = Math.round((correctCount / questions.length) * 100);
     const isPerfect = correctCount === questions.length;
 
     return (
@@ -88,15 +88,11 @@ export function Quiz({ questions, onComplete }: QuizProps) {
           {isPerfect ? "Perfeito!" : "Quiz Concluído!"}
         </h3>
         <p className="text-lg text-muted-foreground mb-4">
-          Você acertou {correctCount}/{questions.length} ({percentage}%)
+          Você acertou {correctCount}/{questions.length}
         </p>
-        {isPerfect ? (
-          <p className="text-success font-bold mb-6">+50 pts conquistados!</p>
-        ) : (
-          <p className="text-muted-foreground mb-6">
-            +{Math.floor((correctCount / questions.length) * 50)} pts conquistados
-          </p>
-        )}
+        <p className={cn("font-bold mb-6", isPerfect ? "text-success" : "text-primary")}>
+          +{isPerfect ? 50 : Math.floor((correctCount / questions.length) * 50)} pts conquistados
+        </p>
         {!isPerfect && (
           <Button variant="outline" icon={RotateCcw} onClick={handleRetry}>
             Tentar Novamente
@@ -125,11 +121,11 @@ export function Quiz({ questions, onComplete }: QuizProps) {
         </div>
       </div>
 
-      <h4 className="font-display font-bold text-lg mb-6">{question.question}</h4>
+      <h4 className="font-display font-bold text-lg mb-6">{question?.question}</h4>
 
       <div className="space-y-3 mb-6">
         <AnimatePresence mode="wait">
-          {question.options.map((option, index) => {
+          {question?.options.map((option, index) => {
             const isSelected = selectedAnswer === index;
             const isCorrectAnswer = index === question.correct;
             const showCorrect = answerState !== "unanswered" && isCorrectAnswer;
@@ -191,7 +187,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
             answerState === "correct" ? "bg-success/10" : "bg-muted"
           )}
         >
-          <p className="text-sm">{question.explanation}</p>
+          <p className="text-sm">{question?.explanation}</p>
         </motion.div>
       )}
 

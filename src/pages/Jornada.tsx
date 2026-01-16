@@ -21,16 +21,19 @@ import { DayCard } from "@/components/features/DayCard";
 import { AchievementBadge } from "@/components/features/AchievementBadge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Button } from "@/components/ui/ButtonCustom";
-import { Quiz } from "@/components/features/Quiz";
 import { useStore } from "@/store/useStore";
+import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
 import { QRScanner } from "@/components/features/QRScanner";
 import { AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Ranking from "@/components/Ranking";
+import { qrcodeService } from "@/services/qrcode.service";
 
 export default function Jornada() {
   const navigate = useNavigate();
-  const { user, days, achievements, unlockDay } = useStore();
+  const { days, achievements, unlockDay } = useStore();
+  const { user } = useAuth();
   const [showQRModal, setShowQRModal] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -56,6 +59,27 @@ export default function Jornada() {
     }
 
     setIsValidating(true);
+
+    // Se o código parecer uma URL, tentamos processar via service
+    if (code.startsWith('http')) {
+      try {
+        const result = await qrcodeService.unlockDay(code);
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+        toast.success(`Dia ${result.day} desbloqueado! +${result.points} pts`);
+        setShowQRModal(false);
+        setShowScanner(false);
+        navigate(`/jornada/dia/${result.day}`);
+      } catch (err: any) {
+        toast.error(err.message === 'AUTH_REQUIRED' ? 'Faça login para continuar' : err.message);
+      } finally {
+        setIsValidating(false);
+      }
+      return;
+    }
 
     if (selectedDay) {
       const result = await unlockDay(selectedDay, "qrcode", code);
@@ -101,10 +125,7 @@ export default function Jornada() {
     navigate(`/jornada/dia/${dayNumber}`);
   };
 
-  if (!user) {
-    navigate("/login");
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -186,6 +207,11 @@ export default function Jornada() {
                 </motion.div>
               ))}
             </div>
+          </section>
+
+          {/* Ranking Section */}
+          <section className="mb-12">
+            <Ranking />
           </section>
 
           {/* Achievements Section */}
