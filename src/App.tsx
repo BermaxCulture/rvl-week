@@ -65,9 +65,8 @@ const App = () => {
         const { day, token } = JSON.parse(pending);
         localStorage.removeItem('pending_qr_unlock'); // Clear early to avoid race conditions
 
-        const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_PRODUCTION_URL || window.location.origin) : window.location.origin;
         import('@/services/qrcode.service').then(({ qrcodeService }) => {
-          qrcodeService.unlockDay(`${baseUrl}/unlock?day=${day}&token=${token}`)
+          qrcodeService.unlockDay(`${qrcodeService.baseUrl}/unlock?day=${day}&token=${token}`)
             .then((result: any) => {
               if (result.points > 0) {
                 toast.success(`Dia ${result.day} desbloqueado! +${result.points} pts`);

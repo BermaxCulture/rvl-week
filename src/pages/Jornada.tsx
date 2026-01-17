@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/ButtonCustom";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
-import { QRScanner } from "@/components/features/QRScanner";
 import { AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Ranking from "@/components/Ranking";
@@ -34,74 +33,13 @@ export default function Jornada() {
   const navigate = useNavigate();
   const { days, achievements, unlockDay } = useStore();
   const { user } = useAuth();
-  const [showQRModal, setShowQRModal] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [qrCode, setQrCode] = useState("");
-  const [isValidating, setIsValidating] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingDay, setPendingDay] = useState<number | null>(null);
   const [selectedAchievement, setSelectedAchievement] = useState<string | null>(null);
 
   const completedDays = days.filter((d) => d.status === "completed").length;
 
-  const handleScanQR = (dayNumber: number) => {
-    setSelectedDay(dayNumber);
-    setQrCode("");
-    setShowQRModal(true);
-  };
-
-  const handleValidateQR = async (codeToValidate?: string) => {
-    const code = codeToValidate || qrCode;
-    if (code.length < 5) {
-      toast.error("Código inválido");
-      return;
-    }
-
-    setIsValidating(true);
-
-    // Se o código parecer uma URL, tentamos processar via service
-    if (code.startsWith('http')) {
-      try {
-        const result = await qrcodeService.unlockDay(code);
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-        toast.success(`Dia ${result.day} desbloqueado! +${result.points} pts`);
-        setShowQRModal(false);
-        setShowScanner(false);
-        navigate(`/jornada/dia/${result.day}`);
-      } catch (err: any) {
-        toast.error(err.message === 'AUTH_REQUIRED' ? 'Faça login para continuar' : err.message);
-      } finally {
-        setIsValidating(false);
-      }
-      return;
-    }
-
-    if (selectedDay) {
-      const result = await unlockDay(selectedDay, "qrcode", code);
-
-      if (result.success) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-
-        toast.success(result.message);
-        setShowQRModal(false);
-        setShowScanner(false);
-        navigate(`/jornada/dia/${selectedDay}`);
-      } else {
-        toast.error(result.message);
-      }
-    }
-
-    setIsValidating(false);
-  };
 
   const handleManualUnlock = (dayNumber: number) => {
     setPendingDay(dayNumber);
@@ -200,7 +138,7 @@ export default function Jornada() {
                 >
                   <DayCard
                     day={day}
-                    onScanQR={() => handleScanQR(day.dayNumber)}
+                    onScanQR={() => { }} // Não mais usado, o modal abre dentro do card
                     onManualUnlock={() => handleManualUnlock(day.dayNumber)}
                     onViewDay={() => handleViewDay(day.dayNumber)}
                   />
@@ -273,75 +211,6 @@ export default function Jornada() {
         </div>
       </main>
 
-      {/* QR Code Modal */}
-      {showQRModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            className="bg-card border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl"
-          >
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="primary"
-                onClick={() => setShowScanner(true)}
-                icon={Camera}
-                fullWidth
-              >
-                Abrir Câmera
-              </Button>
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border"></span>
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Ou digite o código</span>
-                </div>
-              </div>
-              <input
-                type="text"
-                value={qrCode}
-                onChange={(e) => setQrCode(e.target.value.toUpperCase())}
-                placeholder="Ex: RVL2025D1ABC"
-                className="w-full px-4 py-3 rounded-xl border-2 border-border bg-background text-center font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-              />
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowQRModal(false)}
-                className="flex-1"
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => handleValidateQR()}
-                isLoading={isValidating}
-                className="flex-1"
-              >
-                Validar
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* QR Scanner Component */}
-      <AnimatePresence>
-        {showScanner && (
-          <QRScanner
-            onScan={(text) => handleValidateQR(text)}
-            onClose={() => setShowScanner(false)}
-          />
-        )}
-      </AnimatePresence>
 
       {/* Manual Unlock Confirmation Modal */}
       {showConfirmModal && (

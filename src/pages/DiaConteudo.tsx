@@ -28,6 +28,7 @@ import { Quiz } from "@/components/features/Quiz";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
+import { qrcodeService } from "@/services/qrcode.service";
 import { cn } from "@/lib/utils";
 
 export default function DiaConteudo() {
@@ -279,8 +280,7 @@ export default function DiaConteudo() {
                   <div className="flex flex-1 max-w-xl items-center gap-2 bg-black/20 rounded-xl p-2 border border-white/5 overflow-hidden">
                     <code className="flex-1 text-[10px] md:text-xs font-mono text-amber-200/70 truncate px-2">
                       {(() => {
-                        const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_PRODUCTION_URL || window.location.origin) : window.location.origin;
-                        return `${baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
+                        return `${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
                       })()}
                     </code>
                     <Button
@@ -288,8 +288,7 @@ export default function DiaConteudo() {
                       size="sm"
                       className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-black border-none whitespace-nowrap"
                       onClick={() => {
-                        const baseUrl = import.meta.env.PROD ? (import.meta.env.VITE_PRODUCTION_URL || window.location.origin) : window.location.origin;
-                        const qrUrl = `${baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
+                        const qrUrl = `${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
                         navigator.clipboard.writeText(qrUrl);
                         toast.success("URL copiada com sucesso!");
                       }}

@@ -4,6 +4,7 @@ import { Day, Achievement } from "@/types";
 import { mockDays, mockAchievements } from "@/mocks/days.mock";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
+import { qrcodeService } from "@/services/qrcode.service";
 
 interface StoreState {
   // Days
@@ -103,7 +104,14 @@ export const useStore = create<StoreState>()(
                 explanation: q.explicacao
               }))
             },
-            qrCodeUrl: j.qr_code_url ? j.qr_code_url.replace('https://rvlweek.linkchurch.com.br', import.meta.env.PROD ? (import.meta.env.VITE_PRODUCTION_URL || window.location.origin) : window.location.origin) : null
+            qrCodeUrl: j.qr_code_url ? (() => {
+              try {
+                const url = new URL(j.qr_code_url);
+                return `${qrcodeService.baseUrl}/unlock${url.search}`;
+              } catch {
+                return null;
+              }
+            })() : null
           };
         });
 

@@ -1,10 +1,38 @@
 import { supabase } from '@/lib/supabase'
-import Cookies from 'js-cookie'
+import { getBaseUrl } from '@/utils/environment'
 
 export const qrcodeService = {
+    get baseUrl() {
+        return getBaseUrl();
+    },
+
+    generateQRUrl: async (dayNumber: number): Promise<string | null> => {
+        try {
+            const { data } = await supabase
+                .from('jornadas')
+                .select('qr_code_url')
+                .eq('dia_number', dayNumber)
+                .single()
+
+            if (!data?.qr_code_url) return null
+
+            // Usar URL base dinâmica
+            const baseUrl = getBaseUrl()
+
+            // Extrair params da URL salva no banco
+            const savedUrl = new URL(data.qr_code_url)
+            const day = savedUrl.searchParams.get('day')
+            const token = savedUrl.searchParams.get('token')
+
+            // Montar URL com base dinâmica
+            return `${baseUrl}/unlock?day=${day}&token=${token}&t=${Date.now()}`
+        } catch (error) {
+            console.error('Erro ao gerar URL:', error)
+            return null
+        }
+    },
+
     unlockDay: async (qrUrl: string) => {
-        // Extrair params da URL
-        // Exemplo: https://rvlweek.linkchurch.com.br/unlock?day=1&token=RVL2025D1X9K01
         try {
             const url = new URL(qrUrl);
             const day = parseInt(url.searchParams.get('day') || '0');
@@ -14,18 +42,14 @@ export const qrcodeService = {
                 throw new Error('QR Code inválido ou incompleto');
             }
 
-            // Obter usuário logado
             const { data: { session } } = await supabase.auth.getSession();
             const userId = session?.user?.id;
 
             if (!userId) {
-                // Se não houver usuário, salvamos no localStorage/cookie para processar após o login
-                // Seguindo a lógica já existente no app
                 localStorage.setItem('pending_qr_unlock', JSON.stringify({ day, token }));
                 throw new Error('AUTH_REQUIRED');
             }
 
-            // Chamar a função do Supabase
             const { data, error } = await supabase.rpc('unlock_via_qr', {
                 p_user_id: userId,
                 p_day_number: day,

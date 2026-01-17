@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Lock, Star, CheckCircle, QrCode, Unlock, Sparkles, CheckCircle2, Eye, Edit2 } from "lucide-react";
 import { Day } from "@/types";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/ButtonCustom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
+import QRInstructionsModal from "../QRInstructionsModal";
 
 interface DayCardProps {
   day: Day;
@@ -15,6 +17,7 @@ interface DayCardProps {
 
 export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardProps) {
   const { user } = useAuth();
+  const [showInstructions, setShowInstructions] = useState(false);
   const isAdmin = user?.role === 'admin';
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + "T00:00:00");
@@ -37,15 +40,13 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
             </h3>
             <p className="text-sm text-muted-foreground mt-1">{formatDate(day.date)}</p>
             <div className="mt-5 flex flex-col gap-2">
-              <Button
-                variant="primary"
-                size="sm"
-                icon={QrCode}
-                onClick={onScanQR}
-                fullWidth
+              <button
+                onClick={() => setShowInstructions(true)}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-purple-600/10"
               >
-                Escanear QR Code
-              </Button>
+                <QrCode size={20} />
+                DESBLOQUEAR VIA QR CODE
+              </button>
               <Button
                 variant="outline"
                 size="sm"
@@ -165,6 +166,12 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
         </div>
       )}
       {renderContent()}
+
+      <QRInstructionsModal
+        isOpen={showInstructions}
+        onClose={() => setShowInstructions(false)}
+        dayNumber={day.dayNumber}
+      />
     </motion.div>
   );
 }
