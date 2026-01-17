@@ -19,7 +19,7 @@ import ScrollToTop from "./components/utils/ScrollToTop";
 import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/hooks/useAuth";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -95,9 +95,9 @@ const App = () => {
             <Route
               path="/jornada/dia/:dayNumber/editar"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <AdminEditDia />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route

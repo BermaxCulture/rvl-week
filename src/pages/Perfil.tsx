@@ -227,6 +227,12 @@ export default function Perfil() {
                                     </div>
                                 )}
 
+                                {user.role === 'pastor' && (
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-bold uppercase tracking-wider mb-6">
+                                        <Shield className="w-3 h-3" /> Pastor
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-2 gap-4 border-t pt-6">
                                     <div className="text-center">
                                         <p className="text-2xl font-display font-bold text-secondary">

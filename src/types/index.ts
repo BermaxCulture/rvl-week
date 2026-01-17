@@ -7,7 +7,7 @@ export interface User {
   totalPoints: number;
   completedDays: number[];
   achievements: string[];
-  role: 'usuario' | 'admin';
+  role: 'usuario' | 'admin' | 'pastor';
   createdAt: string;
 }
 

@@ -29,6 +29,7 @@ interface RankingUser {
     completed_days: number;
     achievements: string[];
     position: number;
+    role?: string;
 }
 
 interface UserDetail {
@@ -65,9 +66,33 @@ export default function RankingPage() {
     const fetchFullRanking = async () => {
         try {
             setLoading(true);
-            const { data, error } = await supabase.rpc("get_ranking", { limit_count: 100 });
+
+            // Busca direta na tabela profiles excluindo admin e pastor
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id, full_name, email, image_url, total_points, completed_days, achievements, role')
+                .not('role', 'eq', 'admin')
+                .not('role', 'eq', 'pastor')
+                .order('total_points', { ascending: false })
+                .order('full_name', { ascending: true })
+                .limit(100);
+
             if (error) throw error;
-            setUsers(data || []);
+
+            // Mapear para o formato esperado pelo componente e adicionar a posição
+            const mappedUsers = (data || []).map((u: any, index: number) => ({
+                id: u.id,
+                name: u.full_name,
+                email: u.email,
+                avatar_url: u.image_url,
+                total_points: u.total_points || 0,
+                completed_days: u.completed_days || 0,
+                achievements: u.achievements || [],
+                position: index + 1,
+                role: u.role
+            }));
+
+            setUsers(mappedUsers);
         } catch (err) {
             console.error("Erro ao buscar ranking:", err);
         } finally {
@@ -77,10 +102,22 @@ export default function RankingPage() {
 
     const fetchUserRank = async () => {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            if (!authUser) return;
 
-            const { data, error } = await supabase.rpc("get_user_rank", { target_user_id: user.id });
+            // Buscar perfil para checar role
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', authUser.id)
+                .single();
+
+            if (profile?.role === 'pastor' || profile?.role === 'admin') {
+                setUserRank(null);
+                return;
+            }
+
+            const { data, error } = await supabase.rpc("get_user_rank", { target_user_id: authUser.id });
             if (error) throw error;
             if (data && data.length > 0) {
                 setUserRank(data[0]);

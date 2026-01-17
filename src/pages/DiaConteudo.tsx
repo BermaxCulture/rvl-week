@@ -197,7 +197,7 @@ export default function DiaConteudo() {
                 <span className="font-medium">Voltar</span>
               </Link>
 
-              {user?.role === 'admin' && (
+              {(user?.role === 'admin' || user?.role === 'pastor') && (
                 <Link
                   to={`/jornada/dia/${dayNumber}/editar`}
                   className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full hover:bg-primary/20 transition-all font-bold text-sm shadow-sm border border-primary/20"
@@ -255,7 +255,7 @@ export default function DiaConteudo() {
           </motion.div>
 
           {/* Admin QR Code Info */}
-          {user.role === "admin" && (
+          {(user.role === "admin" || user.role === "pastor") && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -280,7 +280,7 @@ export default function DiaConteudo() {
                   <div className="flex flex-1 max-w-xl items-center gap-2 bg-black/20 rounded-xl p-2 border border-white/5 overflow-hidden">
                     <code className="flex-1 text-[10px] md:text-xs font-mono text-amber-200/70 truncate px-2">
                       {(() => {
-                        return `${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
+                        return `${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2026D${day.dayNumber}`;
                       })()}
                     </code>
                     <Button
@@ -288,7 +288,7 @@ export default function DiaConteudo() {
                       size="sm"
                       className="h-9 px-4 bg-amber-500 hover:bg-amber-600 text-black border-none whitespace-nowrap"
                       onClick={() => {
-                        const qrUrl = `${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2025D${day.dayNumber}X9K${day.dayNumber.toString().padStart(2, '0')}`;
+                        const qrUrl = `${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2026D${day.dayNumber}`;
                         navigator.clipboard.writeText(qrUrl);
                         toast.success("URL copiada com sucesso!");
                       }}
