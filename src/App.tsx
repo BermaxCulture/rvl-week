@@ -57,27 +57,7 @@ const App = () => {
   }, [checkAuth, isAuthenticated, setPendingUnlock, unlockDay]);
 
   useEffect(() => {
-    // Process pending QR unlock from qrcodeService flow after login
-    // Don't process if we are currently on the unlock page, to let the page handle it
-    if (isAuthenticated && window.location.pathname !== '/unlock') {
-      const pending = localStorage.getItem('pending_qr_unlock');
-      if (pending) {
-        const { day, token } = JSON.parse(pending);
-        localStorage.removeItem('pending_qr_unlock'); // Clear early to avoid race conditions
-
-        import('@/services/qrcode.service').then(({ qrcodeService }) => {
-          qrcodeService.unlockDay(`${qrcodeService.baseUrl}/unlock?day=${day}&token=${token}`)
-            .then((result: any) => {
-              if (result.points > 0) {
-                toast.success(`Dia ${result.day} desbloqueado! +${result.points} pts`);
-              }
-            })
-            .catch(() => {
-              // Ignore errors on background processing
-            });
-        });
-      }
-    }
+    // Unified visible unlock flow via /unlock page
   }, [isAuthenticated]);
 
   return (

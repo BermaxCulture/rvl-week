@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User, Mail, Phone, Lock } from "lucide-react";
@@ -19,8 +19,24 @@ export default function Cadastro() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const pending = localStorage.getItem('pending_unlock');
+      if (pending) {
+        try {
+          const { day, token } = JSON.parse(pending);
+          navigate(`/unlock?day=${day}&token=${token}`, { replace: true });
+        } catch {
+          navigate("/jornada", { replace: true });
+        }
+      } else {
+        navigate("/jornada", { replace: true });
+      }
+    }
+  }, [isAuthenticated, navigate]);
 
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, "");

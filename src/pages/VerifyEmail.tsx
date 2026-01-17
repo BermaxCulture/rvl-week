@@ -80,7 +80,18 @@ export default function VerifyEmail() {
             const success = await verifyEmail(email, verificationCode);
             if (success) {
                 toast.success("Email verificado com sucesso! Bem-vindo!");
-                navigate("/jornada");
+
+                const pending = localStorage.getItem('pending_unlock');
+                if (pending) {
+                    try {
+                        const { day, token } = JSON.parse(pending);
+                        navigate(`/unlock?day=${day}&token=${token}`, { replace: true });
+                    } catch {
+                        navigate("/jornada", { replace: true });
+                    }
+                } else {
+                    navigate("/jornada", { replace: true });
+                }
             }
         } catch (error) {
             console.error(error);

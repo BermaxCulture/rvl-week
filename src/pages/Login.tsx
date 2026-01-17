@@ -36,7 +36,17 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate(from, { replace: true });
+      const pending = localStorage.getItem('pending_unlock');
+      if (pending) {
+        try {
+          const { day, token } = JSON.parse(pending);
+          navigate(`/unlock?day=${day}&token=${token}`, { replace: true });
+        } catch {
+          navigate(from, { replace: true });
+        }
+      } else {
+        navigate(from, { replace: true });
+      }
     }
   }, [isAuthenticated, navigate, from]);
 
