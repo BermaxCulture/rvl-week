@@ -5,6 +5,7 @@ import { User, RegisterData } from '@/types'
 import { toast } from 'sonner'
 import { useStore } from '@/store/useStore'
 import { supabase } from '@/lib/supabase'
+import { qrcodeService } from '@/services/qrcode.service'
 
 interface AuthState {
     user: User | null
@@ -45,24 +46,30 @@ export const useAuth = create<AuthState>()(
                 // Fetch app data after login
                 await useStore.getState().fetchDays()
 
-                // Check for pending unlocks
-                const { pendingUnlockDay, unlockDay } = useStore.getState()
-                if (pendingUnlockDay) {
-                    await unlockDay(pendingUnlockDay, "qrcode")
-                    useStore.setState({ pendingUnlockDay: null })
-                }
-
                 return true
             },
 
             register: async (data: RegisterData) => {
                 set({ isLoading: true })
-                const { error } = await authService.register(data)
+                const { user: authUser, error } = await authService.register(data)
 
                 if (error) {
                     toast.error('Erro ao criar conta: ' + error.message)
                     set({ isLoading: false })
                     return false
+                }
+
+                // Criar Perfil na tabela profiles explicitamente para garantir que a role seja 'usuario'
+                const { error: profileError } = await supabase.from('profiles').insert({
+                    id: authUser?.id,
+                    full_name: data.name,
+                    email: data.email,
+                    phone_number: data.phone,
+                    role: 'usuario'
+                });
+
+                if (profileError) {
+                    console.error("[Auth] Erro ao criar perfil:", profileError);
                 }
 
                 toast.success('Conta criada! Verifique seu email.')
@@ -88,13 +95,6 @@ export const useAuth = create<AuthState>()(
                 if (user) {
                     set({ user, isAuthenticated: true, isLoading: false })
                     await useStore.getState().fetchDays()
-
-                    // Check for pending unlocks
-                    const { pendingUnlockDay, unlockDay } = useStore.getState()
-                    if (pendingUnlockDay) {
-                        await unlockDay(pendingUnlockDay, "qrcode")
-                        useStore.setState({ pendingUnlockDay: null })
-                    }
 
                     return true
                 }
@@ -221,13 +221,6 @@ export const useAuth = create<AuthState>()(
                 if (user) {
                     set({ user, isAuthenticated: true, isLoading: false })
                     await useStore.getState().fetchDays()
-
-                    // Check for pending unlocks
-                    const { pendingUnlockDay, unlockDay } = useStore.getState()
-                    if (pendingUnlockDay) {
-                        await unlockDay(pendingUnlockDay, "qrcode")
-                        useStore.setState({ pendingUnlockDay: null })
-                    }
                 } else {
                     set({ user: null, isAuthenticated: false, isLoading: false })
                 }

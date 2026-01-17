@@ -36,15 +36,19 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
+      console.log('✅ Usuário logado - verificando pending...');
       const pending = localStorage.getItem('pending_unlock');
       if (pending) {
         try {
           const { day, token } = JSON.parse(pending);
+          console.log('🔓 Pending unlock encontrado:', pending);
           navigate(`/unlock?day=${day}&token=${token}`, { replace: true });
-        } catch {
+        } catch (e) {
+          console.error('❌ Erro ao parsear pending_unlock:', e);
           navigate(from, { replace: true });
         }
       } else {
+        console.log('ℹ️ Nenhum pending unlock - indo para jornada');
         navigate(from, { replace: true });
       }
     }

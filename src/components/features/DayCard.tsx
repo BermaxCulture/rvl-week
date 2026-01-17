@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Lock, Star, CheckCircle, QrCode, Unlock, Sparkles, CheckCircle2, Eye, Edit2 } from "lucide-react";
+import { Lock, Star, CheckCircle, QrCode, Unlock, Sparkles, CheckCircle2, Eye, Edit2, AlertCircle } from "lucide-react";
 import { Day } from "@/types";
 import { Button } from "@/components/ui/ButtonCustom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useStore } from "@/store/useStore";
 import { Link } from "react-router-dom";
 import QRInstructionsModal from "../QRInstructionsModal";
 
@@ -17,8 +18,45 @@ interface DayCardProps {
 
 export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardProps) {
   const { user } = useAuth();
+  const { days } = useStore();
   const [showInstructions, setShowInstructions] = useState(false);
-  const isAdmin = user?.role === 'admin';
+
+  const userRole = (user?.role || 'usuario').toLowerCase();
+  const isElevated = userRole !== 'usuario' && userRole !== 'usuário';
+  const isAdmin = userRole === 'admin';
+
+  const GAMIFIED_DAYS = [1, 2, 3, 4, 5, 6];
+  const isGamifiedDay = (dayNumber: number) => GAMIFIED_DAYS.includes(dayNumber);
+
+  const getLockReason = (method: 'qrcode' | 'manual') => {
+    if (isElevated) return null;
+
+    // 1. Trava de Sequência (Para ambos os métodos, exceto Dia 1)
+    if (day.dayNumber > 1) {
+      const previousDay = days.find(d => d.dayNumber === day.dayNumber - 1);
+      if (!previousDay || previousDay.status === 'locked') {
+        return "sequence";
+      }
+    }
+
+    // 2. Trava de Horário (Apenas para MANUAL)
+    if (method === 'manual') {
+      const now = new Date();
+      const unlockDate = new Date(`${day.date}T19:30:00-03:00`);
+      if (now < unlockDate) {
+        return "time";
+      }
+    }
+
+    return null;
+  };
+
+  const sequenceBlocked = getLockReason('qrcode') === "sequence";
+  const manualTimeBlocked = getLockReason('manual') === "time";
+
+  const isQrBlocked = sequenceBlocked;
+  const isManualBlocked = sequenceBlocked || manualTimeBlocked;
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + "T00:00:00");
     return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
@@ -32,6 +70,28 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
             <div className="absolute -top-2 -right-2 px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-bold shadow-sm">
               +{day.points.total} pts
             </div>
+
+            {(sequenceBlocked || manualTimeBlocked) && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col gap-1 items-center justify-center">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <p className="text-[10px] font-bold text-red-500 uppercase">
+                    Acesso Restrito
+                  </p>
+                </div>
+                {sequenceBlocked && (
+                  <p className="text-[9px] text-red-500/80 font-bold uppercase">
+                    Desbloqueie o Dia {day.dayNumber - 1} primeiro
+                  </p>
+                )}
+                {!sequenceBlocked && manualTimeBlocked && (
+                  <p className="text-[9px] text-red-500/80 font-bold uppercase">
+                    Manual liberado em {formatDate(day.date)} às 19:30
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50">
               <Lock className="w-8 h-8 text-muted-foreground" />
             </div>
@@ -39,22 +99,30 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
               DIA {day.dayNumber}
             </h3>
             <p className="text-sm text-muted-foreground mt-1">{formatDate(day.date)}</p>
-            <div className="mt-5 flex flex-col gap-2">
+
+            <div className={cn("mt-5 flex flex-col gap-2")}>
               <button
+                disabled={isQrBlocked}
                 onClick={() => setShowInstructions(true)}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-purple-600/10"
+                className={cn(
+                  "w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-purple-600/10 disabled:pointer-events-none",
+                  isQrBlocked && "opacity-40"
+                )}
               >
                 <QrCode size={20} />
-                DESBLOQUEAR VIA QR CODE
+                {isElevated ? "DESBLOQUEAR (TESTE)" : "DESBLOQUEAR VIA QR CODE"}
               </button>
+
               <Button
                 variant="outline"
                 size="sm"
                 icon={Unlock}
                 onClick={onManualUnlock}
                 fullWidth
+                disabled={isManualBlocked}
+                className={cn(isManualBlocked && "opacity-40")}
               >
-                Desbloquear
+                Desbloquear Manual
               </Button>
             </div>
           </>
@@ -66,6 +134,7 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
             <div className="absolute -top-2 -right-2 px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-xs font-bold shadow-cartoon-sm">
               +{day.points.total} pts
             </div>
+
             <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-secondary to-accent">
               <Star className="w-8 h-8 text-foreground" />
             </div>
@@ -145,7 +214,7 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
         day.status === "completed" && "bg-card border-3 border-success shadow-cartoon"
       )}
     >
-      {isAdmin && (
+      {isElevated && (
         <div className="absolute top-2 left-2 flex gap-1 z-20">
           <Link
             to={`/jornada/dia/${day.dayNumber}?preview=true`}
@@ -155,14 +224,16 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
           >
             <Eye className="w-4 h-4" />
           </Link>
-          <Link
-            to={`/jornada/dia/${day.dayNumber}/editar`}
-            onClick={(e) => e.stopPropagation()}
-            className="p-2 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white rounded-lg transition-all shadow-sm"
-            title="Editar (Admin)"
-          >
-            <Edit2 className="w-4 h-4" />
-          </Link>
+          {isAdmin && (
+            <Link
+              to={`/jornada/dia/${day.dayNumber}/editar`}
+              onClick={(e) => e.stopPropagation()}
+              className="p-2 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white rounded-lg transition-all shadow-sm"
+              title="Editar (Admin)"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Link>
+          )}
         </div>
       )}
       {renderContent()}

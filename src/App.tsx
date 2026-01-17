@@ -41,19 +41,7 @@ const App = () => {
       window.history.replaceState({}, "", window.location.pathname);
     }
 
-    // Check for QR Code scan in URL (Legacy fallback if needed)
-    const params = new URLSearchParams(window.location.search);
-    const dayToUnlock = params.get("unlock");
-    if (dayToUnlock) {
-      const dayNum = parseInt(dayToUnlock);
-      if (isAuthenticated) {
-        unlockDay(dayNum, "qrcode");
-      } else {
-        setPendingUnlock(dayNum);
-      }
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, "", newUrl);
-    }
+    // Unified visible unlock flow via /unlock page
   }, [checkAuth, isAuthenticated, setPendingUnlock, unlockDay]);
 
   useEffect(() => {

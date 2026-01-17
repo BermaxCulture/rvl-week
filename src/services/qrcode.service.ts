@@ -47,27 +47,37 @@ export const qrcodeService = {
             throw new Error('Parâmetros inválidos');
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id;
+        const { data: { user } } = await supabase.auth.getUser();
 
-        if (!userId) {
-            localStorage.setItem('pending_unlock', JSON.stringify({ day, token }));
-            throw new Error('AUTH_REQUIRED');
+        if (!user) {
+            throw new Error('Usuário não autenticado');
         }
 
+        console.log('🔑 Desbloqueando dia', day, 'para user', user.id);
+
         const { data, error } = await supabase.rpc('unlock_via_qr', {
-            p_user_id: userId,
+            p_user_id: user.id,
             p_day_number: day,
             p_token: token
         });
 
-        if (error) throw error;
-        if (!data.success) throw new Error(data.error);
+        if (error) {
+            console.error('❌ Erro RPC:', error);
+            throw error;
+        }
+
+        const result = typeof data === 'string' ? JSON.parse(data) : data;
+
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+
+        console.log('✅ Dia desbloqueado com sucesso:', result);
 
         return {
             success: true,
-            day: data.day || day,
-            points: data.points || 0
+            dayNumber: result.day || day,
+            pointsEarned: result.points || 0
         };
     }
 }

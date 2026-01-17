@@ -47,16 +47,23 @@ export const useStore = create<StoreState>()(
 
         if (error || !jornadas) return;
 
+        console.log(`🗓️ Dias buscados: ${jornadas.length}`);
+
         let progressMap: Record<string, any> = {};
         let totalEarned = 0;
 
         if (user) {
-          const { data: progress } = await supabase
+          const { data: progress, error: progressError } = await supabase
             .from('progresso_usuario')
             .select('*')
             .eq('user_id', user.id);
 
+          if (progressError) {
+            console.error('❌ Erro ao buscar progresso:', progressError);
+          }
+
           if (progress) {
+            console.log(`📊 Progresso encontrado para ${user.id}:`, progress.length, 'itens');
             progress.forEach(p => {
               progressMap[p.jornada_id] = p;
               totalEarned += p.pontos_acumulados || 0;
@@ -145,6 +152,22 @@ export const useStore = create<StoreState>()(
         if (method === "qrcode") {
           if (!code || code.trim().toUpperCase() !== journey.qr_code_secret?.toUpperCase()) {
             return { success: false, message: "Código QR inválido para este dia" };
+          }
+        } else {
+          // Validação de horário para Desbloqueio MANUAL
+          const userRole = (user?.role || 'usuario').toLowerCase();
+          const isElevated = userRole !== 'usuario' && userRole !== 'usuário';
+
+          if (!isElevated) {
+            const now = new Date();
+            const unlockDate = new Date(`${dayToUnlock.date}T19:30:00-03:00`);
+
+            if (now < unlockDate) {
+              return {
+                success: false,
+                message: "O desbloqueio manual só é permitido após as 19:30 do dia do evento."
+              };
+            }
           }
         }
 

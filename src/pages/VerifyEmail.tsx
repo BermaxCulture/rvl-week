@@ -81,15 +81,19 @@ export default function VerifyEmail() {
             if (success) {
                 toast.success("Email verificado com sucesso! Bem-vindo!");
 
+                console.log('✅ Email verificado - verificando pending...');
                 const pending = localStorage.getItem('pending_unlock');
                 if (pending) {
                     try {
                         const { day, token } = JSON.parse(pending);
+                        console.log('🔓 Pending unlock encontrado:', pending);
                         navigate(`/unlock?day=${day}&token=${token}`, { replace: true });
-                    } catch {
+                    } catch (e) {
+                        console.error('❌ Erro ao parsear pending_unlock:', e);
                         navigate("/jornada", { replace: true });
                     }
                 } else {
+                    console.log('ℹ️ Nenhum pending unlock - indo para jornada');
                     navigate("/jornada", { replace: true });
                 }
             }

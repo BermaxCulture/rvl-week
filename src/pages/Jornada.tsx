@@ -15,6 +15,11 @@ import {
   User,
   PartyPopper,
   Camera,
+  Trophy,
+  BookOpen,
+  Star,
+  Lock,
+  ShieldCheck,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { DayCard } from "@/components/features/DayCard";
@@ -38,7 +43,7 @@ export default function Jornada() {
   const [pendingDay, setPendingDay] = useState<number | null>(null);
   const [selectedAchievement, setSelectedAchievement] = useState<string | null>(null);
 
-  const completedDays = days.filter((d) => d.status === "completed").length;
+  const completedDaysCount = days.filter((d) => d.status === "completed").length;
 
 
   const handleManualUnlock = (dayNumber: number) => {
@@ -63,7 +68,9 @@ export default function Jornada() {
     navigate(`/jornada/dia/${dayNumber}`);
   };
 
-  if (!user) return null;
+  const userRole = (user?.role || 'usuario').toLowerCase();
+  const isElevated = userRole !== 'usuario' && userRole !== 'usuário';
+  const isAdmin = userRole === 'admin';
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,11 +116,11 @@ export default function Jornada() {
 
                 <div className="max-w-md">
                   <p className="text-sm text-foreground/80 mb-2">
-                    Progresso: {completedDays}/7 dias concluídos
+                    Progresso: {completedDaysCount}/6 dias concluídos
                   </p>
                   <ProgressBar
-                    current={completedDays}
-                    total={7}
+                    current={completedDaysCount}
+                    total={6}
                     color="purple"
                     size="lg"
                   />
@@ -124,9 +131,20 @@ export default function Jornada() {
 
           {/* Days Grid */}
           <section className="mb-12">
-            <h2 className="font-display font-bold text-2xl text-foreground mb-6">
-              Sua Jornada
-            </h2>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+              <h2 className="font-display font-bold text-2xl text-foreground">
+                Sua Jornada
+              </h2>
+
+              {isElevated && (
+                <div className="self-start md:self-auto px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-yellow-500 animate-pulse" />
+                  <p className="text-sm font-black text-yellow-500 uppercase tracking-widest">
+                    Modo {isAdmin ? 'Admin' : 'Pastor'} Ativado
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {days.map((day, index) => (
@@ -152,61 +170,158 @@ export default function Jornada() {
             <Ranking />
           </section>
 
-          {/* Achievements Section */}
-          <section>
-            <h2 className="font-display font-bold text-2xl text-foreground mb-6 flex items-center gap-2">
-              <Award className="w-7 h-7 text-secondary" /> Suas Conquistas
+          {/* CONQUISTAS */}
+          <section className="mb-12">
+            <h2 className="font-display font-black text-2xl md:text-3xl text-white mb-6 flex items-center gap-3">
+              <Trophy className="text-yellow-500" size={32} />
+              Suas Conquistas
             </h2>
 
-            {/* Mobile-First Instruction Panel */}
-            <AnimatePresence mode="wait">
-              {selectedAchievement && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-4 overflow-hidden"
-                >
-                  <div className="bg-secondary/10 border-2 border-secondary/20 rounded-2xl p-4 flex items-start gap-3">
-                    <div className="bg-secondary/20 p-2 rounded-xl">
-                      <Sparkles className="w-5 h-5 text-secondary" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-foreground text-sm">
-                        {achievements.find(a => a.id === selectedAchievement)?.name}
-                      </p>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        {achievements.find(a => a.id === selectedAchievement)?.description}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {(() => {
+                const totalDays = 6;
+                const completed = days.filter(d => d.status === 'completed').length;
+                const qrScans = days.filter(d => d.points.earned >= 100).length;
+                const perfectQuizzes = days.filter(d => d.status === 'completed' && d.points.earned >= 150).length;
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {achievements.map((achievement, index) => (
-                <motion.div
-                  key={achievement.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => setSelectedAchievement(achievement.id === selectedAchievement ? null : achievement.id)}
-                  className={cn(
-                    "cursor-pointer transition-all rounded-2xl h-full",
-                    selectedAchievement === achievement.id && "ring-4 ring-secondary/30"
-                  )}
-                >
-                  <AchievementBadge achievement={achievement} />
-                </motion.div>
-              ))}
+                const achievementsList = [
+                  {
+                    id: 'jornada_completa',
+                    name: 'Jornada Completa',
+                    description: 'Completou os 6 dias da RVL Week',
+                    icon: Trophy,
+                    color: 'yellow',
+                    progress: completed,
+                    total: totalDays,
+                    unlocked: completed === totalDays
+                  },
+                  {
+                    id: 'conhecedor_palavra',
+                    name: 'Conhecedor da Palavra',
+                    description: '100% de acerto em todos os 6 quiz',
+                    icon: BookOpen,
+                    color: 'purple',
+                    progress: perfectQuizzes,
+                    total: totalDays,
+                    unlocked: perfectQuizzes === totalDays
+                  },
+                  {
+                    id: 'sempre_presente',
+                    name: 'Sempre Presente',
+                    description: 'Escaneou QR Code em todos os cultos',
+                    icon: Flame,
+                    color: 'orange',
+                    progress: qrScans,
+                    total: totalDays,
+                    unlocked: qrScans === totalDays
+                  },
+                  {
+                    id: 'comprometido',
+                    name: 'Comprometido',
+                    description: 'Completou 4 ou mais dias',
+                    icon: Star,
+                    color: 'green',
+                    progress: completed,
+                    total: 4,
+                    unlocked: completed >= 4
+                  }
+                ];
+
+                return achievementsList.map(achievement => {
+                  const Icon = achievement.icon;
+                  const isLocked = !achievement.unlocked;
+                  const percentage = Math.min((achievement.progress / achievement.total) * 100, 100);
+
+                  // Classes dinâmicas baseadas na cor
+                  const colorMap: Record<string, string> = {
+                    yellow: 'text-yellow-500 bg-yellow-500/20 border-yellow-500',
+                    purple: 'text-purple-500 bg-purple-500/20 border-purple-500',
+                    orange: 'text-orange-500 bg-orange-500/20 border-orange-500',
+                    green: 'text-green-500 bg-green-500/20 border-green-500'
+                  };
+
+                  const barColorMap: Record<string, string> = {
+                    yellow: 'bg-yellow-500',
+                    purple: 'bg-purple-500',
+                    orange: 'bg-orange-500',
+                    green: 'bg-green-500'
+                  };
+
+                  return (
+                    <motion.div
+                      key={achievement.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={cn(
+                        "relative rounded-3xl p-6 border-2 transition-all duration-300",
+                        isLocked
+                          ? 'bg-slate-900/50 border-white/5 grayscale opacity-60'
+                          : colorMap[achievement.color] || 'bg-primary/20 border-primary'
+                      )}
+                    >
+                      {/* Badge de desbloqueado */}
+                      {!isLocked && (
+                        <div className="absolute -top-3 -right-3 bg-green-500 rounded-full p-2 shadow-lg z-10">
+                          <Trophy className="text-white" size={16} />
+                        </div>
+                      )}
+
+                      {/* Cadeado se bloqueado */}
+                      {isLocked && (
+                        <div className="absolute -top-3 -right-3 bg-slate-800 rounded-full p-2 border border-white/10 z-10">
+                          <Lock className="text-white/50" size={16} />
+                        </div>
+                      )}
+
+                      {/* Ícone */}
+                      <div className={cn(
+                        "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4",
+                        isLocked ? "bg-slate-800" : "bg-current/10"
+                      )}>
+                        <Icon
+                          className={isLocked ? 'text-slate-600' : ''}
+                          size={36}
+                        />
+                      </div>
+
+                      {/* Nome */}
+                      <h3 className={cn(
+                        "font-display font-bold text-lg text-center mb-1",
+                        isLocked ? 'text-slate-400' : 'text-white'
+                      )}>
+                        {achievement.name}
+                      </h3>
+
+                      {/* Descrição */}
+                      <p className="text-slate-500 text-xs text-center mb-6 leading-relaxed">
+                        {achievement.description}
+                      </p>
+
+                      {/* Progresso */}
+                      <div className="space-y-2 mt-auto">
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                          <span className="text-slate-500">Progresso</span>
+                          <span className={isLocked ? 'text-slate-600' : ''}>
+                            {achievement.progress}/{achievement.total}
+                          </span>
+                        </div>
+
+                        <div className="h-2 bg-slate-800 rounded-full overflow-hidden border border-white/5">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percentage}%` }}
+                            className={cn(
+                              "h-full transition-all duration-1000",
+                              isLocked ? 'bg-slate-700' : barColorMap[achievement.color] || 'bg-primary'
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                });
+              })()}
             </div>
-            {!selectedAchievement && (
-              <p className="text-center text-xs text-muted-foreground mt-4">
-                Toque em uma conquista para ver como ganhá-la ✨
-              </p>
-            )}
           </section>
         </div>
       </main>

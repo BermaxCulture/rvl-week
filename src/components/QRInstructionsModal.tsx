@@ -49,8 +49,8 @@ export default function QRInstructionsModal({ isOpen, onClose, dayNumber }: QRIn
     }
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-slate-900 rounded-3xl max-w-md w-full p-8 border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto pt-20 pb-20">
+            <div className="bg-slate-900 rounded-3xl max-w-md w-full p-8 border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)] my-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <h3 className="text-white font-display font-bold text-2xl flex items-center gap-3">

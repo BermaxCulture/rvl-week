@@ -4,13 +4,15 @@ import { qrcodeService } from '@/services/qrcode.service';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedGradientBackground from '@/components/ui/animated-gradient-background';
+import { useStore } from '@/store/useStore';
 
 export default function UnlockPage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
 
     const [status, setStatus] = useState<'loading' | 'success' | 'needs_auth' | 'error'>('loading');
     const [dayNumber, setDayNumber] = useState<number | null>(null);
@@ -26,6 +28,8 @@ export default function UnlockPage() {
             const day = parseInt(searchParams.get('day') || '0');
             const token = searchParams.get('token') || '';
 
+            console.log('📍 UNLOCK PAGE - isAuthenticated:', isAuthenticated, 'day:', day, 'token:', token);
+
             if (!day || !token) {
                 toast.error('Link inválido ou incompleto');
                 navigate('/jornada');
@@ -33,19 +37,23 @@ export default function UnlockPage() {
             }
 
             // Se NÃO está autenticado, redirecionar para cadastro/login
-            if (!isAuthenticated) {
+            if (!isAuthenticated || !user) {
+                console.log('❌ Usuário NÃO autenticado - salvando pending_unlock');
                 setStatus('needs_auth');
                 setDayNumber(day);
 
                 // Salvar params no localStorage para usar após login/cadastro
-                localStorage.setItem('pending_unlock', JSON.stringify({ day, token }));
+                localStorage.setItem('pending_unlock', JSON.stringify({
+                    day,
+                    token,
+                    timestamp: Date.now()
+                }));
 
                 // Redirecionar após 2 segundos
                 setTimeout(() => {
                     navigate('/cadastro', {
                         state: {
-                            from: `/unlock?day=${day}&token=${token}`,
-                            message: 'Complete seu cadastro para desbloquear o dia!'
+                            message: `Complete seu cadastro para desbloquear o Dia ${day}!`
                         }
                     });
                 }, 2000);
@@ -53,14 +61,22 @@ export default function UnlockPage() {
             }
 
             // Usuário está autenticado - desbloquear
+            console.log('✅ Usuário autenticado - chamando RPC unlock_via_qr...');
+
+            // DEBUG: Validar formato esperado antes de enviar
+            const expectedFormat = `RVL2026D${day}`;
+            console.log('📍 Token recebido:', token);
+            console.log('📍 Formato esperado:', expectedFormat);
+
             const result = await qrcodeService.unlockDayViaQR(day, token);
 
             if (result.success) {
+                console.log('✅ RPC retornou sucesso:', result);
                 setStatus('success');
-                setDayNumber(result.day);
-                setPoints(result.points);
+                setDayNumber(result.dayNumber);
+                setPoints(result.pointsEarned);
 
-                // Confete (IMAGEM 2)
+                // Confete
                 confetti({
                     particleCount: 200,
                     spread: 160,
@@ -71,15 +87,19 @@ export default function UnlockPage() {
                 // Limpar pending unlock
                 localStorage.removeItem('pending_unlock');
 
+                // ATUALIZAR STORE PARA REFLETIR NOVO STATUS
+                console.log('🔄 Atualizando store local...');
+                await useStore.getState().fetchDays();
+
                 // Mostrar toast tbm para feedback extra
-                if (result.points > 0) {
-                    toast.success(`Parabéns! +${result.points} pontos ganhos!`);
+                if (result.pointsEarned > 0) {
+                    toast.success(`🎉 Dia ${result.dayNumber} desbloqueado! +${result.pointsEarned} pts`);
                 }
 
-                // Redirecionar após 3.5 segundos (mais tempo para ver a celebração)
+                // Redirecionar após 3 segundos
                 setTimeout(() => {
-                    navigate(`/jornada/dia/${result.day}`);
-                }, 3500);
+                    navigate(`/jornada/dia/${result.dayNumber}`);
+                }, 3000);
             }
         } catch (err: any) {
             if (err.message === 'AUTH_REQUIRED') return; // Já tratado acima
@@ -93,16 +113,28 @@ export default function UnlockPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4 bg-background z-50 overflow-hidden">
+            <AnimatedGradientBackground
+                Breathing={true}
+                gradientColors={
+                    status === 'success'
+                        ? ["#064e3b", "#065f46", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7"]
+                        : status === 'error'
+                            ? ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171"]
+                            : ["#020617", "#2e1065", "#581c87", "#7e22ce", "#fcd95b", "#fbbf24", "#7e22ce"]
+                }
+                gradientStops={[35, 50, 60, 70, 85, 95, 100]}
+            />
+
             <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-md bg-card border-3 border-border rounded-3xl p-8 text-center shadow-cartoon relative overflow-hidden"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="w-full max-w-sm sm:max-w-md bg-card/95 backdrop-blur-md border-3 border-border rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 text-center shadow-cartoon-lg relative z-10 mx-auto"
             >
                 {/* Background Sparkles for Success */}
                 {status === 'success' && (
-                    <div className="absolute inset-0 pointer-events-none opacity-20">
-                        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.2),transparent_70%)]" />
+                    <div className="absolute inset-0 pointer-events-none">
+                        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.2),transparent_70%)]" />
                     </div>
                 )}
 
@@ -156,44 +188,49 @@ export default function UnlockPage() {
                             key="success"
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="space-y-6 relative z-10 py-4"
+                            className="flex flex-col items-center justify-center py-4 sm:py-6"
                         >
                             <motion.div
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ delay: 0.2, type: 'spring', bounce: 0.6 }}
+                                className="mb-6"
                             >
-                                <CheckCircle className="w-24 h-24 text-success mx-auto" />
+                                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-success/20 rounded-full flex items-center justify-center">
+                                    <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-success" />
+                                </div>
                             </motion.div>
 
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
+                                className="text-center"
                             >
-                                <h2 className="text-4xl font-display font-black text-foreground mb-2 whitespace-nowrap">
+                                <h2 className="text-3xl sm:text-4xl font-display font-black text-foreground mb-2">
                                     DESBLOQUEADO!
                                 </h2>
-                                <p className="text-muted-foreground text-lg mb-8">
-                                    Dia {dayNumber} desbloqueado com sucesso!
+                                <p className="text-muted-foreground text-base sm:text-lg mb-8">
+                                    O Dia {dayNumber} já está disponível para você.
                                 </p>
                             </motion.div>
 
                             <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
+                                initial={{ scale: 0, rotate: -5 }}
+                                animate={{ scale: 1, rotate: 0 }}
                                 transition={{ delay: 0.7, type: 'spring' }}
-                                className="bg-success/20 border-3 border-success/30 rounded-3xl p-6 mb-8 shadow-cartoon-sm"
+                                className="w-full bg-success/10 border-2 border-success/20 rounded-[1.5rem] sm:rounded-3xl p-6 mb-8 shadow-sm flex flex-col items-center gap-2"
                             >
-                                <p className="text-success font-display font-black text-xl">
-                                    🎉 PARABÉNS! +{points} PONTOS!
+                                <p className="text-success font-display font-black text-lg sm:text-xl flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5" />
+                                    PARABÉNS! +{points} PONTOS!
                                 </p>
                             </motion.div>
 
-                            <p className="text-muted-foreground text-sm flex items-center justify-center gap-2">
+                            <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium">
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Carregando conteúdo...
-                            </p>
+                                <span>Acessando conteúdo...</span>
+                            </div>
                         </motion.div>
                     )}
 
