@@ -234,12 +234,7 @@ export default function DiaConteudo() {
                 <p className="text-sm text-foreground/70">{day.church}</p>
               )}
 
-              <div className="mt-6 bg-card p-6 rounded-2xl border-3 border-foreground/10 shadow-cartoon max-w-lg mx-auto">
-                <p className="text-lg italic text-foreground mb-2">"{day.verse}"</p>
-                <p className="text-sm font-semibold text-primary">
-                  — {day.verseReference}
-                </p>
-              </div>
+              <div className="mb-4" />
             </div>
           </motion.div>
 
@@ -476,7 +471,7 @@ export default function DiaConteudo() {
             className="mb-8"
           >
             <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
-              <Brain className="w-5 h-5 text-purple-500" /> Quiz do Versículo
+              <Brain className="w-5 h-5 text-purple-500" /> Quiz de Sabedoria
             </h2>
 
             {day.activities.quizCompleted ? (

@@ -65,8 +65,6 @@ export default function AdminEditDia() {
                 theme: day.theme,
                 pastor: day.pastor,
                 church: day.church,
-                verse: day.verse,
-                verseReference: day.verseReference,
                 videoUrl: day.content.videoUrl,
                 pastorVideoUrl: day.content.pastorVideoUrl,
                 mainPoints: day.content.mainPoints || ["", "", ""],
@@ -86,8 +84,6 @@ export default function AdminEditDia() {
             theme: formData.theme,
             pastor: formData.pastor,
             church: formData.church,
-            verse: formData.verse,
-            verseReference: formData.verseReference,
             content: {
                 ...days.find(d => d.dayNumber === parseInt(dayNumber!))?.content,
                 videoUrl: formData.videoUrl,
@@ -127,6 +123,11 @@ export default function AdminEditDia() {
     };
 
     const addQuizQuestion = () => {
+        if (formData.quiz.length >= 3) {
+            toast.error("O quiz pode ter no máximo 3 perguntas.");
+            return;
+        }
+
         const newQuestion = {
             question: "",
             options: ["", "", "", ""],
@@ -149,9 +150,7 @@ export default function AdminEditDia() {
     const handleSaveExpanded = () => {
         if (!expandedField) return;
 
-        if (expandedField.field === 'verse') {
-            setFormData({ ...formData, verse: expandedField.value });
-        } else if (expandedField.field === 'question' && expandedField.qIdx !== undefined) {
+        if (expandedField.field === 'question' && expandedField.qIdx !== undefined) {
             updateQuizQuestion(expandedField.qIdx, 'question', expandedField.value);
         } else if (expandedField.field === 'explanation' && expandedField.qIdx !== undefined) {
             updateQuizQuestion(expandedField.qIdx, 'explanation', expandedField.value);
@@ -284,41 +283,6 @@ export default function AdminEditDia() {
                                 </div>
                             </Card>
 
-                            <Card className="p-6 space-y-4">
-                                <h2 className="text-lg font-bold flex items-center gap-2 border-b pb-2 mb-4">
-                                    <Quote className="w-5 h-5 text-secondary" /> Versículo do Dia
-                                </h2>
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <label className="text-sm font-semibold">Texto do Versículo</label>
-                                        <button
-                                            type="button"
-                                            onClick={() => setExpandedField({ title: "Versículo do Dia", value: formData.verse, field: "verse" })}
-                                            className="text-primary hover:text-primary/80 p-1"
-                                        >
-                                            <Maximize2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <textarea
-                                        value={formData.verse}
-                                        onChange={(e) => setFormData({ ...formData, verse: e.target.value })}
-                                        className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-secondary outline-none transition-all h-24 resize-none"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Referência (Ex: João 3:16)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.verseReference}
-                                        onChange={(e) => setFormData({ ...formData, verseReference: e.target.value })}
-                                        className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-secondary outline-none transition-all"
-                                        required
-                                    />
-                                </div>
-                            </Card>
 
                             <Card className="p-6 space-y-4">
                                 <h2 className="text-lg font-bold flex items-center gap-2 border-b pb-2 mb-4">
@@ -461,6 +425,7 @@ export default function AdminEditDia() {
                                         variant="outline"
                                         size="sm"
                                         onClick={addQuizQuestion}
+                                        disabled={formData.quiz.length >= 3}
                                         className="gap-1 sm:gap-2 px-2 sm:px-3 h-8 sm:h-9 text-[10px] sm:text-xs"
                                     >
                                         <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
