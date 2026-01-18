@@ -12,16 +12,16 @@ import renanAmaral from "@/assets/speakers/renan-amaral.jpg";
 import lucasUrrutty from "@/assets/speakers/lucas-urrutty.jpg";
 
 const speakerImages = [
-    franciscoVasco,
-    helvecioCoimbra,
-    pedroLucasRios,
-    vitorLedo,
-    renanAmaral,
-    lucasUrrutty,
+    franciscoVasco,   // Dia 1
+    vitorLedo,        // Dia 2 (Generic)
+    franciscoVasco,   // Dia 3 (Shifted old Day 2)
+    pedroLucasRios,   // Dia 4 (Shifted old Day 3)
+    vitorLedo,        // Dia 5 (Shifted old Day 4)
+    vitorLedo,        // Dia 6 (Shifted old Day 5)
+    helvecioCoimbra,  // Dia 7 (Shifted old Day 6)
 ];
 
-// Use only first 6 days (unique speakers)
-const uniqueDays = mockDays.slice(0, 6);
+const uniqueDays = mockDays;
 
 export function ScheduleCarousel() {
     const [currentIndex, setCurrentIndex] = useState(0);

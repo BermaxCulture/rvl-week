@@ -130,11 +130,12 @@ export default function DiaConteudo() {
       }
       return;
     }
+    const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
     const allComplete =
       day.activities.qrScanned &&
       day.activities.videoWatched &&
       day.activities.pastorVideoWatched &&
-      day.activities.quizCompleted;
+      (!hasQuiz || day.activities.quizCompleted);
 
     if (!allComplete) {
       toast.error("Complete todas as atividades primeiro!");
@@ -160,10 +161,11 @@ export default function DiaConteudo() {
 
   const totalEarned = day.points.earned;
   const totalPossible = day.points.total;
+  const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
   const allComplete =
     day.activities.videoWatched &&
     day.activities.pastorVideoWatched &&
-    day.activities.quizCompleted;
+    (!hasQuiz || day.activities.quizCompleted);
 
   return (
     <div className="min-h-screen bg-background">
@@ -543,21 +545,23 @@ export default function DiaConteudo() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  {day.activities.quizCompleted ? (
-                    <CheckCircle className="w-5 h-5 text-success" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border-2 border-border" />
-                  )}
-                  <span className={day.activities.quizCompleted ? "text-foreground" : "text-muted-foreground"}>
-                    Quiz completado
-                  </span>
-                  <span className="ml-auto text-sm font-semibold">
-                    {day.activities.quizCompleted
-                      ? `+${Math.floor((day.activities.quizScore / 3) * 50)} pts`
-                      : "0/50 pts"}
-                  </span>
-                </div>
+                {hasQuiz && (
+                  <div className="flex items-center gap-3">
+                    {day.activities.quizCompleted ? (
+                      <CheckCircle className="w-5 h-5 text-success" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-border" />
+                    )}
+                    <span className={day.activities.quizCompleted ? "text-foreground" : "text-muted-foreground"}>
+                      Quiz completado
+                    </span>
+                    <span className="ml-auto text-sm font-semibold">
+                      {day.activities.quizCompleted
+                        ? `+${Math.floor((day.activities.quizScore / 3) * 50)} pts`
+                        : "0/50 pts"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <ProgressBar current={totalEarned} total={totalPossible} showLabel color="purple" size="lg" />

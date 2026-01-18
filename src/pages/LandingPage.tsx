@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -43,6 +44,7 @@ const itemVariants = {
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth();
+  const [showVideo, setShowVideo] = useState(false);
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -221,7 +223,7 @@ export default function LandingPage() {
               variants={itemVariants}
               className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed"
             >
-              Uma semana especial de busca e comunhão com Deus, em que adorar,
+              Uma semana especial de busca e comunhão com Deus, em que iremos adorar,
               interceder e receber direção por meio da Palavra. Cada dia é uma
               oportunidade de crescimento espiritual.
             </motion.p>
@@ -365,30 +367,49 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="max-w-4xl mx-auto"
           >
-            <div className="relative group cursor-pointer aspect-video rounded-[32px] overflow-hidden shadow-2xl border-4 border-white/10 group">
-              {/* Thumbnail Placeholder with Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-purple-900/60 to-black flex items-center justify-center">
-                <img
-                  src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80"
-                  className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay group-hover:scale-105 transition-transform duration-700"
-                  alt="Video Thumbnail"
+            <div
+              className="relative group cursor-pointer aspect-video rounded-[32px] overflow-hidden shadow-2xl border-4 border-white/10"
+              onClick={() => setShowVideo(true)}
+            >
+              {showVideo ? (
+                <video
+                  src="https://rzvtpgvrhzr0gbqt.public.blob.vercel-storage.com/Vi%CC%81deo%20Site.mp4"
+                  className="w-full h-full object-cover"
+                  controls
+                  autoPlay
                 />
+              ) : (
+                <>
+                  {/* Video Frame as Thumbnail */}
+                  <video
+                    src="https://rzvtpgvrhzr0gbqt.public.blob.vercel-storage.com/Vi%CC%81deo%20Site.mp4#t=0.1"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
 
-                {/* Play Button Overlay */}
-                <div className="relative z-10 w-24 h-24 rounded-full bg-accent text-black flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
-                  <Play className="w-10 h-10 fill-black ml-1" />
-                </div>
+                  {/* Overlay for depth */}
+                  <div className="absolute inset-0 bg-black/20" />
 
-                {/* Glassy Tag */}
-                <div className="absolute bottom-6 left-6 glass-card-premium px-4 py-2 rounded-full border border-white/20">
-                  <p className="font-heading font-black text-xs text-white uppercase tracking-widest flex items-center gap-2">
-                    <Sparkles className="w-3 h-3 text-accent" /> Assista o vídeo explicativo
-                  </p>
-                </div>
-              </div>
+                  {/* Play Button Overlay - Centered */}
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="w-24 h-24 rounded-full bg-accent text-black flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
+                      <Play className="w-10 h-10 fill-black ml-1" />
+                    </div>
+                  </div>
 
-              {/* Shimmer Effect */}
-              <div className="absolute inset-0 shimmer-effect opacity-30 pointer-events-none" />
+                  {/* Glassy Tag */}
+                  <div className="absolute bottom-6 left-6 z-20 glass-card-premium px-4 py-2 rounded-full border border-white/20">
+                    <p className="font-heading font-black text-xs text-white uppercase tracking-widest flex items-center gap-2">
+                      <Sparkles className="w-3 h-3 text-accent" /> Assista o vídeo explicativo
+                    </p>
+                  </div>
+
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 shimmer-effect opacity-30 pointer-events-none" />
+                </>
+              )}
             </div>
           </motion.div>
         </div>

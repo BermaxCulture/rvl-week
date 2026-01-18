@@ -43,6 +43,21 @@ export function Header() {
                 </Link>
 
                 <Link
+                  to="/ranking"
+                  className="flex items-center gap-2 px-4 py-2 bg-black/5 hover:bg-black/10 rounded-full transition-all group active:scale-95 border border-black/5"
+                  title="Ranking Global"
+                >
+                  <Trophy className="w-4 h-4 text-purple-900" />
+                  <span className="text-purple-900 font-bold text-sm tracking-tight hidden lg:inline">Ranking</span>
+                </Link>
+
+                <div className="flex items-center gap-2 px-4 py-2 bg-black/10 rounded-full">
+                  <span className="text-purple-900 font-bold text-sm flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5 fill-purple-900" /> {user?.totalPoints || 0}
+                  </span>
+                </div>
+
+                <Link
                   to="/perfil"
                   className="relative group block"
                   title="Meu Perfil"
@@ -58,20 +73,6 @@ export function Header() {
                   </div>
                 </Link>
 
-                <Link
-                  to="/ranking"
-                  className="flex items-center gap-2 px-4 py-2 bg-black/5 hover:bg-black/10 rounded-full transition-all group active:scale-95 border border-black/5"
-                  title="Ranking Global"
-                >
-                  <Trophy className="w-4 h-4 text-purple-900" />
-                  <span className="text-purple-900 font-bold text-sm tracking-tight hidden lg:inline">Ranking</span>
-                </Link>
-
-                <div className="flex items-center gap-2 px-4 py-2 bg-black/10 rounded-full">
-                  <span className="text-purple-900 font-bold text-sm flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5 fill-purple-900" /> {user?.totalPoints || 0}
-                  </span>
-                </div>
                 <button
                   onClick={handleLogout}
                   className="p-2 hover:bg-black/10 rounded-full transition-colors text-black/70 hover:text-black"

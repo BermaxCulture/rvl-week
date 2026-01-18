@@ -20,6 +20,14 @@ export function Quiz({ questions, onComplete }: QuizProps) {
   const [userAnswers, setUserAnswers] = useState<boolean[]>([]);
   const [showResults, setShowResults] = useState(false);
 
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="text-center p-8 bg-card rounded-2xl border-2 border-dashed border-muted-foreground/30">
+        <p className="text-muted-foreground italic">O quiz para este dia estará disponível em breve.</p>
+      </div>
+    );
+  }
+
   const question = questions[currentQuestion];
 
   const handleSelectAnswer = (index: number) => {
