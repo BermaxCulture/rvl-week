@@ -215,22 +215,11 @@ export default function DiaConteudo() {
             animate={{ opacity: 1, y: 0 }}
             className="gradient-hero rounded-3xl p-8 mb-8 text-center relative overflow-hidden"
           >
-            {/* Triangle Pattern */}
-            <div className="absolute inset-0 pointer-events-none opacity-30">
-              <svg
-                className="absolute inset-0 w-full h-full"
-                preserveAspectRatio="none"
-                viewBox="0 0 100 100"
-              >
-                <polygon
-                  points="0,100 30,30 60,100"
-                  fill="rgba(190, 243, 7, 0.4)"
-                />
-                <polygon
-                  points="40,100 70,50 100,100"
-                  fill="rgba(91, 0, 163, 0.3)"
-                />
-              </svg>
+            {/* Premium Background Decoration */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
+              <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 rounded-full blur-3xl" />
             </div>
 
             <div className="relative z-10">
@@ -327,7 +316,7 @@ export default function DiaConteudo() {
                   transition={{ delay: 0.1 + index * 0.1 }}
                 >
                   <Card
-                    variant={index === 0 ? "outlined" : index === 1 ? "highlight" : "default"}
+                    variant="highlight"
                     className="h-full"
                   >
                     <div className="flex items-center justify-center w-12 h-12 mb-3 rounded-xl bg-primary/10">
