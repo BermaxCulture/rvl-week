@@ -31,7 +31,10 @@ export const useAuth = create<AuthState>()(
                 const { user, error } = await authService.login(email, password)
 
                 if (error) {
-                    toast.error('Erro ao fazer login: ' + error.message)
+                    const message = error.message === 'Invalid login credentials'
+                        ? 'E-mail ou senha incorretos'
+                        : error.message
+                    toast.error('Erro ao fazer login: ' + message)
                     set({ isLoading: false })
                     return false
                 }
