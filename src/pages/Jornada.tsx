@@ -116,11 +116,11 @@ export default function Jornada() {
 
                 <div className="max-w-md">
                   <p className="text-sm text-foreground/80 mb-2">
-                    Progresso: {completedDaysCount}/6 dias concluídos
+                    Progresso: {completedDaysCount}/7 dias concluídos
                   </p>
                   <ProgressBar
                     current={completedDaysCount}
-                    total={6}
+                    total={7}
                     color="purple"
                     size="lg"
                   />
@@ -179,7 +179,7 @@ export default function Jornada() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {(() => {
-                const totalDays = 6;
+                const totalDays = 7;
                 const completed = days.filter(d => d.status === 'completed').length;
                 const qrScans = days.filter(d => d.points.earned >= 100).length;
                 const perfectQuizzes = days.filter(d => d.status === 'completed' && d.points.earned >= 150).length;
@@ -188,7 +188,7 @@ export default function Jornada() {
                   {
                     id: 'jornada_completa',
                     name: 'Jornada Completa',
-                    description: 'Completou os 6 dias da RVL Week',
+                    description: 'Completou os 7 dias da RVL Week',
                     icon: Trophy,
                     color: 'yellow',
                     progress: completed,
@@ -198,7 +198,7 @@ export default function Jornada() {
                   {
                     id: 'conhecedor_palavra',
                     name: 'Conhecedor da Palavra',
-                    description: '100% de acerto em todos os 6 quiz',
+                    description: '100% de acerto em todos os 7 quiz',
                     icon: BookOpen,
                     color: 'purple',
                     progress: perfectQuizzes,

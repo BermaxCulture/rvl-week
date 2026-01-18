@@ -3,7 +3,7 @@ import { Day } from "@/types";
 export const mockDays: Day[] = [
   {
     dayNumber: 1,
-    date: "2026-01-18",
+    date: "2026-01-19",
     pastor: "Pr. Francisco Vasco",
     church: "Pastor da Igreja Videira - BH | Supervisor Vinha - MG",
     theme: "A Sabedoria que Vem de Deus",
@@ -70,9 +70,9 @@ export const mockDays: Day[] = [
   },
   {
     dayNumber: 2,
-    date: "2026-01-19",
+    date: "2026-01-20",
     pastor: "Pr. Vitor Ledo",
-    church: "Link Church",
+    church: "Pastor Sênior na Link Church",
     theme: "Reforço da Palavra",
     verse: "Lâmpada para os meus pés é tua palavra, e luz para o meu caminho.",
     verseReference: "Salmos 119:105",
@@ -108,7 +108,7 @@ export const mockDays: Day[] = [
   },
   {
     dayNumber: 3,
-    date: "2026-01-20",
+    date: "2026-01-21",
     pastor: "Pr. Francisco Vasco",
     church: "Igreja Videira – MG",
     theme: "Intimidade com Deus Governa Escolhas",
@@ -165,7 +165,7 @@ export const mockDays: Day[] = [
   },
   {
     dayNumber: 4,
-    date: "2026-01-21",
+    date: "2026-01-22",
     pastor: "PL Rios",
     church: "IIR Brasília - LAB",
     theme: "Caráter Revela Quem Nos Governa",
@@ -222,9 +222,9 @@ export const mockDays: Day[] = [
   },
   {
     dayNumber: 5,
-    date: "2026-01-22",
-    pastor: "Pr. Vitor Ledo",
-    church: "Link Church",
+    date: "2026-01-23",
+    pastor: "Pr. Renan Amaral",
+    church: "Pastor na Link Flame",
     theme: "Sabedoria se Expressa em Decisões",
     verse: "Sobre tudo o que se deve guardar, guarda o teu coração, porque dele procedem as saídas da vida.",
     verseReference: "Provérbios 4:23",
@@ -284,9 +284,9 @@ export const mockDays: Day[] = [
   },
   {
     dayNumber: 6,
-    date: "2026-01-23",
-    pastor: "Pr. Vitor Ledo",
-    church: "Link Church",
+    date: "2026-01-24",
+    pastor: "Pr. Lucas Urrutty",
+    church: "Diretor do Instituto Link School | Missionário",
     theme: "Disciplina e Constância Sustentam",
     verse: "A língua branda quebranta ossos.",
     verseReference: "Provérbios 25:15b",
@@ -341,9 +341,9 @@ export const mockDays: Day[] = [
   },
   {
     dayNumber: 7,
-    date: "2026-01-24",
+    date: "2026-01-25",
     pastor: "Pr. Helvécio Neto",
-    church: "Zion Vale do Ribeira",
+    church: "Pastor na Zion Vale do Ribeira - SP | Líder Dunamis Farm",
     theme: "Uma Vida Sábia Estabelece o Reino",
     verse: "O que segue a justiça e a bondade achará a vida, a justiça e a honra.",
     verseReference: "Provérbios 21:21",

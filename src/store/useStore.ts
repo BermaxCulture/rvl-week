@@ -160,12 +160,13 @@ export const useStore = create<StoreState>()(
 
           if (!isElevated) {
             const now = new Date();
-            const unlockDate = new Date(`${dayToUnlock.date}T19:30:00-03:00`);
+            const unlockTime = dayNumber === 7 ? '10:00:00' : '19:30:00';
+            const unlockDate = new Date(`${dayToUnlock.date}T${unlockTime}-03:00`);
 
             if (now < unlockDate) {
               return {
                 success: false,
-                message: "O desbloqueio manual só é permitido após as 19:30 do dia do evento."
+                message: `O desbloqueio manual só é permitido após as ${dayNumber === 7 ? '10h' : '19:30'} do dia do evento.`
               };
             }
           }

@@ -13,12 +13,12 @@ import lucasUrrutty from "@/assets/speakers/lucas-urrutty.jpg";
 
 const speakerImages = [
     franciscoVasco,   // Dia 1
-    vitorLedo,        // Dia 2 (Generic)
-    franciscoVasco,   // Dia 3 (Shifted old Day 2)
-    pedroLucasRios,   // Dia 4 (Shifted old Day 3)
-    vitorLedo,        // Dia 5 (Shifted old Day 4)
-    vitorLedo,        // Dia 6 (Shifted old Day 5)
-    helvecioCoimbra,  // Dia 7 (Shifted old Day 6)
+    vitorLedo,        // Dia 2
+    franciscoVasco,   // Dia 3
+    pedroLucasRios,   // Dia 4
+    renanAmaral,      // Dia 5
+    lucasUrrutty,     // Dia 6
+    helvecioCoimbra,  // Dia 7
 ];
 
 const uniqueDays = mockDays;
