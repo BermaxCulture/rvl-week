@@ -27,8 +27,8 @@ const variantClasses = {
     text-white font-heading font-bold uppercase tracking-wider
     bg-gradient-to-r from-purple-600 to-purple-700
     hover:from-purple-700 hover:to-purple-800
-    shadow-[0_8px_24px_hsl(263_84%_58%/0.4)]
-    hover:shadow-[0_12px_32px_hsl(263_84%_58%/0.5),0_0_20px_hsl(263_84%_58%/0.3)]
+    shadow-lg
+    hover:shadow-xl
     hover:-translate-y-0.5
     active:translate-y-0
   `,

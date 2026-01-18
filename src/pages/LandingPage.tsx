@@ -68,15 +68,6 @@ export default function LandingPage() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="text-center scale-[0.85] md:scale-100 origin-top"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mb-8 mt-10 md:mt-0"
-            >
-              <Logo size="lg" className="mx-auto" />
-            </motion.div>
-
             {/* Main Title - CreateHack Style: Giant Bold Sans-Serif */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
@@ -117,15 +108,22 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            {/* Date */}
+            {/* Date and Location */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
-              className="flex items-center justify-center gap-3 text-lg text-white/90 font-heading font-semibold mb-10"
+              className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-lg text-white/90 font-heading font-semibold mb-10"
             >
-              <Calendar className="w-5 h-5" />
-              <span>18 a 25 de Janeiro | 19h30</span>
+              <div className="flex items-center gap-3">
+                <Calendar className="w-5 h-5 text-accent" />
+                <span>18 a 25 de Janeiro | 19h30</span>
+              </div>
+              <div className="hidden md:block w-px h-6 bg-white/20" />
+              <div className="flex items-center gap-3">
+                <MapPin className="w-5 h-5 text-accent" />
+                <span>Link Church, Belém/PA</span>
+              </div>
             </motion.div>
 
             {/* CTAs */}
@@ -179,20 +177,19 @@ export default function LandingPage() {
       </section >
 
       {/* O Que É Section */}
-      < section className="section-padding relative overflow-hidden" >
+      <section className="section-padding relative overflow-hidden">
         {/* Gradient Background */}
-        < div className="absolute inset-0 gradient-purple" />
+        <div className="absolute inset-0 gradient-purple" />
 
         {/* Geometric shapes from CTA Final */}
-        < div
+        <div
           className="absolute top-0 right-0 w-80 h-80 opacity-30"
           style={{
             background: '#fcd95b',
             clipPath: 'polygon(100% 0, 0% 100%, 100% 100%)',
-          }
-          }
+          }}
         />
-        < div
+        <div
           className="absolute bottom-0 left-0 w-60 h-60 opacity-20"
           style={{
             background: '#5b00a3',
@@ -200,7 +197,7 @@ export default function LandingPage() {
           }}
         />
 
-        < div className="container relative mx-auto px-4" >
+        <div className="container relative mx-auto px-4">
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -225,9 +222,9 @@ export default function LandingPage() {
               variants={itemVariants}
               className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed"
             >
-              Uma semana especial de busca e comunhão com Deus, onde vamos adorar,
-              interceder e receber direção através da Palavra. Cada dia é uma
-              oportunidade de experimentar a bondade de Deus de forma prática.
+              Uma semana especial de busca e comunhão com Deus, em que adorar,
+              interceder e receber direção por meio da Palavra. Cada dia é uma
+              oportunidade para experimentar a bondade de Deus de forma prática.
             </motion.p>
           </motion.div>
 
@@ -262,25 +259,24 @@ export default function LandingPage() {
                 key={index}
                 variants={itemVariants}
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className="bg-black/30 backdrop-blur-md border border-white/10 p-8 rounded-[24px] group cursor-pointer shadow-xl"
+                className="bg-white/5 backdrop-blur-md border-2 border-white/40 p-8 rounded-[32px] group cursor-pointer hover:bg-white/10 hover:border-white/60 transition-all duration-300"
               >
-                <div className={`w - 16 h - 16 rounded - 2xl bg - gradient - to - br ${item.gradient} flex items - center justify - center mb - 6 shadow - glow - sm group - hover: shadow - glow transition - shadow duration - 300`}>
-                  <item.icon className="w-8 h-8 text-white" />
+                <div className="mb-6">
+                  <item.icon className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-300" />
                 </div>
-                <h3 className="font-heading font-bold text-xl text-white mb-3">{item.title}</h3>
+                <h3 className="font-heading font-bold text-xl text-white mb-3 tracking-tight">{item.title}</h3>
                 <p className="text-white/70 leading-relaxed">
                   {item.description}
                 </p>
               </motion.div>
             ))}
           </motion.div>
-        </div >
-      </section >
+        </div>
+      </section>
 
-      {/* Como Funciona Section */}
-      < section className="section-padding bg-card relative overflow-hidden" >
+      <section className="section-padding bg-card relative overflow-hidden">
         {/* Background decoration */}
-        < div className="absolute top-0 right-0 w-96 h-96 bg-[#5b00a3]/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#5b00a3]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#fcd95b]/5 rounded-full blur-3xl" />
 
         <div className="container relative mx-auto px-4">
@@ -310,7 +306,7 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
-            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
           >
             {[
               {
@@ -361,6 +357,41 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Video Explanation Section */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="relative group cursor-pointer aspect-video rounded-[32px] overflow-hidden shadow-2xl border-4 border-white/10 group">
+              {/* Thumbnail Placeholder with Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-purple-900/60 to-black flex items-center justify-center">
+                <img
+                  src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80"
+                  className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay group-hover:scale-105 transition-transform duration-700"
+                  alt="Video Thumbnail"
+                />
+
+                {/* Play Button Overlay */}
+                <div className="relative z-10 w-24 h-24 rounded-full bg-accent text-black flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
+                  <Play className="w-10 h-10 fill-black ml-1" />
+                </div>
+
+                {/* Glassy Tag */}
+                <div className="absolute bottom-6 left-6 glass-card-premium px-4 py-2 rounded-full border border-white/20">
+                  <p className="font-heading font-black text-xs text-white uppercase tracking-widest flex items-center gap-2">
+                    <Sparkles className="w-3 h-3 text-accent" /> Assista o vídeo explicativo
+                  </p>
+                </div>
+              </div>
+
+              {/* Shimmer Effect */}
+              <div className="absolute inset-0 shimmer-effect opacity-30 pointer-events-none" />
+            </div>
+          </motion.div>
         </div>
       </section >
 
@@ -368,20 +399,19 @@ export default function LandingPage() {
       < ScheduleCarousel />
 
       {/* Info Section */}
-      < section className="section-padding bg-card" >
+      <section className="section-padding bg-card">
         <div className="container mx-auto px-4">
           <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {[
               { icon: Clock, label: "Horário", value: "19h30" },
               { icon: MapPin, label: "Local", value: "Link Church, Belém/PA" },
               { icon: Baby, label: "Link Kids", value: "Disponível" },
-              { icon: Cross, label: "Tema", value: "A Bondade de Deus" },
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -397,22 +427,22 @@ export default function LandingPage() {
             ))}
           </motion.div>
         </div>
-      </section >
+      </section>
 
       {/* CTA Final */}
-      < section className="section-padding relative overflow-hidden" >
+      <section className="section-padding relative overflow-hidden">
         {/* Gradient Background */}
-        < div className="absolute inset-0 gradient-purple" />
+        <div className="absolute inset-0 gradient-purple" />
 
         {/* Geometric shapes */}
-        < div
+        <div
           className="absolute top-0 right-0 w-80 h-80 opacity-30"
           style={{
             background: '#fcd95b',
             clipPath: 'polygon(100% 0, 0% 100%, 100% 100%)',
           }}
         />
-        < div
+        <div
           className="absolute bottom-0 left-0 w-60 h-60 opacity-20"
           style={{
             background: '#5b00a3',
@@ -420,7 +450,7 @@ export default function LandingPage() {
           }}
         />
 
-        < div className="container relative z-10 mx-auto px-4 text-center" >
+        <div className="container relative z-10 mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -440,26 +470,26 @@ export default function LandingPage() {
               NÃO PERCA ESSA JORNADA
             </h2>
             <p className="text-white/80 text-lg md:text-xl mb-10 max-w-xl mx-auto font-heading">
-              7 dias para experimentar a bondade de Deus e crescer na fé
+              7 dias para experimentar a bondade de Deus e crescer na&nbsp;fé
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {isAuthenticated ? (
                 <Link to="/jornada">
-                  <Button variant="primary" size="xl" glow>
+                  <Button variant="primary" size="xl">
                     ACESSAR MINHA JORNADA
                   </Button>
                 </Link>
               ) : (
                 <Link to="/cadastro">
-                  <Button variant="primary" size="xl" glow>
+                  <Button variant="primary" size="xl">
                     COMEÇAR AGORA
                   </Button>
                 </Link>
               )}
             </div>
           </motion.div>
-        </div >
-      </section >
+        </div>
+      </section>
 
       <Footer />
     </div >

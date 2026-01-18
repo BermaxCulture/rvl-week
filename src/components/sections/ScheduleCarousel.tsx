@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, ArrowRight, Clock, MapPin, Calendar, Sparkles } from "lucide-react";
 import { mockDays } from "@/mocks/days.mock";
@@ -18,15 +18,29 @@ const speakerImages = [
     vitorLedo,
     renanAmaral,
     lucasUrrutty,
-    vitorLedo, // 7th speaker (Wrap up)
 ];
+
+// Use only first 6 days (unique speakers)
+const uniqueDays = mockDays.slice(0, 6);
 
 export function ScheduleCarousel() {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
     const isMobile = useIsMobile();
 
-    const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % mockDays.length);
-    const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + mockDays.length) % mockDays.length);
+    const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % uniqueDays.length);
+    const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + uniqueDays.length) % uniqueDays.length);
+
+    // Auto-play carousel
+    useEffect(() => {
+        if (isPaused) return;
+
+        const interval = setInterval(() => {
+            nextSlide();
+        }, 5000); // Change slide every 5 seconds
+
+        return () => clearInterval(interval);
+    }, [currentIndex, isPaused]);
 
     // SVG Grain Filter component
     const GrainOverlay = () => (
@@ -71,11 +85,15 @@ export function ScheduleCarousel() {
                     </div>
 
                     {/* 3D Stacked Carousel */}
-                    <div className="relative w-full flex justify-center perspective-1000 py-6">
+                    <div
+                        className="relative w-full flex justify-center perspective-1000 py-6"
+                        onMouseEnter={() => setIsPaused(true)}
+                        onMouseLeave={() => setIsPaused(false)}
+                    >
                         <div className="relative w-full max-w-[450px] md:max-w-[700px] aspect-[1.2/1] preserve-3d">
                             <AnimatePresence mode="popLayout" initial={false}>
                                 {[...Array(4)].map((_, i) => {
-                                    const slideIndex = (currentIndex + i) % mockDays.length;
+                                    const slideIndex = (currentIndex + i) % uniqueDays.length;
                                     const isFront = i === 0;
 
                                     return (
@@ -103,26 +121,20 @@ export function ScheduleCarousel() {
                                             <div className="relative w-full h-full">
                                                 <img
                                                     src={speakerImages[slideIndex]}
-                                                    alt={mockDays[slideIndex].pastor}
+                                                    alt={uniqueDays[slideIndex].pastor}
                                                     className="w-full h-full object-cover grayscale-[0.2]"
                                                 />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-[#00004dE6] via-transparent to-transparent" />
 
                                                 <div className="absolute inset-x-0 bottom-0 p-8 md:p-10">
                                                     <div className="space-y-4">
-                                                        <div className="inline-flex h-7 md:h-8 bg-[#fcd95b] rounded-sm items-center px-4 font-black text-[12px] md:text-[14px] text-black italic">
-                                                            1UV
-                                                        </div>
                                                         <div className="space-y-1">
-                                                            <p className="text-white/70 font-heading font-medium text-[10px] md:text-xs uppercase tracking-widest">
-                                                                Speaker
-                                                            </p>
                                                             <h3 className="font-display text-3xl md:text-5xl text-white uppercase italic font-black leading-[0.85] tracking-tighter">
-                                                                {mockDays[slideIndex].pastor}
+                                                                {uniqueDays[slideIndex].pastor}
                                                             </h3>
-                                                            {mockDays[slideIndex].church && (
+                                                            {uniqueDays[slideIndex].church && (
                                                                 <p className="text-white/60 font-heading text-[10px] md:text-sm uppercase tracking-wide">
-                                                                    {mockDays[slideIndex].church}
+                                                                    {uniqueDays[slideIndex].church}
                                                                 </p>
                                                             )}
                                                         </div>
@@ -138,13 +150,13 @@ export function ScheduleCarousel() {
                             <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between z-50 pointer-events-none">
                                 <button
                                     onClick={prevSlide}
-                                    className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/60 flex items-center justify-center text-white pointer-events-auto hover:bg-white/20 transition-all -ml-4 md:-ml-7 shadow-2xl bg-black/10 backdrop-blur-md group"
+                                    className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/60 flex items-center justify-center text-white pointer-events-auto hover:bg-white/20 transition-all -ml-8 md:-ml-16 shadow-2xl bg-black/10 backdrop-blur-md group"
                                 >
                                     <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 stroke-[3px] group-active:scale-90 transition-transform" />
                                 </button>
                                 <button
                                     onClick={nextSlide}
-                                    className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/60 flex items-center justify-center text-white pointer-events-auto hover:bg-white/20 transition-all -mr-4 md:-mr-7 shadow-2xl bg-black/10 backdrop-blur-md group"
+                                    className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/60 flex items-center justify-center text-white pointer-events-auto hover:bg-white/20 transition-all -mr-8 md:-mr-16 shadow-2xl bg-black/10 backdrop-blur-md group"
                                 >
                                     <ChevronRight className="w-6 h-6 md:w-8 md:h-8 stroke-[3px] group-active:scale-90 transition-transform" />
                                 </button>
