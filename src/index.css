@@ -77,6 +77,17 @@
     @apply bg-background text-foreground font-body antialiased;
   }
 
+  /* Remove browser's default password reveal/clear buttons */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+  
+  input::-webkit-contacts-auto-fill-button,
+  input::-webkit-credentials-auto-fill-button {
+    display: none !important;
+  }
+
   h1,
   h2,
   h3,

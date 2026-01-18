@@ -48,8 +48,8 @@ export const authService = {
 
         if (error) return { user: null, error };
 
-        // We don't return the full user here because email verification might be required
-        return { user: authData.user, error: null };
+        // We return the session too, in case email confirmation is disabled
+        return { user: authData.user, session: authData.session, error: null };
     },
 
     logout: async () => {

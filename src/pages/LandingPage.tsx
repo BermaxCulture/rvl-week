@@ -49,17 +49,27 @@ export default function LandingPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center">
-        {/* Background Gradient - Clean & Simple */}
-        <div className="absolute inset-0 gradient-hero opacity-95" />
+      <section className="relative min-h-screen flex items-center justify-center pt-24">
+        {/* Background Base */}
+        <div className="absolute inset-0 bg-[#020617]" />
 
-        {/* Subtle Gradient Overlay */}
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(circle at 80% 20%, rgba(252, 217, 91, 0.15) 0%, transparent 50%)',
-        }} />
+        {/* Visible Background Image */}
+        <div
+          className="absolute inset-0 opacity-50 pointer-events-none overflow-hidden"
+          style={{
+            backgroundImage: 'url("/images/revival-week-bg.jpeg")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center 40%',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Internal darkening overlay to help text contrast within the image div */}
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
 
-        {/* Dark overlay for text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+        {/* Gradient Overlays for Brand Colors and Depth */}
+        <div className="absolute inset-0 gradient-hero opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/80 via-transparent to-[#020617]/90" />
 
         <div className="container relative z-10 mx-auto px-4 pt-20 pb-20 md:pt-32">
           <motion.div
@@ -96,17 +106,6 @@ export default function LandingPage() {
               Uma semana de adoração, intercessão e direção
             </motion.p>
 
-            {/* Theme Card - Glassmorphism */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="inline-block glass-card px-8 py-5 mb-8"
-            >
-              <p className="font-display text-2xl md:text-3xl text-white tracking-wider">
-                A BONDADE DE DEUS
-              </p>
-            </motion.div>
 
             {/* Date and Location */}
             <motion.div
@@ -117,7 +116,7 @@ export default function LandingPage() {
             >
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-accent" />
-                <span>18 a 25 de Janeiro | 19h30</span>
+                <span>19 a 24 de Janeiro | 19h30</span>
               </div>
               <div className="hidden md:block w-px h-6 bg-white/20" />
               <div className="flex items-center gap-3">
@@ -224,7 +223,7 @@ export default function LandingPage() {
             >
               Uma semana especial de busca e comunhão com Deus, em que adorar,
               interceder e receber direção por meio da Palavra. Cada dia é uma
-              oportunidade para experimentar a bondade de Deus de forma prática.
+              oportunidade de crescimento espiritual.
             </motion.p>
           </motion.div>
 
@@ -470,7 +469,7 @@ export default function LandingPage() {
               NÃO PERCA ESSA JORNADA
             </h2>
             <p className="text-white/80 text-lg md:text-xl mb-10 max-w-xl mx-auto font-heading">
-              7 dias para experimentar a bondade de Deus e crescer na&nbsp;fé
+              6 dias para viver uma experiência marcante e crescer na fé
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {isAuthenticated ? (

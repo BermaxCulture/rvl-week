@@ -11,7 +11,6 @@ import DiaConteudo from "./pages/DiaConteudo";
 import AdminEditDia from "./pages/AdminEditDia";
 import Perfil from "./pages/Perfil";
 import RankingPage from "./pages/RankingPage";
-import VerifyEmail from "./pages/VerifyEmail";
 import UnlockPage from "./pages/UnlockPage";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/utils/ScrollToTop";
@@ -60,7 +59,6 @@ const App = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
-            <Route path="/verificar-email" element={<VerifyEmail />} />
             <Route path="/unlock" element={<UnlockPage />} />
 
             {/* Protected Routes */}

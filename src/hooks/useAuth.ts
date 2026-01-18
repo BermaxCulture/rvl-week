@@ -13,11 +13,7 @@ interface AuthState {
     isLoading: boolean
     login: (email: string, password: string) => Promise<boolean>
     register: (data: RegisterData) => Promise<boolean>
-    verifyEmail: (email: string, token: string) => Promise<boolean>
-    resendOTP: (email: string) => Promise<boolean>
     updateProfile: (data: Partial<User>) => Promise<boolean>
-    updateEmail: (newEmail: string) => Promise<boolean>
-    confirmEmailChange: (newEmail: string, token: string) => Promise<boolean>
     updatePassword: (newPassword: string) => Promise<boolean>
     logout: () => void
     checkAuth: () => Promise<void>
@@ -51,7 +47,7 @@ export const useAuth = create<AuthState>()(
 
             register: async (data: RegisterData) => {
                 set({ isLoading: true })
-                const { user: authUser, error } = await authService.register(data)
+                const { user: authUser, session, error } = await authService.register(data)
 
                 if (error) {
                     toast.error('Erro ao criar conta: ' + error.message)
@@ -59,7 +55,7 @@ export const useAuth = create<AuthState>()(
                     return false
                 }
 
-                // Criar Perfil na tabela profiles explicitamente para garantir que a role seja 'usuario'
+                // Criar Perfil na tabela profiles
                 const { error: profileError } = await supabase.from('profiles').insert({
                     id: authUser?.id,
                     full_name: data.name,
@@ -72,51 +68,23 @@ export const useAuth = create<AuthState>()(
                     console.error("[Auth] Erro ao criar perfil:", profileError);
                 }
 
-                toast.success('Conta criada! Verifique seu email.')
-                set({ isLoading: false })
-                return true
-            },
-
-            verifyEmail: async (email: string, token: string) => {
-                set({ isLoading: true })
-                const { data, error } = await supabase.auth.verifyOtp({
-                    email,
-                    token,
-                    type: 'signup'
-                })
-
-                if (error || !data.user) {
-                    set({ isLoading: false })
-                    toast.error(error?.message || "Código inválido ou expirado")
-                    return false
-                }
-
-                const user = await authService.getCurrentUser()
-                if (user) {
+                if (session) {
+                    // Se houver sessão, o login foi automático
+                    const user = await authService.getCurrentUser()
                     set({ user, isAuthenticated: true, isLoading: false })
                     await useStore.getState().fetchDays()
-
-                    return true
+                    toast.success('Conta criada e autenticada! 🚀')
+                } else {
+                    toast.success('Conta criada! Bem-vindo.')
+                    // Se não houver sessão e o usuário removeu o provider, ele provavelmente 
+                    // configurou o supabase de forma que não loga automático mas também não tem OTP
+                    // Nesse caso o usuário terá que fazer login manual.
+                    set({ isLoading: false })
                 }
 
-                set({ isLoading: false })
-                return false
-            },
-
-            resendOTP: async (email: string) => {
-                const { error } = await supabase.auth.resend({
-                    type: 'signup',
-                    email,
-                })
-
-                if (error) {
-                    toast.error("Erro ao reenviar código: " + error.message)
-                    return false
-                }
-
-                toast.success("Novo código enviado para seu email!")
                 return true
             },
+
 
             updateProfile: async (updateData: Partial<User>) => {
                 const { user } = get()
@@ -138,64 +106,6 @@ export const useAuth = create<AuthState>()(
                 return false
             },
 
-            updateEmail: async (newEmail: string) => {
-                const { error } = await supabase.auth.updateUser({ email: newEmail })
-                if (error) {
-                    toast.error("Erro ao atualizar email: " + error.message)
-                    return false
-                }
-                toast.success("Código enviado para seu novo e-mail!")
-                return true
-            },
-
-            confirmEmailChange: async (newEmail: string, token: string) => {
-                console.log("[Auth] Iniciando confirmação de troca de email...");
-                console.log("[Auth] Novo Email alvo:", newEmail);
-
-                const { data, error } = await supabase.auth.verifyOtp({
-                    email: newEmail,
-                    token,
-                    type: 'email_change'
-                })
-
-                if (error) {
-                    console.error("[Auth] Erro ao verificar OTP:", error);
-                    toast.error("Código inválido ou expirado: " + error.message)
-                    return false
-                }
-
-                console.log("[Auth] OTP verificado com sucesso no Auth do Supabase!");
-                console.log("[Auth] Dados do usuário retornados:", data.user);
-
-                // IMPORTANTE: Sincronizar com a tabela public.profiles
-                if (data.user) {
-                    console.log("[Auth] Sincronizando tabela public.profiles para o ID:", data.user.id);
-                    const { error: profileError } = await supabase
-                        .from('profiles')
-                        .update({ email: newEmail })
-                        .eq('id', data.user.id);
-
-                    if (profileError) {
-                        console.error("[Auth] Erro ao atualizar perfil público:", profileError);
-                        // Mesmo com erro no profile, a conta auth já mudou, então não retornamos false aqui
-                        // mas avisamos o dev via log.
-                    } else {
-                        console.log("[Auth] Tabela public.profiles atualizada com sucesso!");
-                    }
-                }
-
-                toast.success("E-mail atualizado com sucesso!")
-
-                // Refresh user data localmente
-                console.log("[Auth] Recarregando dados do usuário para o estado global...");
-                const updatedUser = await authService.getCurrentUser()
-                if (updatedUser) {
-                    set({ user: updatedUser })
-                    console.log("[Auth] Estado global atualizado com novo email:", updatedUser.email);
-                }
-
-                return true
-            },
 
             updatePassword: async (newPassword: string) => {
                 const { error } = await supabase.auth.updateUser({ password: newPassword })

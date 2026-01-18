@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, User, Trophy, Zap, ChevronRight } from "lucide-react";
+import { Menu, X, LogOut, User, Trophy, Zap, ChevronRight, Flame } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/ButtonCustom";
 import { useStore } from "@/store/useStore";
@@ -24,15 +24,24 @@ export function Header() {
   return (
     <header className="fixed top-4 left-0 right-0 z-50 px-4">
       <div className="container mx-auto">
-        <div className="bg-[#fcd95b] rounded-full shadow-2xl px-6 py-3 flex items-center justify-between">
+        <div className="bg-[#fcd95b] rounded-full shadow-2xl px-6 py-2 flex items-center justify-between">
           <Link to="/" className="flex items-center">
             <Logo size="sm" />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
+                <Link
+                  to="/jornada"
+                  className="flex items-center gap-2 px-4 py-2 bg-black/5 hover:bg-black/10 rounded-full transition-all group active:scale-95 border border-black/5"
+                  title="Minha Jornada"
+                >
+                  <Flame className="w-4 h-4 text-purple-900" />
+                  <span className="text-purple-900 font-bold text-sm tracking-tight hidden lg:inline">Jornada</span>
+                </Link>
+
                 <Link
                   to="/perfil"
                   className="relative group block"

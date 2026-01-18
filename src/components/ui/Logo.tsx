@@ -6,7 +6,7 @@ interface LogoProps {
 }
 
 const sizeClasses = {
-  sm: "h-16 w-auto",
+  sm: "h-12 w-auto",
   md: "h-24 w-auto",
   lg: "h-32 w-auto",
   xl: "h-48 w-auto",
