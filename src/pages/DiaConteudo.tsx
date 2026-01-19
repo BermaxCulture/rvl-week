@@ -394,12 +394,35 @@ export default function DiaConteudo() {
                 ) : (
                   <button
                     onClick={() => handleWatchVideo("main")}
-                    className="flex flex-col items-center gap-3 group"
+                    className="relative w-full h-full flex items-center justify-center group overflow-hidden"
                   >
-                    <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center shadow-cartoon group-hover:scale-110 transition-transform">
-                      <Play className="w-10 h-10 text-secondary-foreground ml-1" />
+                    {isDirectVideo(day.content.videoUrl) ? (
+                      <video
+                        src={`${day.content.videoUrl}#t=0.5`}
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <img
+                        src={`https://img.youtube.com/vi/${getYouTubeId(day.content.videoUrl)}/maxresdefault.jpg`}
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                        alt="Thumbnail"
+                        onError={(e) => {
+                          // Fallback to hqdefault if maxres doesn't exist
+                          e.currentTarget.src = `https://img.youtube.com/vi/${getYouTubeId(day.content.videoUrl)}/hqdefault.jpg`;
+                        }}
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+                    <div className="relative flex flex-col items-center gap-3 z-10">
+                      <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center shadow-cartoon group-hover:scale-110 transition-transform">
+                        <Play className="w-10 h-10 text-secondary-foreground ml-1" />
+                      </div>
+                      <p className="font-semibold text-white drop-shadow-md">Clique para assistir</p>
                     </div>
-                    <p className="font-semibold text-foreground">Clique para assistir</p>
                   </button>
                 )}
 
@@ -465,12 +488,34 @@ export default function DiaConteudo() {
                 ) : (
                   <button
                     onClick={() => handleWatchVideo("pastor")}
-                    className="flex flex-col items-center gap-3 group"
+                    className="relative w-full h-full flex items-center justify-center group overflow-hidden"
                   >
-                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-cartoon group-hover:scale-110 transition-transform">
-                      <Play className="w-10 h-10 text-primary-foreground ml-1" />
+                    {isDirectVideo(day.content.pastorVideoUrl) ? (
+                      <video
+                        src={`${day.content.pastorVideoUrl}#t=0.5`}
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <img
+                        src={`https://img.youtube.com/vi/${getYouTubeId(day.content.pastorVideoUrl)}/maxresdefault.jpg`}
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                        alt="Thumbnail"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://img.youtube.com/vi/${getYouTubeId(day.content.pastorVideoUrl)}/hqdefault.jpg`;
+                        }}
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+                    <div className="relative flex flex-col items-center gap-3 z-10">
+                      <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-cartoon group-hover:scale-110 transition-transform">
+                        <Play className="w-10 h-10 text-primary-foreground ml-1" />
+                      </div>
+                      <p className="font-semibold text-white drop-shadow-md">Clique para assistir</p>
                     </div>
-                    <p className="font-semibold text-foreground">Clique para assistir</p>
                   </button>
                 )}
 
