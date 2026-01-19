@@ -267,7 +267,22 @@ export const useStore = create<StoreState>()(
 
         if (!journey) return;
 
-        const pointsToAdd = type === "main" ? 0 : 50;
+        const currentPoints = day.points.earned || 0;
+        const newTotalPoints =
+          (type === "main" ? 0 : 50) + // Points for current action
+          (day.activities.qrScanned ? 100 : 0) +
+          (type === "main" ? currentPoints : (day.activities.pastorVideoWatched ? 0 : 0)) // This logic is getting complex, let's simplify
+
+        // Let's use a cleaner approach: recalculate EVERYTHING
+        const points = {
+          qr: day.activities.qrScanned ? 100 : 0,
+          main: (type === "main" || day.activities.videoWatched) ? 0 : 0,
+          pastor: (type === "pastor" || day.activities.pastorVideoWatched) ? 50 : 0,
+          quiz: day.activities.quizCompleted ? Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50) : 0,
+          completion: day.status === 'completed' ? 50 : 0
+        };
+
+        const totalPoints = points.qr + points.main + points.pastor + points.quiz + points.completion;
 
         const { error } = await supabase
           .from('progresso_usuario')
@@ -275,7 +290,7 @@ export const useStore = create<StoreState>()(
             user_id: user.id,
             jornada_id: journey.id,
             [type === "main" ? "video_principal_assistido" : "video_preparacao_assistido"]: true,
-            pontos_acumulados: (day.points.earned || 0) + pointsToAdd
+            pontos_acumulados: totalPoints
           }, { onConflict: 'user_id,jornada_id' });
 
         if (!error) {
@@ -300,7 +315,16 @@ export const useStore = create<StoreState>()(
         if (!journey) return;
 
         const totalQuestions = day.content.quiz.length || 1;
-        const quizPoints = score === totalQuestions ? 50 : Math.floor((score / totalQuestions) * 50);
+        const newQuizPoints = Math.floor((score / totalQuestions) * 50);
+
+        // Recalculate total points
+        const totalPoints =
+          (day.activities.qrScanned ? 100 : 0) +
+          50 + // Points for pastor video (now always 50)
+          newQuizPoints +
+          (day.status === 'completed' ? 50 : 0);
+
+        console.log(`📝 Completando quiz: Dia ${dayNumber}, Score ${score}/${totalQuestions}, Points ${newQuizPoints}, Total ${totalPoints}`);
 
         const { error } = await supabase
           .from('progresso_usuario')
@@ -309,13 +333,16 @@ export const useStore = create<StoreState>()(
             jornada_id: journey.id,
             quiz_concluido: true,
             quiz_score: score,
-            pontos_acumulados: (day.points.earned || 0) + quizPoints
+            pontos_acumulados: totalPoints
           }, { onConflict: 'user_id,jornada_id' });
 
-        if (!error) {
-          await get().fetchDays();
-          get().checkAchievements();
+        if (error) {
+          console.error('❌ Erro ao completar quiz:', error);
+          return;
         }
+
+        await get().fetchDays();
+        get().checkAchievements();
       },
 
       markDayComplete: async (dayNumber: number) => {
@@ -334,20 +361,27 @@ export const useStore = create<StoreState>()(
 
         if (!journey) return;
 
-        const completionPoints = 50;
+        const totalPoints =
+          (day.activities.qrScanned ? 100 : 0) +
+          50 + // Pastor video
+          Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50) +
+          50; // Completion points
 
         const { error } = await supabase
           .from('progresso_usuario')
           .upsert({
             user_id: user.id,
             jornada_id: journey.id,
-            pontos_acumulados: (day.points.earned || 0) + completionPoints
+            pontos_acumulados: totalPoints
           }, { onConflict: 'user_id,jornada_id' });
 
-        if (!error) {
-          await get().fetchDays();
-          get().checkAchievements();
+        if (error) {
+          console.error('❌ Erro ao marcar dia como completo:', error);
+          return;
         }
+
+        await get().fetchDays();
+        get().checkAchievements();
       },
 
       checkAchievements: () => {

@@ -142,7 +142,6 @@ export default function DiaConteudo() {
     const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
     const allComplete =
       day.activities.qrScanned &&
-      day.activities.videoWatched &&
       day.activities.pastorVideoWatched &&
       (!hasQuiz || day.activities.quizCompleted);
 
@@ -172,6 +171,7 @@ export default function DiaConteudo() {
   const totalPossible = day.points.total;
   const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
   const allComplete =
+    day.activities.qrScanned &&
     day.activities.pastorVideoWatched &&
     (!hasQuiz || day.activities.quizCompleted);
 
@@ -525,8 +525,8 @@ export default function DiaConteudo() {
                     </span>
                     <span className="ml-auto text-sm font-semibold">
                       {day.activities.quizCompleted
-                        ? `+${Math.floor((day.activities.quizScore / 3) * 50)} pts`
-                        : "0/50 pts"}
+                        ? `+${Math.floor((day.activities.quizScore / (day.content.quiz?.length || 1)) * day.points.quiz)} pts`
+                        : `0/${day.points.quiz} pts`}
                     </span>
                   </div>
                 )}
