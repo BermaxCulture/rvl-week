@@ -279,27 +279,6 @@ export default function AdminEditDia() {
                                 </h2>
 
                                 <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold">Vídeo do Culto (YouTube ou MP4 direto)</label>
-                                        <input
-                                            type="text"
-                                            value={formData.videoUrl}
-                                            onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                                            placeholder="https://... ou .mp4"
-                                            className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-red-500 outline-none transition-all"
-                                        />
-                                    </div>
-                                    {formData.videoUrl && (
-                                        <div className="rounded-xl overflow-hidden border-2 border-border aspect-video bg-black">
-                                            {isDirectVideo(formData.videoUrl) ? (
-                                                <video src={formData.videoUrl} className="w-full h-full object-contain" controls />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs p-4 text-center">
-                                                    Player do YouTube será usado na exibição.
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
 
 

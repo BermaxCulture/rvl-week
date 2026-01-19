@@ -84,8 +84,8 @@ export const useStore = create<StoreState>()(
             status: p.quiz_concluido ? 'completed' : (p.jornada_id ? 'available' : 'locked'),
             points: {
               qrcode: 100,
-              videoMain: 30,
-              videoPastor: 20,
+              videoMain: 0,
+              videoPastor: 50,
               quiz: 50,
               completion: 50,
               total: 250,
@@ -267,7 +267,7 @@ export const useStore = create<StoreState>()(
 
         if (!journey) return;
 
-        const pointsToAdd = type === "main" ? 30 : 20;
+        const pointsToAdd = type === "main" ? 0 : 50;
 
         const { error } = await supabase
           .from('progresso_usuario')
