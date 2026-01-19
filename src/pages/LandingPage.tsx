@@ -15,6 +15,8 @@ import {
   ArrowRight,
   Calendar,
   Sparkles,
+  Store,
+  Coffee,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/ButtonCustom";
@@ -326,8 +328,8 @@ export default function LandingPage() {
               {
                 icon: Calendar,
                 step: "1",
-                title: "Participe dos cultos",
-                description: "Venha aos cultos nos horários indicados",
+                title: "Esteja com a gente!",
+                description: "Teremos cultos todos os dias no prédio da igreja nesse período",
               },
               {
                 icon: QrCode,
@@ -344,8 +346,8 @@ export default function LandingPage() {
               {
                 icon: Trophy,
                 step: "4",
-                title: "Acumule conquistas",
-                description: "Complete a jornada e seja premiado",
+                title: "Exercite a disciplina",
+                description: "Seja constante durante todos os dias nos cultos e jejum e seja transformado nesse período",
               },
             ].map((item, index) => (
               <motion.div
@@ -439,12 +441,14 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto"
           >
             {[
               { icon: Clock, label: "Horário", value: "Seg-Sex 19h30 | Dom 10h, 17h, 19h" },
               { icon: MapPin, label: "Local", value: "Link Church, Belém/PA" },
               { icon: Baby, label: "Link Kids", value: "Disponível" },
+              { icon: Store, label: "Link Store", value: "Disponível" },
+              { icon: Coffee, label: "Link Coffee", value: "Disponível" },
             ].map((item, index) => (
               <motion.div
                 key={index}
