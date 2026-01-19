@@ -2,10 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner, toast } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
+import ResetPassword from "./pages/ResetPassword";
 import Jornada from "./pages/Jornada";
 import DiaConteudo from "./pages/DiaConteudo";
 import AdminEditDia from "./pages/AdminEditDia";
@@ -19,12 +20,14 @@ import { useEffect } from "react";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute";
+import { supabase } from "@/lib/supabase";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+const AppContent = () => {
   const { checkAuth, isAuthenticated } = useAuth();
   const { setPendingUnlock, unlockDay } = useStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
@@ -44,67 +47,83 @@ const App = () => {
   }, [checkAuth, isAuthenticated, setPendingUnlock, unlockDay]);
 
   useEffect(() => {
-    // Unified visible unlock flow via /unlock page
-  }, [isAuthenticated]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('🔄 Recovery event detected, navigating to reset-password');
+        navigate('/reset-password', { replace: true });
+      }
+    });
 
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  return (
+    <>
+      <ScrollToTop />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/unlock" element={<UnlockPage />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/jornada"
+          element={
+            <ProtectedRoute>
+              <Jornada />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jornada/dia/:dayNumber"
+          element={
+            <ProtectedRoute>
+              <DiaConteudo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jornada/dia/:dayNumber/editar"
+          element={
+            <AdminRoute>
+              <AdminEditDia />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ranking"
+          element={
+            <ProtectedRoute>
+              <RankingPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+};
+
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/cadastro" element={<Cadastro />} />
-            <Route path="/unlock" element={<UnlockPage />} />
-
-            {/* Protected Routes */}
-            <Route
-              path="/jornada"
-              element={
-                <ProtectedRoute>
-                  <Jornada />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/jornada/dia/:dayNumber"
-              element={
-                <ProtectedRoute>
-                  <DiaConteudo />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/jornada/dia/:dayNumber/editar"
-              element={
-                <AdminRoute>
-                  <AdminEditDia />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/perfil"
-              element={
-                <ProtectedRoute>
-                  <Perfil />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ranking"
-              element={
-                <ProtectedRoute>
-                  <RankingPage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppContent />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

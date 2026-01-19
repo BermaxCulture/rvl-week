@@ -13,7 +13,8 @@ import AnimatedGradientBackground from "@/components/ui/animated-gradient-backgr
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isLoading } = useAuth();
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const { login, sendResetPasswordEmail, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,20 +23,30 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isForgotPassword) {
+      if (!email) {
+        toast.error("Preencha o campo de e-mail");
+        return;
+      }
+      const success = await sendResetPasswordEmail(email);
+      if (success) {
+        setIsForgotPassword(false);
+      }
+      return;
+    }
+
     if (!email || !password) {
       toast.error("Preencha todos os campos");
       return;
     }
 
     await login(email, password);
-    // Note: useAuth.login handles its own success toast and isLoading
-    // We navigate based on isAuthenticated in a useEffect or here if we know it succeeded
   };
 
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isForgotPassword) {
       console.log('✅ Usuário logado - verificando pending...');
       const pending = localStorage.getItem('pending_unlock');
       if (pending) {
@@ -52,7 +63,7 @@ export default function Login() {
         navigate(from, { replace: true });
       }
     }
-  }, [isAuthenticated, navigate, from]);
+  }, [isAuthenticated, navigate, from, isForgotPassword]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
@@ -73,10 +84,12 @@ export default function Login() {
               <Logo size="md" className="mx-auto mb-3" />
             </Link>
             <h1 className="font-display font-bold text-xl text-primary mb-1">
-              Entre na sua jornada
+              {isForgotPassword ? "Recuperar Senha" : "Entre na sua jornada"}
             </h1>
             <p className="text-muted-foreground text-sm">
-              Continue de onde você parou
+              {isForgotPassword
+                ? "Informa seu e-mail para receber o link"
+                : "Continue de onde você parou"}
             </p>
           </div>
 
@@ -91,22 +104,25 @@ export default function Login() {
               className="py-2.5"
             />
 
-            <Input
-              label="Senha"
-              type="password"
-              icon={Lock}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="py-2.5"
-            />
+            {!isForgotPassword && (
+              <Input
+                label="Senha"
+                type="password"
+                icon={Lock}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="py-2.5"
+              />
+            )}
 
             <div className="text-right">
               <button
                 type="button"
+                onClick={() => setIsForgotPassword(!isForgotPassword)}
                 className="text-sm text-primary hover:underline"
               >
-                Esqueci minha senha
+                {isForgotPassword ? "Voltar para o login" : "Esqueci minha senha"}
               </button>
             </div>
 
@@ -118,21 +134,23 @@ export default function Login() {
               isLoading={isLoading}
               className="mt-2"
             >
-              ENTRAR
+              {isForgotPassword ? "ENVIAR LINK" : "ENTRAR"}
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
-            <p className="text-muted-foreground">
-              Não tem conta?{" "}
-              <Link
-                to="/cadastro"
-                className="text-secondary font-bold hover:underline"
-              >
-                Criar conta
-              </Link>
-            </p>
-          </div>
+          {!isForgotPassword && (
+            <div className="mt-4 text-center">
+              <p className="text-muted-foreground">
+                Não tem conta?{" "}
+                <Link
+                  to="/cadastro"
+                  className="text-secondary font-bold hover:underline"
+                >
+                  Criar conta
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 text-center">

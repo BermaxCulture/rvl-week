@@ -15,6 +15,7 @@ interface AuthState {
     register: (data: RegisterData) => Promise<boolean>
     updateProfile: (data: Partial<User>) => Promise<boolean>
     updatePassword: (newPassword: string) => Promise<boolean>
+    sendResetPasswordEmail: (email: string) => Promise<boolean>
     logout: () => void
     checkAuth: () => Promise<void>
 }
@@ -118,6 +119,21 @@ export const useAuth = create<AuthState>()(
                     return false
                 }
                 toast.success("Senha atualizada com sucesso!")
+                return true
+            },
+
+            sendResetPasswordEmail: async (email: string) => {
+                set({ isLoading: true })
+                const { error } = await authService.sendResetPasswordEmail(email);
+
+                if (error) {
+                    toast.error("Erro ao enviar e-mail: " + error.message)
+                    set({ isLoading: false })
+                    return false
+                }
+
+                toast.success("E-mail de recuperação enviado! Verifique sua caixa de entrada.")
+                set({ isLoading: false })
                 return true
             },
 
