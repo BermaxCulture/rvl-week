@@ -9,6 +9,7 @@ export interface User {
   achievements: string[];
   role: 'usuario' | 'admin' | 'pastor';
   createdAt: string;
+  isMember: boolean;
 }
 
 export interface QuizQuestion {
@@ -80,4 +81,5 @@ export interface RegisterData {
   phone: string;
   password: string;
   confirmPassword: string;
+  isMember: boolean;
 }

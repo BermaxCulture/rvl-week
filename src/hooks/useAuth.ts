@@ -64,7 +64,8 @@ export const useAuth = create<AuthState>()(
                     full_name: data.name,
                     email: data.email,
                     phone_number: data.phone,
-                    role: 'usuario'
+                    role: 'usuario',
+                    is_member: data.isMember
                 });
 
                 if (profileError) {

@@ -11,10 +11,6 @@ import {
     Quote,
     ListChecks,
     AlertCircle,
-    Upload,
-    XCircle,
-    FileVideo,
-    Loader2,
     Brain,
     Plus,
     Trash2,
@@ -38,7 +34,6 @@ export default function AdminEditDia() {
 
     const [formData, setFormData] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
     const quizEndRef = useRef<HTMLDivElement>(null);
 
     // Estado para o modal de expansão
@@ -65,6 +60,8 @@ export default function AdminEditDia() {
                 theme: day.theme,
                 pastor: day.pastor,
                 church: day.church,
+                verse: day.verse || "",
+                verseReference: day.verseReference || "",
                 videoUrl: day.content.videoUrl,
                 pastorVideoUrl: day.content.pastorVideoUrl,
                 mainPoints: day.content.mainPoints || ["", "", ""],
@@ -84,6 +81,8 @@ export default function AdminEditDia() {
             theme: formData.theme,
             pastor: formData.pastor,
             church: formData.church,
+            verse: formData.verse,
+            verseReference: formData.verseReference,
             content: {
                 ...days.find(d => d.dayNumber === parseInt(dayNumber!))?.content,
                 videoUrl: formData.videoUrl,
@@ -162,44 +161,11 @@ export default function AdminEditDia() {
         setExpandedField(null);
     };
 
-    const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const fileSizeInMB = file.size / (1024 * 1024);
-        if (fileSizeInMB > 50) {
-            toast.error("O vídeo deve ter no máximo 50MB");
-            return;
-        }
-
-        setIsUploading(true);
-
-        try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${dayNumber}_pastor_video_${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
-
-            const { error } = await supabase.storage
-                .from('videos')
-                .upload(filePath, file, {
-                    cacheControl: '3600',
-                    upsert: true
-                });
-
-            if (error) throw error;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('videos')
-                .getPublicUrl(filePath);
-
-            setFormData({ ...formData, pastorVideoUrl: publicUrl });
-            toast.success("Vídeo enviado com sucesso!");
-        } catch (error: any) {
-            console.error("Erro no upload:", error);
-            toast.error("Erro ao enviar o vídeo: " + error.message);
-        } finally {
-            setIsUploading(false);
-        }
+    const isDirectVideo = (url: string) => {
+        if (!url) return false;
+        return url.match(/\.(mp4|webm|ogg|mov)$/) !== null ||
+            url.includes('vercel-storage.com') ||
+            url.includes('.supabase.co/storage');
     };
 
     return (
@@ -281,6 +247,29 @@ export default function AdminEditDia() {
                                         />
                                     </div>
                                 </div>
+
+                                <div className="space-y-2 pt-2 border-t border-border/50">
+                                    <label className="text-sm font-semibold flex items-center gap-2">
+                                        <Quote className="w-4 h-4" /> Versículo Chave (Texto)
+                                    </label>
+                                    <textarea
+                                        value={formData.verse}
+                                        onChange={(e) => setFormData({ ...formData, verse: e.target.value })}
+                                        placeholder="Digite o texto do versículo..."
+                                        className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-primary outline-none transition-all resize-none h-24"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold">Referência Bíblica</label>
+                                    <input
+                                        type="text"
+                                        value={formData.verseReference}
+                                        onChange={(e) => setFormData({ ...formData, verseReference: e.target.value })}
+                                        placeholder="ex: Provérbios 3:5-6"
+                                        className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-primary outline-none transition-all"
+                                    />
+                                </div>
                             </Card>
 
 
@@ -289,101 +278,54 @@ export default function AdminEditDia() {
                                     <Video className="w-5 h-5 text-red-500" /> Vídeos (YouTube URLs)
                                 </h2>
 
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold">Vídeo do Culto (YouTube)</label>
-                                    <input
-                                        type="text"
-                                        value={formData.videoUrl}
-                                        onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                                        placeholder="https://www.youtube.com/watch?v=..."
-                                        className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-red-500 outline-none transition-all"
-                                    />
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold">Vídeo do Culto (YouTube ou MP4 direto)</label>
+                                        <input
+                                            type="text"
+                                            value={formData.videoUrl}
+                                            onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                                            placeholder="https://... ou .mp4"
+                                            className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-red-500 outline-none transition-all"
+                                        />
+                                    </div>
+                                    {formData.videoUrl && (
+                                        <div className="rounded-xl overflow-hidden border-2 border-border aspect-video bg-black">
+                                            {isDirectVideo(formData.videoUrl) ? (
+                                                <video src={formData.videoUrl} className="w-full h-full object-contain" controls />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs p-4 text-center">
+                                                    Player do YouTube será usado na exibição.
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
-                                {formData.pastorVideoUrl && (
-                                    <div className="mt-4 rounded-xl overflow-hidden border-2 border-border aspect-video bg-black">
-                                        {formData.pastorVideoUrl.includes('supabase') || formData.pastorVideoUrl.match(/\.(mp4|webm|mov|ogg)$/) ? (
-                                            <video
-                                                src={formData.pastorVideoUrl}
-                                                className="w-full h-full object-contain"
-                                                controls
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs p-4 text-center">
-                                                Link externo detectado. O player nativo suporta apenas arquivos hospedados ou diretos.
-                                            </div>
-                                        )}
+
+
+                                <div className="space-y-4 pt-4 border-t border-border/50">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold">Vídeo Próximo Dia (Pastor - YouTube ou MP4 direto)</label>
+                                        <input
+                                            type="text"
+                                            value={formData.pastorVideoUrl}
+                                            onChange={(e) => setFormData({ ...formData, pastorVideoUrl: e.target.value })}
+                                            placeholder="https://... ou .mp4"
+                                            className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2 focus:border-primary outline-none transition-all"
+                                        />
                                     </div>
-                                )}
-
-                                <div className="space-y-4">
-                                    <label className="text-sm font-semibold block">Vídeo Próximo Dia (Pastor)</label>
-
-                                    <div className="space-y-4 bg-muted/20 p-4 rounded-xl border border-border">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Link Direto (Opcional)</label>
-                                            <input
-                                                type="text"
-                                                value={formData.pastorVideoUrl}
-                                                onChange={(e) => setFormData({ ...formData, pastorVideoUrl: e.target.value })}
-                                                placeholder="Cole o link aqui ou suba um arquivo abaixo..."
-                                                className="w-full bg-background border-2 border-border rounded-xl px-4 py-2 focus:border-primary outline-none transition-all text-sm"
-                                            />
+                                    {formData.pastorVideoUrl && (
+                                        <div className="rounded-xl overflow-hidden border-2 border-border aspect-video bg-black">
+                                            {isDirectVideo(formData.pastorVideoUrl) ? (
+                                                <video src={formData.pastorVideoUrl} className="w-full h-full object-contain" controls />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs p-4 text-center">
+                                                    Player do YouTube será usado na exibição.
+                                                </div>
+                                            )}
                                         </div>
-
-                                        <div className="relative flex items-center gap-4 py-1">
-                                            <div className="h-px bg-border flex-1" />
-                                            <span className="text-[10px] uppercase font-bold text-muted-foreground">OU</span>
-                                            <div className="h-px bg-border flex-1" />
-                                        </div>
-
-                                        {formData.pastorVideoUrl && !formData.pastorVideoUrl.includes('blob:') && !isUploading ? (
-                                            <div className="flex items-center gap-4 bg-primary/5 p-4 rounded-xl border-2 border-primary/20">
-                                                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                                    <FileVideo className="w-6 h-6 text-primary" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-medium text-muted-foreground truncate">Vídeo definido:</p>
-                                                    <p className="text-sm font-bold truncate">{formData.pastorVideoUrl}</p>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setFormData({ ...formData, pastorVideoUrl: "" })}
-                                                    className="p-2 hover:bg-red-500/10 text-muted-foreground hover:text-red-500 rounded-lg transition-colors"
-                                                >
-                                                    <XCircle className="w-6 h-6" />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="relative group">
-                                                <input
-                                                    type="file"
-                                                    accept="video/*"
-                                                    onChange={handleVideoUpload}
-                                                    disabled={isUploading}
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
-                                                />
-                                                <div className="border-2 border-dashed border-border group-hover:border-primary/50 group-hover:bg-primary/5 rounded-xl p-8 transition-all text-center space-y-3">
-                                                    {isUploading ? (
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-                                                            <p className="text-sm font-bold">Enviando vídeo...</p>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto">
-                                                                <Upload className="w-6 h-6 text-muted-foreground" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-sm">Clique para subir arquivo</p>
-                                                                <p className="text-xs text-muted-foreground mt-1">MP4, MOV ou WebM (Máx 50MB)</p>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
                             </Card>
 
@@ -553,61 +495,63 @@ export default function AdminEditDia() {
                         </form>
                     </motion.div>
                 </div>
-            </main>
+            </main >
 
             {/* Modal de Edição Expandida */}
             <AnimatePresence>
-                {expandedField && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="w-full max-w-2xl bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-                        >
-                            <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between bg-muted/20">
-                                <h3 className="text-lg sm:text-xl font-display font-bold flex items-center gap-2 truncate pr-2">
-                                    <Edit3 className="w-5 h-5 text-primary flex-shrink-0" />
-                                    <span className="truncate">{expandedField.title}</span>
-                                </h3>
-                                <button
-                                    onClick={() => setExpandedField(null)}
-                                    className="p-2 hover:bg-muted rounded-full transition-colors flex-shrink-0"
-                                >
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
+                {
+                    expandedField && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="w-full max-w-2xl bg-card border-2 border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                            >
+                                <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between bg-muted/20">
+                                    <h3 className="text-lg sm:text-xl font-display font-bold flex items-center gap-2 truncate pr-2">
+                                        <Edit3 className="w-5 h-5 text-primary flex-shrink-0" />
+                                        <span className="truncate">{expandedField.title}</span>
+                                    </h3>
+                                    <button
+                                        onClick={() => setExpandedField(null)}
+                                        className="p-2 hover:bg-muted rounded-full transition-colors flex-shrink-0"
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </div>
 
-                            <div className="p-4 sm:p-6 flex-1 overflow-auto">
-                                <textarea
-                                    value={expandedField.value}
-                                    onChange={(e) => setExpandedField({ ...expandedField, value: e.target.value })}
-                                    className="w-full h-full min-h-[250px] sm:min-h-[300px] bg-muted/10 border-2 border-border rounded-2xl p-4 sm:p-6 focus:border-primary outline-none transition-all text-base sm:text-lg leading-relaxed resize-none"
-                                    autoFocus
-                                    placeholder="Digite o texto aqui..."
-                                />
-                            </div>
+                                <div className="p-4 sm:p-6 flex-1 overflow-auto">
+                                    <textarea
+                                        value={expandedField.value}
+                                        onChange={(e) => setExpandedField({ ...expandedField, value: e.target.value })}
+                                        className="w-full h-full min-h-[250px] sm:min-h-[300px] bg-muted/10 border-2 border-border rounded-2xl p-4 sm:p-6 focus:border-primary outline-none transition-all text-base sm:text-lg leading-relaxed resize-none"
+                                        autoFocus
+                                        placeholder="Digite o texto aqui..."
+                                    />
+                                </div>
 
-                            <div className="p-4 sm:p-6 border-t border-border bg-muted/20 flex flex-col sm:flex-row gap-3">
-                                <Button
-                                    onClick={handleSaveExpanded}
-                                    variant="primary"
-                                    className="w-full sm:flex-1 h-12 sm:h-14 text-base sm:text-lg font-bold order-1 sm:order-1"
-                                >
-                                    Confirmar Alteração
-                                </Button>
-                                <Button
-                                    onClick={() => setExpandedField(null)}
-                                    variant="outline"
-                                    className="w-full sm:w-auto px-8 h-12 sm:h-14 order-2 sm:order-2"
-                                >
-                                    Cancelar
-                                </Button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </div>
+                                <div className="p-4 sm:p-6 border-t border-border bg-muted/20 flex flex-col sm:flex-row gap-3">
+                                    <Button
+                                        onClick={handleSaveExpanded}
+                                        variant="primary"
+                                        className="w-full sm:flex-1 h-12 sm:h-14 text-base sm:text-lg font-bold order-1 sm:order-1"
+                                    >
+                                        Confirmar Alteração
+                                    </Button>
+                                    <Button
+                                        onClick={() => setExpandedField(null)}
+                                        variant="outline"
+                                        className="w-full sm:w-auto px-8 h-12 sm:h-14 order-2 sm:order-2"
+                                    >
+                                        Cancelar
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )
+                }
+            </AnimatePresence >
+        </div >
     );
 }

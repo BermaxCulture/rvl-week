@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Lock, Eye, EyeOff, AlertTriangle, Check, X } from "lucide-react";
+import { User, Mail, Phone, Lock, Eye, EyeOff, AlertTriangle, Check, X, Church } from "lucide-react";
 import { toast } from "sonner";
 import { Logo } from "@/components/ui/Logo";
 import { Input } from "@/components/ui/InputCustom";
@@ -16,6 +16,7 @@ export default function Cadastro() {
     phone: "",
     password: "",
     confirmPassword: "",
+    isMember: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -67,10 +68,11 @@ export default function Cadastro() {
   };
 
   const handleChange = (field: string, value: string) => {
+    let finalValue = value;
     if (field === "phone") {
-      value = formatPhone(value);
+      finalValue = formatPhone(value);
     }
-    setFormData({ ...formData, [field]: value });
+    setFormData({ ...formData, [field]: finalValue });
     if (errors[field]) {
       setErrors({ ...errors, [field]: "" });
     }
@@ -131,8 +133,6 @@ export default function Cadastro() {
       const success = await register(formData);
       if (success) {
         toast.success("Conta criada com sucesso! 🚀");
-        // O useAuth já deve lidar com o login automático se o Supabase permitir
-        // O useEffect de monitoramento de isAuthenticated cuidará do redirecionamento
       }
     } catch (error: any) {
       toast.error(error.message || "Ocorreu um erro. Tente novamente.");
@@ -224,6 +224,14 @@ export default function Cadastro() {
               className="py-2.5"
             />
 
+            <div className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border-2 border-border/50 hover:border-primary/30 transition-all cursor-pointer"
+              onClick={() => setFormData({ ...formData, isMember: !formData.isMember })}>
+              <div className={`w-5 h-5 rounded flex items-center justify-center transition-all ${formData.isMember ? 'bg-primary text-primary-foreground' : 'bg-muted border-2 border-border'}`}>
+                {formData.isMember && <Check className="w-4 h-4" />}
+              </div>
+              <span className="text-sm font-semibold select-none">Sou membro da Link Church</span>
+            </div>
+
             <Button
               type="submit"
               variant="primary"
@@ -255,7 +263,7 @@ export default function Cadastro() {
           </Link>
         </div>
       </motion.div>
-      {/* Modal de Confirmação */}
+
       <AnimatePresence>
         {showConfirmModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
@@ -331,6 +339,18 @@ export default function Cadastro() {
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center">
+                        <Church className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-1">Status</p>
+                        <p className="font-bold text-foreground">
+                          {formData.isMember ? "Membro Link Church" : "Visitante"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
