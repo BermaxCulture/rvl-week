@@ -21,7 +21,24 @@ const speakerImages = [
     helvecioCoimbra,  // Dia 7
 ];
 
-const uniqueDays = mockDays;
+const uniqueDays = mockDays.reduce((acc: any[], current) => {
+    const x = acc.find(item => item.pastor === current.pastor);
+    if (!x) {
+        return acc.concat([current]);
+    } else {
+        return acc;
+    }
+}, []);
+
+// Map speaker images only for the unique pastors
+const speakerImagesMap: Record<string, any> = {
+    "Pr. Francisco Vasco": franciscoVasco,
+    "Pr. Vitor Ledo": vitorLedo,
+    "PL Rios": pedroLucasRios,
+    "Pr. Renan Amaral": renanAmaral,
+    "Pr. Lucas Urrutty": lucasUrrutty,
+    "Pr. Helvécio Neto": helvecioCoimbra
+};
 
 export function ScheduleCarousel() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -120,7 +137,7 @@ export function ScheduleCarousel() {
                                         >
                                             <div className="relative w-full h-full">
                                                 <img
-                                                    src={speakerImages[slideIndex]}
+                                                    src={speakerImagesMap[uniqueDays[slideIndex].pastor]}
                                                     alt={uniqueDays[slideIndex].pastor}
                                                     className="w-full h-full object-cover grayscale-[0.2]"
                                                 />

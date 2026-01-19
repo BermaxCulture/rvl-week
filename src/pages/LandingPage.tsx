@@ -236,7 +236,7 @@ export default function LandingPage() {
             </motion.h2>
             <motion.p
               variants={itemVariants}
-              className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed text-justify md:text-center"
             >
               Será uma semana em que viveremos juntos como igreja, com cultos todos os dias, buscando avivamento pessoal, metanoia e alinhamento como Igreja de Cristo.
               <br /><br />
@@ -506,7 +506,7 @@ export default function LandingPage() {
             >
               NÃO PERCA ESSA JORNADA
             </h2>
-            <p className="text-white/80 text-lg md:text-xl mb-10 max-w-xl mx-auto font-heading">
+            <p className="text-white/80 text-lg md:text-xl mb-10 max-w-2xl mx-auto font-heading">
               7 dias para viver uma experiência marcante e crescer na fé
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

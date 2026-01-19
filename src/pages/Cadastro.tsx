@@ -229,7 +229,7 @@ export default function Cadastro() {
               <div className={`w-5 h-5 rounded flex items-center justify-center transition-all ${formData.isMember ? 'bg-primary text-primary-foreground' : 'bg-muted border-2 border-border'}`}>
                 {formData.isMember && <Check className="w-4 h-4" />}
               </div>
-              <span className="text-sm font-semibold select-none">Sou membro da Link Church</span>
+              <span className="text-sm font-semibold select-none">Sou membro na Link Church</span>
             </div>
 
             <Button
@@ -348,7 +348,7 @@ export default function Cadastro() {
                       <div>
                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-1">Status</p>
                         <p className="font-bold text-foreground">
-                          {formData.isMember ? "Membro Link Church" : "Visitante"}
+                          {formData.isMember ? "Membro na Link Church" : "Visitante"}
                         </p>
                       </div>
                     </div>
