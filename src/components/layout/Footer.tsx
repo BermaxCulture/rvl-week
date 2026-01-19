@@ -10,7 +10,7 @@ export const Footer = () => {
                     transition={{ delay: 0.5 }}
                     className="text-sm text-muted-foreground font-medium flex items-center justify-center gap-1.5"
                 >
-                    Desenvolvido por <span className="text-foreground font-bold hover:text-primary transition-colors cursor-default">Bermax Culture</span>
+                    Desenvolvido por <a href="https://www.bermaxculture.com.br/" target="_blank" rel="noopener noreferrer" className="text-foreground font-bold hover:text-primary transition-colors">Bermax Culture</a>
                 </motion.p>
                 <p className="text-[10px] text-muted-foreground/50 mt-2 uppercase tracking-widest font-bold">
                     Revival Week 2026 • Link Church
