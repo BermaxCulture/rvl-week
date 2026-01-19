@@ -15,6 +15,8 @@ import {
   ArrowRight,
   Calendar,
   Sparkles,
+  Store,
+  Coffee,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/ButtonCustom";
@@ -105,7 +107,7 @@ export default function LandingPage() {
               transition={{ delay: 0.5 }}
               className="text-xl md:text-2xl text-white/90 font-heading font-medium mb-8 max-w-2xl mx-auto"
             >
-              Uma semana de adoração, intercessão e direção
+              Sete dias de avivamento, entrega, adoração e direção!
             </motion.p>
 
 
@@ -114,15 +116,28 @@ export default function LandingPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7 }}
-              className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 text-lg text-white/90 font-heading font-semibold mb-10"
+              className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-8 text-white/90 font-heading font-semibold mb-10"
             >
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-accent" />
-                <span>19 a 25 de Janeiro | 19h30</span>
+              <div className="flex items-center gap-3 text-base md:text-lg">
+                <Calendar className="w-5 h-5 text-accent shrink-0" />
+                <span>19 a 25 de janeiro</span>
               </div>
-              <div className="hidden md:block w-px h-6 bg-white/20" />
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-accent" />
+
+              <div className="hidden lg:block w-px h-6 bg-white/20" />
+
+              <div className="flex items-start lg:items-center gap-3 text-base md:text-lg text-left lg:text-left">
+                <Clock className="w-5 h-5 text-accent shrink-0 mt-1 lg:mt-0" />
+                <span className="leading-tight">
+                  Segunda a sexta 19h30<br className="sm:hidden" />
+                  <span className="hidden sm:inline"> | </span>
+                  Domingo 10h, 17h e 19h
+                </span>
+              </div>
+
+              <div className="hidden lg:block w-px h-6 bg-white/20" />
+
+              <div className="flex items-center gap-3 text-base md:text-lg">
+                <MapPin className="w-5 h-5 text-accent shrink-0" />
                 <span>Link Church, Belém/PA</span>
               </div>
             </motion.div>
@@ -223,9 +238,9 @@ export default function LandingPage() {
               variants={itemVariants}
               className="text-lg text-white/80 max-w-3xl mx-auto leading-relaxed"
             >
-              Uma semana especial de busca e comunhão com Deus, em que iremos adorar,
-              interceder e receber direção por meio da Palavra. Cada dia é uma
-              oportunidade de crescimento espiritual.
+              Será uma semana em que viveremos juntos como igreja, com cultos todos os dias, buscando avivamento pessoal, metanoia e alinhamento como Igreja de Cristo.
+              <br /><br />
+              No ano da bondade de Deus, escolhemos confiar e entregar todos os nossos planos a Ele, caminhando em obediência e rendição àquilo que Deus já determinou para nós, tanto individualmente quanto como igreja.
             </motion.p>
           </motion.div>
 
@@ -238,21 +253,21 @@ export default function LandingPage() {
           >
             {[
               {
-                icon: Flame,
-                title: "Adoração Intensa",
-                description: "Ambiente preparado, tempo prolongado e intencional de louvor",
+                icon: Heart,
+                title: "Entrega diária",
+                description: "Decidir todos os dias confiar e entregar o controle a Deus.",
                 gradient: "from-[#5b00a3] to-[#fcd95b]",
               },
               {
-                icon: Heart,
-                title: "Intercessão Dirigida",
-                description: "Pautas específicas para igreja, famílias e cidade",
+                icon: Flame,
+                title: "Busca pela Presença",
+                description: "Priorizar estar com Deus acima de qualquer outra coisa.",
                 gradient: "from-[#fcd95b] to-[#5b00a3]",
               },
               {
-                icon: BookOpen,
-                title: "Palavra de Direção",
-                description: "Baseada em Provérbios para sabedoria e discernimento",
+                icon: Sparkles,
+                title: "Liberação de destino",
+                description: "Permitir que o que Deus já determinou se manifeste.",
                 gradient: "from-purple-600 to-purple-400",
               },
             ].map((item, index) => (
@@ -313,8 +328,8 @@ export default function LandingPage() {
               {
                 icon: Calendar,
                 step: "1",
-                title: "Participe dos cultos",
-                description: "Venha aos cultos noturnos às 19h30",
+                title: "Esteja com a gente!",
+                description: "Teremos cultos todos os dias no prédio da igreja nesse período",
               },
               {
                 icon: QrCode,
@@ -331,8 +346,8 @@ export default function LandingPage() {
               {
                 icon: Trophy,
                 step: "4",
-                title: "Acumule conquistas",
-                description: "Complete a jornada e seja premiado",
+                title: "Exercite a disciplina",
+                description: "Seja constante durante todos os dias nos cultos e jejum e seja transformado nesse período",
               },
             ].map((item, index) => (
               <motion.div
@@ -426,12 +441,14 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto"
           >
             {[
-              { icon: Clock, label: "Horário", value: "19h30" },
+              { icon: Clock, label: "Horário", value: "Seg-Sex 19h30 | Dom 10h, 17h, 19h" },
               { icon: MapPin, label: "Local", value: "Link Church, Belém/PA" },
               { icon: Baby, label: "Link Kids", value: "Disponível" },
+              { icon: Store, label: "Link Store", value: "Disponível" },
+              { icon: Coffee, label: "Link Coffee", value: "Disponível" },
             ].map((item, index) => (
               <motion.div
                 key={index}
@@ -490,7 +507,7 @@ export default function LandingPage() {
               NÃO PERCA ESSA JORNADA
             </h2>
             <p className="text-white/80 text-lg md:text-xl mb-10 max-w-xl mx-auto font-heading">
-              6 dias para viver uma experiência marcante e crescer na fé
+              7 dias para viver uma experiência marcante e crescer na fé
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {isAuthenticated ? (

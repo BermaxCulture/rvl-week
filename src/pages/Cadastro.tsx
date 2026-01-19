@@ -290,31 +290,31 @@ export default function Cadastro() {
               <div className="space-y-4 mb-8">
                 <div className="bg-muted/30 p-4 rounded-2xl border border-border/50">
                   <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
                         <User className="w-4 h-4 text-primary" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-1">Nome</p>
-                        <p className="font-bold text-foreground">{formData.name}</p>
+                        <p className="font-bold text-foreground break-words">{formData.name}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
                         <Mail className="w-4 h-4 text-primary" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-1">Email</p>
-                        <p className="font-bold text-foreground">{formData.email}</p>
+                        <p className="font-bold text-foreground break-all">{formData.email}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
                         <Phone className="w-4 h-4 text-primary" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider leading-none mb-1">Telefone</p>
                         <p className="font-bold text-foreground">{formData.phone}</p>
                       </div>
