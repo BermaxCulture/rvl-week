@@ -19,7 +19,8 @@ import {
     Shield,
     AlertCircle,
     Eye,
-    EyeOff
+    EyeOff,
+    Church
 } from "lucide-react";
 import { toast } from "sonner";
 import { Header } from "@/components/layout/Header";
@@ -219,17 +220,33 @@ export default function Perfil() {
                                 </div>
 
                                 <h2 className="text-xl font-display font-bold">{user.name}</h2>
-                                <p className="text-sm text-muted-foreground mb-6">{user.email}</p>
+                                <p className="text-sm text-muted-foreground mb-4">{user.email}</p>
+
+                                {user.role === 'usuario' && (
+                                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-6 ${user.isMember ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                        <Church className="w-3 h-3" /> {user.isMember ? 'Membro na Link Church' : 'Visitante na Link Church'}
+                                    </div>
+                                )}
 
                                 {user.role === 'admin' && (
-                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-6">
-                                        <Shield className="w-3 h-3" /> Administrador
+                                    <div className="flex flex-col items-center gap-2 mb-6">
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider w-fit">
+                                            <Shield className="w-3 h-3" /> Administrador
+                                        </div>
+                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit ${user.isMember ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                            <Church className="w-3 h-3" /> {user.isMember ? 'Membro na Link Church' : 'Visitante na Link Church'}
+                                        </div>
                                     </div>
                                 )}
 
                                 {user.role === 'pastor' && (
-                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-bold uppercase tracking-wider mb-6">
-                                        <Shield className="w-3 h-3" /> Pastor
+                                    <div className="flex flex-col items-center gap-2 mb-6">
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary rounded-full text-xs font-bold uppercase tracking-wider w-fit">
+                                            <Shield className="w-3 h-3" /> Pastor
+                                        </div>
+                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit ${user.isMember ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                            <Church className="w-3 h-3" /> {user.isMember ? 'Membro na Link Church' : 'Visitante na Link Church'}
+                                        </div>
                                     </div>
                                 )}
 

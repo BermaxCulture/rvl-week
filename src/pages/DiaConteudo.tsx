@@ -16,7 +16,8 @@ import {
   Sparkles,
   Save,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Quote
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -49,7 +50,15 @@ export default function DiaConteudo() {
     if (!url) return "";
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : url;
+    return (match && match[2].length === 11) ? match[2] : ""; // Return empty if not YouTube
+  };
+
+  const isDirectVideo = (url: string) => {
+    if (!url) return false;
+    // Check for mp4, webm, etc OR Vercel Blob URLs OR Supabase storage URLs
+    return url.match(/\.(mp4|webm|ogg|mov)$/) !== null ||
+      url.includes('vercel-storage.com') ||
+      url.includes('.supabase.co/storage');
   };
 
   const dayNum = parseInt(dayNumber || "1");
@@ -236,6 +245,18 @@ export default function DiaConteudo() {
                 <p className="text-sm text-foreground/70">{day.church}</p>
               )}
 
+              {day.verse && (
+                <div className="mt-6 max-w-xl mx-auto bg-primary/5 border border-primary/20 rounded-2xl p-3 md:p-4 backdrop-blur-sm">
+                  <Quote className="w-5 h-5 text-primary/40 mx-auto mb-2" />
+                  <p className="font-serif italic text-base md:text-lg text-foreground/90 leading-relaxed mb-2">
+                    "{day.verse}"
+                  </p>
+                  <p className="text-[10px] font-medium text-primary uppercase tracking-widest">
+                    {day.verseReference}
+                  </p>
+                </div>
+              )}
+
               <div className="mb-4" />
             </div>
           </motion.div>
@@ -352,14 +373,24 @@ export default function DiaConteudo() {
                     <p className="text-muted-foreground">Preparando player...</p>
                   </div>
                 ) : (day.activities.videoWatched || showMainVideo) ? (
-                  <iframe
-                    className="w-full h-full"
-                    src={`https://www.youtube.com/embed/${getYouTubeId(day.content.videoUrl)}${showMainVideo ? '?autoplay=1' : ''}`}
-                    title="YouTube video player"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  ></iframe>
+                  isDirectVideo(day.content.videoUrl) ? (
+                    <video
+                      className="w-full h-full object-contain bg-black"
+                      src={day.content.videoUrl}
+                      controls
+                      autoPlay={showMainVideo}
+                      playsInline
+                    />
+                  ) : (
+                    <iframe
+                      className="w-full h-full"
+                      src={`https://www.youtube.com/embed/${getYouTubeId(day.content.videoUrl)}${showMainVideo ? '?autoplay=1' : ''}`}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
+                  )
                 ) : (
                   <button
                     onClick={() => handleWatchVideo("main")}
@@ -413,8 +444,7 @@ export default function DiaConteudo() {
                     <p className="text-muted-foreground">Preparando player...</p>
                   </div>
                 ) : (day.activities.pastorVideoWatched || showPastorVideo) ? (
-                  // Check if it's a direct video link (Supabase Storage) or YouTube
-                  day.content.pastorVideoUrl.match(/\.(mp4|webm|ogg|mov)$|^https:\/\/.*\.supabase\..*\/storage\/v1\/object\/public\//) ? (
+                  isDirectVideo(day.content.pastorVideoUrl) ? (
                     <video
                       className="w-full h-full object-contain bg-black"
                       src={day.content.pastorVideoUrl}

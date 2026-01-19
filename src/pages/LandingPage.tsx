@@ -118,7 +118,7 @@ export default function LandingPage() {
             >
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-accent" />
-                <span>19 a 24 de Janeiro | 19h30</span>
+                <span>19 a 25 de Janeiro | 19h30</span>
               </div>
               <div className="hidden md:block w-px h-6 bg-white/20" />
               <div className="flex items-center gap-3">

@@ -14,7 +14,7 @@ export const authService = {
 
         const { data: profile } = await supabase
             .from('profiles')
-            .select('full_name, role, phone_number, image_url')
+            .select('full_name, role, phone_number, image_url, is_member')
             .eq('id', data.user.id)
             .single();
 
@@ -29,6 +29,7 @@ export const authService = {
             achievements: [],
             role: (profile?.role as any) || 'usuario',
             createdAt: data.user.created_at,
+            isMember: profile?.is_member || false,
         };
 
         return { user, error: null };
@@ -42,6 +43,7 @@ export const authService = {
                 data: {
                     name: data.name,
                     phone: data.phone,
+                    isMember: data.isMember,
                 }
             }
         });
@@ -62,7 +64,7 @@ export const authService = {
 
         const { data: profile } = await supabase
             .from('profiles')
-            .select('role, full_name, phone_number, image_url')
+            .select('role, full_name, phone_number, image_url, is_member')
             .eq('id', session.user.id)
             .single();
 
@@ -77,6 +79,7 @@ export const authService = {
             achievements: [],
             role: (profile?.role as any) || 'usuario',
             createdAt: session.user.created_at,
+            isMember: profile?.is_member || false,
         };
 
         return user;
