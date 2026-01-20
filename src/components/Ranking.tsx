@@ -22,6 +22,7 @@ interface UserDetail {
     title: string
     completed: boolean
     points_earned: number
+    data_real: string
 }
 
 interface UserRank {
@@ -407,29 +408,63 @@ export default function Ranking() {
                                         </div>
                                     ) : (
                                         <div className="grid gap-3 text-left">
-                                            {userDetails.map((day) => (
-                                                <div
-                                                    key={day.day_number}
-                                                    className={`
-                                                        flex items-center gap-4 p-4 rounded-2xl border-2 transition-all
-                                                        ${day.completed ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/10 opacity-60"}
-                                                    `}
-                                                >
-                                                    <div className={`
-                                                        w-10 h-10 rounded-xl flex items-center justify-center font-display font-black
-                                                        ${day.completed ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}
-                                                    `}>
-                                                        {day.day_number}
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-sm leading-tight">{day.title}</h4>
-                                                        <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
-                                                            {day.completed ? `+${day.points_earned} PTS` : "Não concluído"}
-                                                        </p>
-                                                    </div>
-                                                    {day.completed && <CheckCircle2 className="w-6 h-6 text-green-500" />}
-                                                </div>
-                                            ))}
+                                            {userDetails
+                                                .filter((day) => {
+                                                    const now = new Date();
+                                                    const isCompleted = day.completed;
+                                                    const dateStr = day.data_real.toString().split('T')[0];
+                                                    // Início do dia (00:00) para saber se o dia já "existe" na jornada
+                                                    const dayStart = new Date(`${dateStr}T00:00:00-03:00`);
+
+                                                    // Se já completou, sempre mostra. Se o dia já começou, mostra.
+                                                    return isCompleted || now >= dayStart;
+                                                })
+                                                .map((day) => {
+                                                    const now = new Date();
+                                                    const isCompleted = day.completed || (Number(day.points_earned) >= 200);
+                                                    const dateStr = day.data_real.toString().split('T')[0];
+                                                    const unlockTime = day.day_number === 7 ? '10:00:00' : '19:30:00';
+                                                    const unlockDate = new Date(`${dateStr}T${unlockTime}-03:00`);
+
+                                                    const isRevealed = now >= unlockDate || isCompleted;
+                                                    const displayTitle = isRevealed ? day.title : "CONTEÚDO PRIVADO";
+
+                                                    return (
+                                                        <div
+                                                            key={day.day_number}
+                                                            className={`
+                                                                flex items-center gap-4 p-4 rounded-2xl border-2 transition-all
+                                                                ${isCompleted
+                                                                    ? "bg-green-500/20 border-green-500/60 shadow-[0_0_20px_rgba(34,197,94,0.2)] scale-[1.02]"
+                                                                    : isRevealed
+                                                                        ? "bg-red-500/5 border-red-500/10 opacity-60"
+                                                                        : "bg-muted/10 border-border/20 grayscale opacity-40"}
+                                                            `}
+                                                        >
+                                                            <div className={`
+                                                                w-10 h-10 rounded-xl flex items-center justify-center font-display font-black
+                                                                ${isCompleted ? "bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.6)]" : "bg-muted text-muted-foreground"}
+                                                            `}>
+                                                                {day.day_number}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <h4 className={`font-bold text-sm leading-tight ${isCompleted ? "text-green-400" : ""}`}>{displayTitle}</h4>
+                                                                <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
+                                                                    {isCompleted ? `+${day.points_earned} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                </p>
+                                                            </div>
+                                                            {isCompleted ? (
+                                                                <div className="bg-green-500 rounded-full p-1 shadow-[0_0_15px_rgba(34,197,94,0.6)]">
+                                                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                                                </div>
+                                                            ) : !isRevealed && (
+                                                                <div className="w-6 h-6 border-2 border-border/30 rounded-full flex items-center justify-center opacity-30">
+                                                                    <div className="w-1.5 h-1.5 bg-border/50 rounded-full" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                         </div>
                                     )}
                                 </div>

@@ -319,7 +319,7 @@ export const useStore = create<StoreState>()(
 
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
-          50 + // Points for pastor video
+          (day.activities.pastorVideoWatched ? 50 : 0) +
           newQuizPoints;
 
         console.log(`📝 Completando quiz: Dia ${dayNumber}, Score ${score}/${totalQuestions}, Points ${newQuizPoints}, Total ${totalPoints}`);
@@ -361,7 +361,7 @@ export const useStore = create<StoreState>()(
 
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
-          50 + // Pastor video
+          (day.activities.pastorVideoWatched ? 50 : 0) +
           Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50);
 
         const { error } = await supabase
@@ -401,15 +401,15 @@ export const useStore = create<StoreState>()(
               break;
             case "conhecedor_palavra":
               progress = perfectQuizCount;
-              unlocked = perfectQuizCount >= 3; // Ajustado para 3 para teste mais fácil, ou manter 7
+              unlocked = perfectQuizCount >= 7;
               break;
             case "sempre_presente":
               progress = qrScannedCount;
-              unlocked = qrScannedCount >= 1; // Ajustado para 1 para teste
+              unlocked = qrScannedCount >= 7;
               break;
             case "comprometido":
               progress = completedDaysCount;
-              unlocked = completedDaysCount >= 3; // Ajustado para 3
+              unlocked = completedDaysCount >= 4;
               break;
           }
 
