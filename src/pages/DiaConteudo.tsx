@@ -90,11 +90,7 @@ export default function DiaConteudo() {
 
   const handleWatchVideo = async (type: "main" | "pastor") => {
     const activityKey = type === "main" ? "videoWatched" : "pastorVideoWatched";
-
-    if (day.activities[activityKey]) {
-      toast.info("Você já assistiu este vídeo");
-      return;
-    }
+    const alreadyWatched = day.activities[activityKey];
 
     if (type === "main") {
       setIsLoadingVideo(true);
@@ -107,20 +103,24 @@ export default function DiaConteudo() {
     // Simular carregamento do vídeo
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    if (!isPreview) {
+    if (!isPreview && !alreadyWatched) {
       markVideoWatched(dayNum, type);
     }
 
     if (type === "main") {
       setIsLoadingVideo(false);
-      toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +30 pts", {
-        icon: <Zap className="w-5 h-5 text-secondary fill-secondary" />
-      });
+      if (!alreadyWatched) {
+        toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +30 pts", {
+          icon: <Zap className="w-5 h-5 text-secondary fill-secondary" />
+        });
+      }
     } else {
       setIsLoadingPastorVideo(false);
-      toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +50 pts", {
-        icon: <Zap className="w-5 h-5 text-primary fill-primary" />
-      });
+      if (!alreadyWatched) {
+        toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +50 pts", {
+          icon: <Zap className="w-5 h-5 text-primary fill-primary" />
+        });
+      }
     }
   };
 
@@ -372,7 +372,7 @@ export default function DiaConteudo() {
                     <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                     <p className="text-muted-foreground">Preparando player...</p>
                   </div>
-                ) : (day.activities.pastorVideoWatched || showPastorVideo) ? (
+                ) : (showPastorVideo) ? (
                   isDirectVideo(day.content.pastorVideoUrl) ? (
                     <video
                       className="w-full h-full object-contain bg-black"
@@ -544,7 +544,7 @@ export default function DiaConteudo() {
                     fullWidth
                   >
                     {allComplete ? (
-                      <>✓ MARCAR DIA COMO CONCLUÍDO (+50 pts)</>
+                      <>✓ MARCAR DIA COMO CONCLUÍDO</>
                     ) : (
                       "Complete todas as atividades"
                     )}

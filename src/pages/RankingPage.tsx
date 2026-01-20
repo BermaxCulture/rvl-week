@@ -74,8 +74,7 @@ export default function RankingPage() {
                 .not('role', 'eq', 'admin')
                 .not('role', 'eq', 'pastor')
                 .order('total_points', { ascending: false })
-                .order('full_name', { ascending: true })
-                .limit(100);
+                .order('full_name', { ascending: true });
 
             if (error) throw error;
 

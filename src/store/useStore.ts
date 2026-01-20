@@ -317,12 +317,10 @@ export const useStore = create<StoreState>()(
         const totalQuestions = day.content.quiz.length || 1;
         const newQuizPoints = Math.floor((score / totalQuestions) * 50);
 
-        // Recalculate total points
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
-          50 + // Points for pastor video (now always 50)
-          newQuizPoints +
-          (day.status === 'completed' ? 50 : 0);
+          50 + // Points for pastor video
+          newQuizPoints;
 
         console.log(`📝 Completando quiz: Dia ${dayNumber}, Score ${score}/${totalQuestions}, Points ${newQuizPoints}, Total ${totalPoints}`);
 
@@ -364,8 +362,7 @@ export const useStore = create<StoreState>()(
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
           50 + // Pastor video
-          Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50) +
-          50; // Completion points
+          Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50);
 
         const { error } = await supabase
           .from('progresso_usuario')
