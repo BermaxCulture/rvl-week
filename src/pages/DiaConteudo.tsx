@@ -207,7 +207,7 @@ export default function DiaConteudo() {
                 <span className="font-medium">Voltar</span>
               </Link>
 
-              {(user?.role === 'admin' || user?.role === 'pastor') && (
+              {(user?.role === 'admin') && (
                 <Link
                   to={`/jornada/dia/${dayNumber}/editar`}
                   className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full hover:bg-primary/20 transition-all font-bold text-sm shadow-sm border border-primary/20"
@@ -261,7 +261,7 @@ export default function DiaConteudo() {
           </motion.div>
 
           {/* Admin QR Code Info */}
-          {(user.role === "admin" || user.role === "pastor") && (
+          {(user.role === "admin") && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}

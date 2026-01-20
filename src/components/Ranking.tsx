@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { Trophy, Medal, Award, Zap, ArrowRight, X, Calendar, Target, CheckCircle2, User } from 'lucide-react'
+import { Trophy, Medal, Award, Zap, ArrowRight, X, Calendar, Target, CheckCircle2, User, Church } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/ButtonCustom'
 import { mockAchievements } from '@/mocks/days.mock'
@@ -14,6 +14,7 @@ interface RankingUser {
     total_points: number
     completed_days: number
     achievements: string[]
+    is_member: boolean
     position: number
 }
 
@@ -57,7 +58,7 @@ export default function Ranking() {
             // Busca direta na tabela profiles excluindo admin e pastor para o Top 3
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, full_name, email, image_url, total_points, completed_days, achievements, role')
+                .select('id, full_name, email, image_url, total_points, completed_days, achievements, role, is_member')
                 .not('role', 'eq', 'admin')
                 .not('role', 'eq', 'pastor')
                 .order('total_points', { ascending: false })
@@ -75,6 +76,7 @@ export default function Ranking() {
                 total_points: u.total_points || 0,
                 completed_days: u.completed_days || 0,
                 achievements: u.achievements || [],
+                is_member: u.is_member || false,
                 position: index + 1
             }));
 
@@ -365,6 +367,10 @@ export default function Ranking() {
                                             <div className="bg-primary/10 text-primary px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Calendar className="w-4 h-4" />
                                                 {selectedUser.completed_days}/7 DIAS
+                                            </div>
+                                            <div className="bg-muted text-muted-foreground px-4 py-1 rounded-full flex items-center gap-2 font-black italic uppercase text-[10px] tracking-widest border border-border/50">
+                                                <Church className="w-3.5 h-3.5" />
+                                                {selectedUser.is_member ? "Membro" : "Visitante"}
                                             </div>
                                         </div>
                                     </div>

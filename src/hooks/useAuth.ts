@@ -101,6 +101,7 @@ export const useAuth = create<AuthState>()(
                         full_name: updateData.name,
                         phone_number: updateData.phone,
                         image_url: updateData.imageUrl,
+                        is_member: updateData.isMember,
                     })
                     .eq('id', user.id)
 

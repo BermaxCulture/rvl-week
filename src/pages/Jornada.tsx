@@ -69,8 +69,8 @@ export default function Jornada() {
   };
 
   const userRole = (user?.role || 'usuario').toLowerCase();
-  const isElevated = userRole !== 'usuario' && userRole !== 'usuário';
   const isAdmin = userRole === 'admin';
+  const isElevated = isAdmin;
 
   return (
     <div className="min-h-screen bg-background">
