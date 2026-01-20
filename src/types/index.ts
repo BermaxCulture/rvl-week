@@ -47,6 +47,7 @@ export interface DayActivities {
 }
 
 export interface Day {
+  id: string;
   dayNumber: number;
   date: string;
   pastor: string;

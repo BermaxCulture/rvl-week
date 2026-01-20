@@ -110,7 +110,7 @@ export default function Jornada() {
 
                 <div className="flex items-center gap-3 mb-6">
                   <span className="inline-flex items-center gap-2 px-6 py-2 bg-white/10 backdrop-blur-md rounded-full font-display font-bold text-xl text-accent">
-                    <Zap className="w-5 h-5 fill-accent" /> {user.totalPoints} pontos
+                    <Zap className="w-5 h-5 fill-accent" /> {Number(user.totalPoints).toFixed(2)} pontos
                   </span>
                 </div>
 

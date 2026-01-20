@@ -256,7 +256,7 @@ export default function Ranking() {
                                 <div className="flex items-center gap-1 justify-end">
                                     <Zap className="text-yellow-500 fill-yellow-500" size={16} />
                                     <p className="text-xl font-black text-yellow-500">
-                                        {user.total_points}
+                                        {user.total_points.toFixed(2)}
                                     </p>
                                 </div>
                                 <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">
@@ -302,7 +302,7 @@ export default function Ranking() {
                     <div className="flex items-center gap-8">
                         <div className="text-center">
                             <p className="text-2xl font-black text-yellow-500 flex items-center gap-2">
-                                <Zap className="w-5 h-5 fill-yellow-500" /> {userRank.user_total_points}
+                                <Zap className="w-5 h-5 fill-yellow-500" /> {userRank.user_total_points.toFixed(2)}
                             </p>
                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1">PONTOS</p>
                         </div>
@@ -360,7 +360,7 @@ export default function Ranking() {
                                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                             <div className="bg-yellow-500/10 text-yellow-500 px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Zap className="w-4 h-4 fill-yellow-500" />
-                                                {selectedUser.total_points} PTS
+                                                {selectedUser.total_points.toFixed(2)} PTS
                                             </div>
                                             <div className="bg-primary/10 text-primary px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Calendar className="w-4 h-4" />
@@ -450,7 +450,7 @@ export default function Ranking() {
                                                             <div className="flex-1">
                                                                 <h4 className={`font-bold text-sm leading-tight ${isCompleted ? "text-green-400" : ""}`}>{displayTitle}</h4>
                                                                 <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
-                                                                    {isCompleted ? `+${day.points_earned} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                    {isCompleted ? `+${Number(day.points_earned).toFixed(2)} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
                                                                 </p>
                                                             </div>
                                                             {isCompleted ? (
