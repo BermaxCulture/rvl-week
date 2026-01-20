@@ -34,7 +34,7 @@ export const mockDays: Day[] = [
       ],
       videoUrl: "mock-video-main-1",
       videoThumbnail: "/placeholder.svg",
-      pastorVideoUrl: "mock-video-pastor-1",
+      pastorVideoUrl: "https://youtube.com/shorts/drmdZk3KBps?feature=share",
       pastorVideoThumbnail: "/placeholder.svg",
       quiz: [
         {

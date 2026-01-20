@@ -22,6 +22,21 @@ DO $$
 DECLARE
     jornada_id UUID;
 BEGIN
+    -- DIA 1
+    INSERT INTO jornadas (dia_number, dia_label, preletor, igreja_preletor, titulo, versiculo_texto, versiculo_referencia, ensinamentos, video_url_principal, video_url_proximo_dia)
+    VALUES (1, 'DIA 1 • 2025-01-20', 'Pr. Francisco Vasco', 'Igreja Videira - BH', 'A Sabedoria que Vem de Deus', 'Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.', 'Provérbios 3:5-6', ARRAY['Confiar é escolher depender de Deus, não da nossa própria capacidade', 'A sabedoria verdadeira começa com o temor ao Senhor', 'Quando reconhecemos Deus em tudo, Ele dirige nossos caminhos'], 'https://www.youtube.com/watch?v=R-NkZJB0r3Y', 'https://youtube.com/shorts/drmdZk3KBps?feature=share')
+    ON CONFLICT (dia_number) DO UPDATE SET 
+        titulo = EXCLUDED.titulo,
+        preletor = EXCLUDED.preletor,
+        video_url_proximo_dia = EXCLUDED.video_url_proximo_dia
+    RETURNING id INTO jornada_id;
+
+    INSERT INTO perguntas_quiz (jornada_id, pergunta, alternativas, resposta_correta, explicacao)
+    VALUES 
+    (jornada_id, 'Complete: "Confia no Senhor de todo o teu..."', ARRAY['coração', 'pensamento', 'entendimento', 'espírito'], 0, 'Provérbios 3:5 nos ensina a confiar no Senhor de todo o coração.'),
+    (jornada_id, 'Segundo Provérbios 3:6, o que acontece quando reconhecemos Deus?', ARRAY['Ele nos abençoa financeiramente', 'Ele endireitará nossas veredas', 'Ele nos dá sabedoria instantânea', 'Ele afasta todo sofrimento'], 1, 'O versículo diz: "reconhece-o em todos os teus caminhos, e ele endireitará as tuas veredas."'),
+    (jornada_id, 'O que NÃO devemos fazer segundo Provérbios 3:5?', ARRAY['Confiar no Senhor', 'Estribar no próprio entendimento', 'Buscar sabedoria', 'Orar constantemente'], 1, 'O versículo alerta para não nos estribarmos no nosso próprio entendimento.');
+
     -- DIA 2
     INSERT INTO jornadas (dia_number, dia_label, preletor, igreja_preletor, titulo, versiculo_texto, versiculo_referencia, ensinamentos, video_url_principal, video_url_proximo_dia)
     VALUES (2, 'DIA 2 • 2025-01-21', 'PL Rios', 'IIR Brasil', 'Buscando a Direção de Deus', 'Reconhece-o em todos os teus caminhos, e ele endireitará as tuas veredas.', 'Provérbios 3:6', ARRAY['Reconhecer Deus é mais do que saber que Ele existe', 'Em cada decisão, busque a vontade divina', 'Deus promete endireitar nossos caminhos'], 'https://storage.example.com/videos/dia2-main.mp4', 'https://storage.example.com/videos/dia2-pastor.mp4')
