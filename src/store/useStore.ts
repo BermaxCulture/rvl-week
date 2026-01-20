@@ -87,8 +87,8 @@ export const useStore = create<StoreState>()(
               videoMain: 0,
               videoPastor: 50,
               quiz: 50,
-              completion: 50,
-              total: 250,
+              completion: 0,
+              total: 200,
               earned: p.pontos_acumulados || 0
             },
             activities: {
@@ -276,10 +276,10 @@ export const useStore = create<StoreState>()(
         // Let's use a cleaner approach: recalculate EVERYTHING
         const points = {
           qr: day.activities.qrScanned ? 100 : 0,
-          main: (type === "main" || day.activities.videoWatched) ? 0 : 0,
+          main: 0,
           pastor: (type === "pastor" || day.activities.pastorVideoWatched) ? 50 : 0,
           quiz: day.activities.quizCompleted ? Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50) : 0,
-          completion: day.status === 'completed' ? 50 : 0
+          completion: 0
         };
 
         const totalPoints = points.qr + points.main + points.pastor + points.quiz + points.completion;
