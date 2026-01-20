@@ -402,18 +402,23 @@ export default function RankingPage() {
                                         <div className="grid gap-3 text-left">
                                             {userDetails
                                                 .filter((day) => {
+                                                    if (!day.data_real) return day.completed;
                                                     const now = new Date();
                                                     const isCompleted = day.completed;
-                                                    const dateStr = day.data_real.toString().split('T')[0];
-                                                    const dayStart = new Date(`${dateStr}T00:00:00-03:00`);
+                                                    const datePart = day.data_real.toString().includes('T')
+                                                        ? day.data_real.toString().split('T')[0]
+                                                        : day.data_real.toString();
+                                                    const dayStart = new Date(`${datePart}T00:00:00-03:00`);
                                                     return isCompleted || now >= dayStart;
                                                 })
                                                 .map((day) => {
                                                     const now = new Date();
                                                     const isCompleted = day.completed || (Number(day.points_earned) >= 200);
-                                                    const dateStr = day.data_real.toString().split('T')[0];
+                                                    const datePart = day.data_real.toString().includes('T')
+                                                        ? day.data_real.toString().split('T')[0]
+                                                        : day.data_real.toString();
                                                     const unlockTime = day.day_number === 7 ? '10:00:00' : '19:30:00';
-                                                    const unlockDate = new Date(`${dateStr}T${unlockTime}-03:00`);
+                                                    const unlockDate = new Date(`${datePart}T${unlockTime}-03:00`);
 
                                                     const isRevealed = now >= unlockDate || isCompleted;
                                                     const displayTitle = isRevealed ? day.title : "CONTEÚDO PRIVADO";
