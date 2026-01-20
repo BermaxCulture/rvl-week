@@ -387,21 +387,20 @@ export default function LandingPage() {
               onClick={() => setShowVideo(true)}
             >
               {showVideo ? (
-                <video
-                  src="https://rzvtpgvrhzr0gbqt.public.blob.vercel-storage.com/Vi%CC%81deo%20Site.mp4"
-                  className="w-full h-full object-cover"
-                  controls
-                  autoPlay
+                <iframe
+                  src="https://www.youtube.com/embed/swbgKy85bwQ?autoplay=1&rel=0"
+                  className="w-full h-full border-none"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Como funciona a jornada"
                 />
               ) : (
                 <>
-                  {/* Video Frame as Thumbnail */}
-                  <video
-                    src="https://rzvtpgvrhzr0gbqt.public.blob.vercel-storage.com/Vi%CC%81deo%20Site.mp4#t=0.1"
+                  {/* Video Thumbnail from YouTube */}
+                  <img
+                    src="https://img.youtube.com/vi/swbgKy85bwQ/maxresdefault.jpg"
+                    alt="Como funciona a jornada"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    muted
-                    playsInline
-                    preload="metadata"
                   />
 
                   {/* Overlay for depth */}
