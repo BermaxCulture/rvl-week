@@ -2,6 +2,7 @@ import { Day } from "@/types";
 
 export const mockDays: Day[] = [
   {
+    id: "1",
     dayNumber: 1,
     date: "2026-01-19",
     pastor: "Pr. Francisco Vasco",
@@ -69,6 +70,7 @@ export const mockDays: Day[] = [
     },
   },
   {
+    id: "2",
     dayNumber: 2,
     date: "2026-01-20",
     pastor: "Pr. Vitor Ledo",
@@ -107,6 +109,7 @@ export const mockDays: Day[] = [
     },
   },
   {
+    id: "3",
     dayNumber: 3,
     date: "2026-01-21",
     pastor: "Pr. Francisco Vasco",
@@ -164,6 +167,7 @@ export const mockDays: Day[] = [
     },
   },
   {
+    id: "4",
     dayNumber: 4,
     date: "2026-01-22",
     pastor: "PL Rios",
@@ -221,6 +225,7 @@ export const mockDays: Day[] = [
     },
   },
   {
+    id: "5",
     dayNumber: 5,
     date: "2026-01-23",
     pastor: "Pr. Renan Amaral",
@@ -283,6 +288,7 @@ export const mockDays: Day[] = [
     },
   },
   {
+    id: "6",
     dayNumber: 6,
     date: "2026-01-24",
     pastor: "Pr. Lucas Urrutty",
@@ -340,6 +346,7 @@ export const mockDays: Day[] = [
     },
   },
   {
+    id: "7",
     dayNumber: 7,
     date: "2026-01-25",
     pastor: "Pr. Helvécio Neto",

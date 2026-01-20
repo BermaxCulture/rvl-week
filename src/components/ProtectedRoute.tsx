@@ -40,8 +40,8 @@ export const AdminRoute = ({ children }: ProtectedRouteProps) => {
         return <Navigate to="/login" state={{ from: location.pathname }} replace />
     }
 
-    // Permite acesso se for admin OU pastor
-    if (user?.role !== 'admin' && user?.role !== 'pastor') {
+    // Permite acesso apenas se for admin
+    if (user?.role !== 'admin') {
         return <Navigate to="/jornada" replace />
     }
 

@@ -12,7 +12,8 @@ import {
     CheckCircle2,
     X,
     Target,
-    User
+    User,
+    Church
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Header } from "@/components/layout/Header";
@@ -30,6 +31,7 @@ interface RankingUser {
     achievements: string[];
     position: number;
     role?: string;
+    is_member: boolean;
 }
 
 interface UserDetail {
@@ -71,7 +73,7 @@ export default function RankingPage() {
             // Busca direta na tabela profiles excluindo admin e pastor
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, full_name, email, image_url, total_points, completed_days, achievements, role')
+                .select('id, full_name, email, image_url, total_points, completed_days, achievements, role, is_member')
                 .not('role', 'eq', 'admin')
                 .not('role', 'eq', 'pastor')
                 .order('total_points', { ascending: false })
@@ -88,6 +90,7 @@ export default function RankingPage() {
                 total_points: u.total_points || 0,
                 completed_days: u.completed_days || 0,
                 achievements: u.achievements || [],
+                is_member: u.is_member || false,
                 position: index + 1,
                 role: u.role
             }));
@@ -200,7 +203,7 @@ export default function RankingPage() {
                             <div className="flex gap-6">
                                 <div className="text-right">
                                     <p className="text-xl font-black text-yellow-500 flex items-center gap-1">
-                                        <Zap className="w-4 h-4 fill-yellow-500" /> {userRank.user_total_points}
+                                        <Zap className="w-4 h-4 fill-yellow-500" /> {userRank.user_total_points.toFixed(2)}
                                     </p>
                                     <p className="text-[10px] font-black text-muted-foreground uppercase">PONTOS</p>
                                 </div>
@@ -279,7 +282,7 @@ export default function RankingPage() {
                                         <div className="flex items-center gap-2 justify-end">
                                             <Zap className="w-5 h-5 md:w-6 md:h-6 text-yellow-500 fill-yellow-500" />
                                             <span className="text-2xl md:text-3xl font-black font-display text-yellow-500">
-                                                {user.total_points}
+                                                {user.total_points.toFixed(2)}
                                             </span>
                                         </div>
                                         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">PONTOS</span>
@@ -342,11 +345,15 @@ export default function RankingPage() {
                                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                             <div className="bg-yellow-500/10 text-yellow-500 px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Zap className="w-4 h-4 fill-yellow-500" />
-                                                {selectedUser.total_points} PTS
+                                                {selectedUser.total_points.toFixed(2)} PTS
                                             </div>
                                             <div className="bg-primary/10 text-primary px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Calendar className="w-4 h-4" />
                                                 {selectedUser.completed_days}/7 DIAS
+                                            </div>
+                                            <div className="bg-muted text-muted-foreground px-4 py-1 rounded-full flex items-center gap-2 font-black italic uppercase text-[10px] tracking-widest border border-border/50">
+                                                <Church className="w-3.5 h-3.5" />
+                                                {selectedUser.is_member ? "Membro" : "Visitante"}
                                             </div>
                                         </div>
                                     </div>
@@ -432,7 +439,7 @@ export default function RankingPage() {
                                                             <div className="flex-1">
                                                                 <h4 className={`font-bold text-sm leading-tight ${isCompleted ? "text-green-400" : ""}`}>{displayTitle}</h4>
                                                                 <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
-                                                                    {isCompleted ? `+${day.points_earned} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                    {isCompleted ? `+${Number(day.points_earned).toFixed(2)} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
                                                                 </p>
                                                             </div>
                                                             {isCompleted ? (

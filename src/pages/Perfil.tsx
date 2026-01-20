@@ -30,6 +30,7 @@ import { Card } from "@/components/ui/CardCustom";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 
 export default function Perfil() {
     const { user, updateProfile } = useAuth();
@@ -43,7 +44,8 @@ export default function Perfil() {
         name: "",
         email: "",
         phone: "",
-        imageUrl: ""
+        imageUrl: "",
+        isMember: false
     });
 
     const [modalData, setModalData] = useState({
@@ -63,7 +65,8 @@ export default function Perfil() {
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
-                imageUrl: user.imageUrl || ""
+                imageUrl: user.imageUrl || "",
+                isMember: user.isMember
             });
             fetchJourneyDetails();
         }
@@ -94,7 +97,8 @@ export default function Perfil() {
         const success = await updateProfile({
             name: formData.name,
             phone: formData.phone,
-            imageUrl: formData.imageUrl
+            imageUrl: formData.imageUrl,
+            isMember: formData.isMember
         });
 
         if (success) {
@@ -315,6 +319,40 @@ export default function Perfil() {
                                                 disabled={!isEditing}
                                                 className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2.5 focus:border-primary outline-none transition-all disabled:opacity-70"
                                             />
+                                        </div>
+
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-sm font-semibold flex items-center gap-2">
+                                                <Church className="w-4 h-4 text-muted-foreground" /> Tipo de Vínculo
+                                            </label>
+                                            <div className="flex bg-muted/30 p-1.5 rounded-2xl border-2 border-border gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    disabled={!isEditing}
+                                                    onClick={() => setFormData({ ...formData, isMember: true })}
+                                                    className={cn(
+                                                        "flex-1 py-3 rounded-xl font-bold text-xs uppercase transition-all",
+                                                        formData.isMember
+                                                            ? "bg-primary text-white shadow-lg"
+                                                            : "text-muted-foreground hover:bg-white/5"
+                                                    )}
+                                                >
+                                                    Membro
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={!isEditing}
+                                                    onClick={() => setFormData({ ...formData, isMember: false })}
+                                                    className={cn(
+                                                        "flex-1 py-3 rounded-xl font-bold text-xs uppercase transition-all",
+                                                        !formData.isMember
+                                                            ? "bg-primary text-white shadow-lg"
+                                                            : "text-muted-foreground hover:bg-white/5"
+                                                    )}
+                                                >
+                                                    Visitante
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 

@@ -415,7 +415,7 @@ export default function AdminEditDia() {
 
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <label className="text-[10px] font-black uppercase text-muted-foreground">Explicação da resposta</label>
+                                                    <label className="text-[10px] font-black uppercase text-muted-foreground">Explicação da resposta (Opcional)</label>
                                                     <button
                                                         type="button"
                                                         onClick={() => setExpandedField({ title: `Explicação (Q${qIdx + 1})`, value: q.explanation, field: "explanation", qIdx })}

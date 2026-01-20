@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { Day, Achievement } from "@/types";
 import { mockDays, mockAchievements } from "@/mocks/days.mock";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { qrcodeService } from "@/services/qrcode.service";
 
@@ -74,6 +75,7 @@ export const useStore = create<StoreState>()(
         const mappedDays: Day[] = jornadas.map(j => {
           const p = progressMap[j.id] || {};
           return {
+            id: j.id,
             dayNumber: j.dia_number,
             date: j.data_real || '',
             pastor: j.preletor,
@@ -86,9 +88,9 @@ export const useStore = create<StoreState>()(
               qrcode: 100,
               videoMain: 0,
               videoPastor: 50,
-              quiz: 50,
+              quiz: 100,
               completion: 0,
-              total: 200,
+              total: 250,
               earned: p.pontos_acumulados || 0
             },
             activities: {
@@ -278,7 +280,7 @@ export const useStore = create<StoreState>()(
           qr: day.activities.qrScanned ? 100 : 0,
           main: 0,
           pastor: (type === "pastor" || day.activities.pastorVideoWatched) ? 50 : 0,
-          quiz: day.activities.quizCompleted ? Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50) : 0,
+          quiz: day.activities.quizCompleted ? day.activities.quizScore : 0,
           completion: 0
         };
 
@@ -314,15 +316,12 @@ export const useStore = create<StoreState>()(
 
         if (!journey) return;
 
-        const totalQuestions = day.content.quiz.length || 1;
-        const newQuizPoints = Math.floor((score / totalQuestions) * 50);
+        // score here is already the dynamic points calculated by QuizTimed (0-100)
+        const qrPoints = day.activities.qrScanned ? 100 : 0;
+        const pastorPoints = day.activities.pastorVideoWatched ? 50 : 0;
+        const totalPoints = qrPoints + pastorPoints + score;
 
-        const totalPoints =
-          (day.activities.qrScanned ? 100 : 0) +
-          (day.activities.pastorVideoWatched ? 50 : 0) +
-          newQuizPoints;
-
-        console.log(`📝 Completando quiz: Dia ${dayNumber}, Score ${score}/${totalQuestions}, Points ${newQuizPoints}, Total ${totalPoints}`);
+        console.log(`📝 Enviando para Supabase: Dia ${dayNumber}, QuizPts: ${score}, QR: ${qrPoints}, Pastor: ${pastorPoints}, Total: ${totalPoints}`);
 
         const { error } = await supabase
           .from('progresso_usuario')
@@ -335,12 +334,15 @@ export const useStore = create<StoreState>()(
           }, { onConflict: 'user_id,jornada_id' });
 
         if (error) {
-          console.error('❌ Erro ao completar quiz:', error);
+          console.error('❌ Erro no upsert do progresso:', error);
+          toast.error("Erro ao salvar progresso no servidor.");
           return;
         }
 
+        console.log('✅ Progresso salvo com sucesso! Atualizando estado local...');
         await get().fetchDays();
         get().checkAchievements();
+        toast.success("Progresso salvo com sucesso!");
       },
 
       markDayComplete: async (dayNumber: number) => {
@@ -362,7 +364,7 @@ export const useStore = create<StoreState>()(
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
           (day.activities.pastorVideoWatched ? 50 : 0) +
-          Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50);
+          day.activities.quizScore;
 
         const { error } = await supabase
           .from('progresso_usuario')
