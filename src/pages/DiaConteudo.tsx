@@ -48,7 +48,7 @@ export default function DiaConteudo() {
 
   const getYouTubeId = (url: string) => {
     if (!url) return "";
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : ""; // Return empty if not YouTube
   };
@@ -462,14 +462,20 @@ export default function DiaConteudo() {
                 <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
                 <h3 className="font-display font-bold text-xl mb-2">Quiz Concluído!</h3>
                 <p className="text-muted-foreground">
-                  Você acertou {day.activities.quizScore}/3 perguntas
+                  Você fez {day.activities.quizScore} de {day.content.quiz.length} acertos
                 </p>
                 <p className="text-success font-semibold mt-2">
-                  +{Math.floor((day.activities.quizScore / 3) * 50)} pts conquistados
+                  +{Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * (day.content.quizMaxPoints || 100))} pts conquistados
                 </p>
               </Card>
             ) : (
-              <Quiz questions={day.content.quiz} onComplete={handleQuizComplete} />
+              <Quiz
+                questions={day.content.quiz}
+                timeLimit={day.content.quizTimeLimit}
+                penaltyTime={day.content.quizPenaltyTime}
+                maxPoints={day.content.quizMaxPoints}
+                onComplete={handleQuizComplete}
+              />
             )}
           </motion.section>
 

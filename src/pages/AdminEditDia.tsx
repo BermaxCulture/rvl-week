@@ -65,7 +65,10 @@ export default function AdminEditDia() {
                 videoUrl: day.content.videoUrl,
                 pastorVideoUrl: day.content.pastorVideoUrl,
                 mainPoints: day.content.mainPoints || ["", "", ""],
-                quiz: day.content.quiz || []
+                quiz: day.content.quiz || [],
+                quizTimeLimit: day.content.quizTimeLimit || 60,
+                quizPenaltyTime: day.content.quizPenaltyTime || 30,
+                quizMaxPoints: day.content.quizMaxPoints || 100
             });
         }
     }, [dayNumber, days, user, navigate]);
@@ -88,7 +91,10 @@ export default function AdminEditDia() {
                 videoUrl: formData.videoUrl,
                 pastorVideoUrl: formData.pastorVideoUrl,
                 mainPoints: formData.mainPoints,
-                quiz: formData.quiz
+                quiz: formData.quiz,
+                quizTimeLimit: formData.quizTimeLimit,
+                quizPenaltyTime: formData.quizPenaltyTime,
+                quizMaxPoints: formData.quizMaxPoints
             }
         });
 
@@ -354,6 +360,59 @@ export default function AdminEditDia() {
                                     </Button>
                                 </div>
 
+                                <div className="flex items-center gap-3 mb-6 p-3 bg-muted/10 rounded-xl border border-border/50">
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-black uppercase text-muted-foreground whitespace-nowrap">Tempo Total (s)</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                min="10"
+                                                max="300"
+                                                value={formData.quizTimeLimit || 60}
+                                                onChange={(e) => setFormData({ ...formData, quizTimeLimit: parseInt(e.target.value) })}
+                                                className="w-20 bg-background border-2 border-border rounded-lg px-2 py-1 text-sm font-bold text-center outline-none focus:border-purple-500 transition-all"
+                                            />
+                                            <span className="text-[10px] text-muted-foreground italic">Padrão: 60s</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="w-px h-10 bg-border/50 mx-2" />
+
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-black uppercase text-muted-foreground whitespace-nowrap">Tempo p/ Penalidade (s)</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                min="5"
+                                                max="300"
+                                                value={formData.quizPenaltyTime || 30}
+                                                onChange={(e) => setFormData({ ...formData, quizPenaltyTime: parseInt(e.target.value) })}
+                                                className="w-20 bg-background border-2 border-border rounded-lg px-2 py-1 text-sm font-bold text-center outline-none focus:border-purple-500 transition-all"
+                                            />
+                                            <span className="text-[10px] text-muted-foreground italic">Padrão: 30s</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="w-px h-10 bg-border/50 mx-2" />
+
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-[10px] font-black uppercase text-muted-foreground whitespace-nowrap">Pontos Máx.</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                min="10"
+                                                max="1000"
+                                                step="10"
+                                                value={formData.quizMaxPoints || 100}
+                                                onChange={(e) => setFormData({ ...formData, quizMaxPoints: parseInt(e.target.value) })}
+                                                className="w-20 bg-background border-2 border-border rounded-lg px-2 py-1 text-sm font-bold text-center outline-none focus:border-purple-500 transition-all"
+                                            />
+                                            <span className="text-[10px] text-muted-foreground italic">Padrão: 100</span>
+                                        </div>
+                                    </div>
+
+                                </div>
+
                                 <div className="space-y-8">
                                     {formData.quiz.map((q: any, qIdx: number) => (
                                         <div key={qIdx} className="p-4 bg-card border-2 border-border rounded-2xl relative space-y-4 shadow-sm">
@@ -389,7 +448,7 @@ export default function AdminEditDia() {
                                                 {q.options.map((opt: string, oIdx: number) => (
                                                     <div key={oIdx} className="space-y-1">
                                                         <div className="flex items-center justify-between px-1">
-                                                            <label className="text-[10px] font-black uppercase text-muted-foreground">Opção {oIdx + 1}</label>
+                                                            <label className="text-[10px] font-black uppercase text-muted-foreground">Opção {oIdx + 1} {oIdx === 3 && <span className="text-muted-foreground/50 lowercase italic font-normal">(opcional)</span>}</label>
                                                             <div className="flex items-center gap-1">
                                                                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Correta</span>
                                                                 <input
@@ -405,9 +464,9 @@ export default function AdminEditDia() {
                                                             type="text"
                                                             value={opt}
                                                             onChange={(e) => updateQuizOption(qIdx, oIdx, e.target.value)}
-                                                            placeholder={`Opção ${oIdx + 1}`}
+                                                            placeholder={oIdx === 3 ? "Opção 4 (Deixe em branco se não houver)" : `Opção ${oIdx + 1}`}
                                                             className={`w-full bg-muted/10 border-2 rounded-xl px-4 py-2 outline-none transition-all text-sm ${q.correct === oIdx ? 'border-purple-500/50 bg-purple-500/5' : 'border-border'}`}
-                                                            required
+                                                            required={oIdx < 3}
                                                         />
                                                     </div>
                                                 ))}
@@ -415,7 +474,7 @@ export default function AdminEditDia() {
 
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <label className="text-[10px] font-black uppercase text-muted-foreground">Explicação da resposta</label>
+                                                    <label className="text-[10px] font-black uppercase text-muted-foreground">Explicação da resposta <span className="text-muted-foreground/50 lowercase italic font-normal">(opcional)</span></label>
                                                     <button
                                                         type="button"
                                                         onClick={() => setExpandedField({ title: `Explicação (Q${qIdx + 1})`, value: q.explanation, field: "explanation", qIdx })}

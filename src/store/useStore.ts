@@ -86,9 +86,9 @@ export const useStore = create<StoreState>()(
               qrcode: 100,
               videoMain: 0,
               videoPastor: 50,
-              quiz: 50,
+              quiz: j.quiz_max_points || 100,
               completion: 0,
-              total: 200,
+              total: 100 + 50 + (j.quiz_max_points || 100), // QR + Video + Quiz
               earned: p.pontos_acumulados || 0
             },
             activities: {
@@ -109,7 +109,10 @@ export const useStore = create<StoreState>()(
                 options: q.alternativas,
                 correct: q.resposta_correta,
                 explanation: q.explicacao
-              }))
+              })),
+              quizTimeLimit: j.quiz_time_limit || 60,
+              quizPenaltyTime: j.quiz_penalty_time || 30,
+              quizMaxPoints: j.quiz_max_points || 100
             },
             qrCodeUrl: j.qr_code_url ? (() => {
               try {
@@ -217,7 +220,10 @@ export const useStore = create<StoreState>()(
             video_url_principal: updateData.content?.videoUrl,
             video_url_proximo_dia: updateData.content?.pastorVideoUrl,
             data_real: updateData.date,
-            dia_label: `DIA ${dayNumber} • ${new Date(updateData.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}`
+            dia_label: `DIA ${dayNumber} • ${new Date(updateData.date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}`,
+            quiz_time_limit: updateData.content?.quizTimeLimit,
+            quiz_penalty_time: updateData.content?.quizPenaltyTime,
+            quiz_max_points: updateData.content?.quizMaxPoints
           })
           .eq('id', journey.id);
 
@@ -278,7 +284,7 @@ export const useStore = create<StoreState>()(
           qr: day.activities.qrScanned ? 100 : 0,
           main: 0,
           pastor: (type === "pastor" || day.activities.pastorVideoWatched) ? 50 : 0,
-          quiz: day.activities.quizCompleted ? Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50) : 0,
+          quiz: day.activities.quizCompleted ? Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * (day.content.quizMaxPoints || 100)) : 0,
           completion: 0
         };
 
@@ -315,7 +321,7 @@ export const useStore = create<StoreState>()(
         if (!journey) return;
 
         const totalQuestions = day.content.quiz.length || 1;
-        const newQuizPoints = Math.floor((score / totalQuestions) * 50);
+        const newQuizPoints = Math.floor((score / totalQuestions) * (day.content.quizMaxPoints || 100));
 
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
@@ -362,7 +368,7 @@ export const useStore = create<StoreState>()(
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
           50 + // Pastor video
-          Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * 50);
+          Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * (day.content.quizMaxPoints || 100));
 
         const { error } = await supabase
           .from('progresso_usuario')

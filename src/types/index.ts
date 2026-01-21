@@ -26,6 +26,9 @@ export interface DayContent {
   pastorVideoUrl: string;
   pastorVideoThumbnail: string;
   quiz: QuizQuestion[];
+  quizTimeLimit?: number;
+  quizPenaltyTime?: number;
+  quizMaxPoints?: number;
 }
 
 export interface DayPoints {

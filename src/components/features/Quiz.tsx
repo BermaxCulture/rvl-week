@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, ArrowRight, RotateCcw, PartyPopper, FileText } from "lucide-react";
 import { QuizQuestion } from "@/types";
@@ -8,16 +8,19 @@ import confetti from "canvas-confetti";
 
 interface QuizProps {
   questions: QuizQuestion[];
+  timeLimit?: number;
+  penaltyTime?: number;
+  maxPoints?: number;
   onComplete: (score: number) => void;
 }
 
-type AnswerState = "unanswered" | "correct" | "incorrect";
+type AnswerState = "unanswered" | "correct" | "incorrect" | "timeout" | "correct_with_penalty";
 
-export function Quiz({ questions, onComplete }: QuizProps) {
+export function Quiz({ questions, timeLimit = 60, penaltyTime = 30, maxPoints = 100, onComplete }: QuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [answerState, setAnswerState] = useState<AnswerState>("unanswered");
-  const [userAnswers, setUserAnswers] = useState<boolean[]>([]);
+  const [userAnswers, setUserAnswers] = useState<number[]>([]);
   const [showResults, setShowResults] = useState(false);
 
   if (!questions || questions.length === 0) {
@@ -39,21 +42,59 @@ export function Quiz({ questions, onComplete }: QuizProps) {
     if (selectedAnswer === null || answerState !== "unanswered") return;
 
     const isCorrect = selectedAnswer === question.correct;
-    setAnswerState(isCorrect ? "correct" : "incorrect");
-    setUserAnswers(prev => [...prev, isCorrect]);
+
+    // Check for penalty
+    // If timeLeft is less than (timeLimit - penaltyTime), it means we passed the penalty threshold
+    // e.g. Limit 60, Penalty 30. Penalty starts at 30s elapsed (timeLeft <= 30).
+    const isPenalty = timeLeft <= (timeLimit - penaltyTime);
+
+    if (isCorrect) {
+      if (isPenalty) {
+        setAnswerState("correct_with_penalty");
+        setUserAnswers(prev => [...prev, 0.5]);
+      } else {
+        setAnswerState("correct");
+        setUserAnswers(prev => [...prev, 1]);
+      }
+    } else {
+      setAnswerState("incorrect");
+      setUserAnswers(prev => [...prev, 0]);
+    }
   };
+
+  const [timeLeft, setTimeLeft] = useState(timeLimit);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 0) {
+          if (answerState === "unanswered") {
+            setAnswerState("timeout");
+            setUserAnswers(prevAnswers => [...prevAnswers, 0]);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [currentQuestion, showResults, answerState]);
 
   const handleNextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setAnswerState("unanswered");
+      setTimeLeft(timeLimit);
     } else {
-      // O userAnswers já contém o resultado da pergunta atual, pois foi adicionado no handleSubmitAnswer
-      const correctCount = userAnswers.filter(Boolean).length;
+      // O userAnswers já contém o resultado da pergunta atual
+      const totalScore = userAnswers.reduce((a, b) => a + b, 0);
       setShowResults(true);
 
-      if (correctCount === questions.length) {
+      const correctCount = userAnswers.filter(s => s >= 0.5).length; // Count passed questions
+
+      if (userAnswers.every(s => s === 1)) {
         confetti({
           particleCount: 150,
           spread: 100,
@@ -61,7 +102,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
         });
       }
 
-      onComplete(correctCount);
+      onComplete(totalScore);
     }
   };
 
@@ -71,11 +112,13 @@ export function Quiz({ questions, onComplete }: QuizProps) {
     setAnswerState("unanswered");
     setUserAnswers([]);
     setShowResults(false);
+    setTimeLeft(timeLimit);
   };
 
   if (showResults) {
-    const correctCount = userAnswers.filter(Boolean).length;
-    const isPerfect = correctCount === questions.length;
+    const totalScore = userAnswers.reduce((a, b) => a + b, 0);
+    const maxScore = questions.length;
+    const isPerfect = totalScore === maxScore;
 
     return (
       <motion.div
@@ -96,10 +139,10 @@ export function Quiz({ questions, onComplete }: QuizProps) {
           {isPerfect ? "Perfeito!" : "Quiz Concluído!"}
         </h3>
         <p className="text-lg text-muted-foreground mb-4">
-          Você acertou {correctCount}/{questions.length}
+          Você fez {totalScore} de {maxScore} pontos possíveis
         </p>
         <p className={cn("font-bold mb-6", isPerfect ? "text-success" : "text-primary")}>
-          +{isPerfect ? 50 : Math.floor((correctCount / questions.length) * 50)} pts conquistados
+          +{Math.ceil((totalScore / maxScore) * maxPoints)} pts conquistados
         </p>
         {!isPerfect && (
           <Button variant="outline" icon={RotateCcw} onClick={handleRetry}>
@@ -115,9 +158,9 @@ export function Quiz({ questions, onComplete }: QuizProps) {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-semibold text-primary">
-            Pergunta {currentQuestion + 1} de {questions.length}
+            Pergunta {currentQuestion + 1} de {questions.length} • {timeLeft}s
           </span>
-          <span className="text-sm text-muted-foreground">+50 pts (100%)</span>
+          <span className="text-sm text-muted-foreground">+{maxPoints} pts ({Math.round((maxPoints / questions.length) * 100) / 100} pts/pergunta)</span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <motion.div
@@ -134,6 +177,7 @@ export function Quiz({ questions, onComplete }: QuizProps) {
       <div className="space-y-3 mb-6">
         <AnimatePresence mode="wait">
           {question?.options.map((option, index) => {
+            if (!option || !option.trim()) return null;
             const isSelected = selectedAnswer === index;
             const isCorrectAnswer = index === question.correct;
             const showCorrect = answerState !== "unanswered" && isCorrectAnswer;
@@ -186,16 +230,37 @@ export function Quiz({ questions, onComplete }: QuizProps) {
         </AnimatePresence>
       </div>
 
+      {/* Feedback Message */}
       {answerState !== "unanswered" && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "p-4 rounded-xl mb-6",
-            answerState === "correct" ? "bg-success/10" : "bg-muted"
+            "p-4 rounded-xl mb-6 flex items-start gap-3",
+            (answerState === "correct" || answerState === "correct_with_penalty") ? "bg-success/10 text-success-foreground" :
+              answerState === "timeout" ? "bg-warning/10 text-warning-foreground" : "bg-destructive/10 text-destructive-foreground"
           )}
         >
-          <p className="text-sm">{question?.explanation}</p>
+          {(answerState === "correct" || answerState === "correct_with_penalty") ? (
+            <CheckCircle className="w-5 h-5 shrink-0 mt-0.5 text-success" />
+          ) : answerState === "timeout" ? (
+            <RotateCcw className="w-5 h-5 shrink-0 mt-0.5 text-warning" />
+          ) : (
+            <XCircle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
+          )}
+          <div>
+            <p className="font-bold mb-1">
+              {answerState === "correct" ? "Resposta Correta!" :
+                answerState === "correct_with_penalty" ? "Resposta correta, mas seja mais rápido na próxima para ganhar a pontuação máxima!" :
+                  answerState === "timeout" ? "Tempo Esgotado!" : "Resposta Incorreta"}
+            </p>
+            {question?.explanation && (
+              <p className="text-sm opacity-90">{question.explanation}</p>
+            )}
+            {!question?.explanation && (answerState !== "correct" && answerState !== "correct_with_penalty") && (
+              <p className="text-sm opacity-90">A resposta correta era: {question.options[question.correct]}</p>
+            )}
+          </div>
         </motion.div>
       )}
 
