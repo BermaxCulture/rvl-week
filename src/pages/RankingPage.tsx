@@ -150,11 +150,27 @@ export default function RankingPage() {
         u.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const getPosColor = (pos: number) => {
-        if (pos === 1) return "text-yellow-500 border-yellow-500 bg-yellow-500/10";
-        if (pos === 2) return "text-gray-300 border-gray-300 bg-gray-300/10";
-        if (pos === 3) return "text-orange-500 border-orange-500 bg-orange-500/10";
-        return "text-purple-400 border-purple-900/50 bg-purple-900/20";
+    const getRankStyle = (pos: number) => {
+        if (pos === 1) return {
+            border: "border-yellow-500",
+            icon: <Trophy className="w-6 h-6 md:w-8 md:h-8 text-yellow-500" />,
+            bg: "bg-yellow-500/5"
+        };
+        if (pos === 2) return {
+            border: "border-slate-400",
+            icon: <Medal className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />,
+            bg: "bg-slate-400/5"
+        };
+        if (pos === 3) return {
+            border: "border-orange-500",
+            icon: <Award className="w-6 h-6 md:w-8 md:h-8 text-orange-500" />,
+            bg: "bg-orange-500/5"
+        };
+        return {
+            border: "border-border/50",
+            icon: <span className="font-display font-black text-xl opacity-50">#{pos}</span>,
+            bg: "bg-card/30"
+        };
     };
 
     return (
@@ -219,76 +235,72 @@ export default function RankingPage() {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {filteredUsers.map((user, idx) => (
-                                <motion.div
-                                    key={user.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    onClick={() => fetchUserDetails(user)}
-                                    className={`
-                                        group relative flex items-center gap-4 p-4 md:p-6 rounded-3xl cursor-pointer
-                                        border-2 transition-all duration-300
-                                        ${getPosColor(user.position)}
-                                        hover:scale-[1.01] hover:shadow-2xl hover:shadow-primary/10
-                                    `}
-                                >
-                                    {/* Position Badge */}
-                                    <div className="w-12 md:w-16 text-center">
-                                        {user.position <= 3 ? (
-                                            user.position === 1 ? <span className="text-3xl">🥇</span> :
-                                                user.position === 2 ? <span className="text-3xl">🥈</span> :
-                                                    <span className="text-3xl">🥉</span>
-                                        ) : (
-                                            <span className="font-display font-black text-2xl opacity-50">#{user.position}</span>
-                                        )}
-                                    </div>
+                            {filteredUsers.map((user, idx) => {
+                                const rankStyle = getRankStyle(user.position);
 
-                                    {/* Avatar */}
-                                    <div className="relative">
-                                        {user.avatar_url ? (
-                                            <img
-                                                src={user.avatar_url}
-                                                alt={user.name}
-                                                className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover border-2 border-current shadow-lg"
-                                            />
-                                        ) : (
-                                            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-primary/20 flex items-center justify-center font-bold text-lg border-2 border-current shadow-lg">
-                                                {user.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
-                                            </div>
-                                        )}
-                                        {user.completed_days === 7 && (
-                                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white rounded-full p-1 shadow-md">
-                                                <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4" />
-                                            </div>
-                                        )}
-                                    </div>
+                                return (
+                                    <motion.div
+                                        key={user.id}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                        onClick={() => fetchUserDetails(user)}
+                                        className={`
+                                            group relative flex items-center gap-3 md:gap-6 p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] cursor-pointer
+                                            border-[1.5px] transition-all duration-300
+                                            ${rankStyle.border} ${rankStyle.bg}
+                                            hover:scale-[1.01] hover:brightness-110
+                                        `}
+                                    >
+                                        {/* Position Icon */}
+                                        <div className="w-8 md:w-14 flex justify-center items-center shrink-0">
+                                            {rankStyle.icon}
+                                        </div>
 
-                                    {/* Info */}
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-display font-bold text-lg md:text-xl truncate text-foreground group-hover:text-primary transition-colors uppercase italic">
-                                            {user.name}
-                                        </h3>
-                                        <div className="flex items-center gap-3 text-xs md:text-sm text-muted-foreground">
-                                            <span className="flex items-center gap-1 font-medium italic">
-                                                <Calendar className="w-3 h-3 md:w-4 md:h-4" />
-                                                {user.completed_days}/7 dias completos
+                                        {/* Avatar/Initials */}
+                                        <div className="relative shrink-0">
+                                            {user.avatar_url ? (
+                                                <img
+                                                    src={user.avatar_url}
+                                                    alt={user.name}
+                                                    className="w-9 h-9 md:w-12 md:h-12 rounded-full object-cover border border-white/10"
+                                                />
+                                            ) : (
+                                                <div className={`
+                                                    w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center 
+                                                    font-bold text-xs md:text-base border border-white/10
+                                                    bg-background/50
+                                                `}>
+                                                    {user.name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                            <h3 className="font-display font-black text-sm md:text-lg truncate text-foreground leading-tight uppercase tracking-tight">
+                                                {user.name}
+                                            </h3>
+                                            <span className="text-[9px] md:text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                                                {user.completed_days}/7 dias concluídos
                                             </span>
                                         </div>
-                                    </div>
 
-                                    {/* Points Tag */}
-                                    <div className="text-right">
-                                        <div className="flex items-center gap-2 justify-end">
-                                            <Zap className="w-5 h-5 md:w-6 md:h-6 text-yellow-500 fill-yellow-500" />
-                                            <span className="text-2xl md:text-3xl font-black font-display text-yellow-500">
-                                                {user.total_points.toFixed(2)}
-                                            </span>
+                                        {/* Points */}
+                                        <div className="text-right shrink-0">
+                                            <div className="flex items-center gap-1 justify-end">
+                                                <Zap className="w-3.5 h-3.5 md:w-5 md:h-5 text-yellow-500 fill-yellow-500" />
+                                                <span className="text-lg md:text-2xl font-black font-display text-yellow-500">
+                                                    {user.total_points.toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mr-1">
+                                                PONTOS
+                                            </p>
                                         </div>
-                                        <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">PONTOS</span>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                    </motion.div>
+                                );
+                            })}
 
                             {filteredUsers.length === 0 && (
                                 <div className="text-center py-20 bg-card/30 rounded-3xl border-2 border-dashed border-border">
@@ -326,33 +338,33 @@ export default function RankingPage() {
                                             <img
                                                 src={selectedUser.avatar_url}
                                                 alt={selectedUser.name}
-                                                className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-primary shadow-xl"
+                                                className="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover border-4 border-primary shadow-xl"
                                             />
                                         ) : (
-                                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/20 flex items-center justify-center font-bold text-4xl border-4 border-primary shadow-xl">
+                                            <div className="w-20 h-20 md:w-32 md:h-32 rounded-full bg-primary/20 flex items-center justify-center font-bold text-2xl md:text-4xl border-4 border-primary shadow-xl">
                                                 {selectedUser.name[0]}
                                             </div>
                                         )}
-                                        <div className="absolute -top-4 -right-2 bg-yellow-500 text-black font-black px-4 py-1 rounded-full text-lg shadow-cartoon-sm">
+                                        <div className="absolute -top-2 -right-2 md:-top-4 md:-right-2 bg-yellow-500 text-black font-black px-3 py-0.5 md:px-4 md:py-1 rounded-full text-sm md:text-lg shadow-cartoon-sm">
                                             #{selectedUser.position}
                                         </div>
                                     </div>
 
                                     <div className="text-center md:text-left">
-                                        <h2 className="text-3xl md:text-4xl font-black font-display mb-2 uppercase tracking-tight">
+                                        <h2 className="text-xl md:text-3xl font-black font-display mb-2 uppercase tracking-tight leading-tight">
                                             {selectedUser.name}
                                         </h2>
-                                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                                            <div className="bg-yellow-500/10 text-yellow-500 px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
-                                                <Zap className="w-4 h-4 fill-yellow-500" />
+                                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4">
+                                            <div className="bg-yellow-500/10 text-yellow-500 px-3 py-1 rounded-full flex items-center gap-1.5 font-black italic text-xs md:text-base">
+                                                <Zap className="w-3.5 h-3.5 fill-yellow-500" />
                                                 {selectedUser.total_points.toFixed(2)} PTS
                                             </div>
-                                            <div className="bg-primary/10 text-primary px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
-                                                <Calendar className="w-4 h-4" />
+                                            <div className="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1.5 font-black italic text-xs md:text-base">
+                                                <Calendar className="w-3.5 h-3.5" />
                                                 {selectedUser.completed_days}/7 DIAS
                                             </div>
-                                            <div className="bg-muted text-muted-foreground px-4 py-1 rounded-full flex items-center gap-2 font-black italic uppercase text-[10px] tracking-widest border border-border/50">
-                                                <Church className="w-3.5 h-3.5" />
+                                            <div className="bg-muted text-muted-foreground px-3 py-1 rounded-full flex items-center gap-1.5 font-black italic uppercase text-[9px] md:text-[10px] tracking-widest border border-border/50">
+                                                <Church className="w-3 h-3" />
                                                 {selectedUser.is_member ? "Membro" : "Visitante"}
                                             </div>
                                         </div>
@@ -367,21 +379,21 @@ export default function RankingPage() {
                                     <h3 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-2 text-left">
                                         <Award className="w-5 h-5 text-secondary" /> Conquistas Desbloqueadas
                                     </h3>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 md:gap-4">
                                         {mockAchievements.map((m) => {
                                             const isUnlocked = selectedUser.achievements?.includes(m.id);
                                             return (
                                                 <div
                                                     key={m.id}
                                                     className={`
-                                                        relative flex flex-col items-center p-4 rounded-3xl border-2 transition-all
+                                                        relative flex flex-col items-center p-2 md:p-4 rounded-2xl md:rounded-3xl border-2 transition-all
                                                         ${isUnlocked ? "bg-secondary/5 border-secondary/30 grayscale-0" : "bg-card border-border grayscale opacity-40"}
                                                     `}
                                                 >
-                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 bg-gradient-to-br ${isUnlocked ? 'from-secondary to-purple-600' : 'from-muted to-muted'} shadow-lg`}>
-                                                        <Award className="text-white w-7 h-7" />
+                                                    <div className={`w-8 h-8 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-2 md:mb-3 bg-gradient-to-br ${isUnlocked ? 'from-secondary to-purple-600' : 'from-muted to-muted'} shadow-lg`}>
+                                                        <Award className="text-white w-4 h-4 md:w-7 md:h-7" />
                                                     </div>
-                                                    <p className="text-[10px] font-bold text-center leading-tight uppercase font-heading">{m.name}</p>
+                                                    <p className="text-[8px] md:text-[10px] font-bold text-center leading-tight uppercase font-heading">{m.name}</p>
                                                 </div>
                                             );
                                         })}

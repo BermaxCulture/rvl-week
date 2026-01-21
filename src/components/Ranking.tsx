@@ -144,36 +144,26 @@ export default function Ranking() {
         return `${parts[0]} ${parts[parts.length - 1]}`
     }
 
-    const getPositionStyle = (position: number) => {
-        switch (position) {
-            case 1:
-                return {
-                    icon: <Trophy className="text-yellow-500" size={28} />,
-                    bgGradient: 'from-yellow-500/20 to-orange-500/20',
-                    borderColor: 'border-yellow-500',
-                    badge: '🥇'
-                }
-            case 2:
-                return {
-                    icon: <Medal className="text-gray-400" size={28} />,
-                    bgGradient: 'from-gray-400/20 to-gray-500/20',
-                    borderColor: 'border-gray-400',
-                    badge: '🥈'
-                }
-            case 3:
-                return {
-                    icon: <Award className="text-orange-600" size={28} />,
-                    bgGradient: 'from-orange-600/20 to-orange-700/20',
-                    borderColor: 'border-orange-600',
-                    badge: '🥉'
-                }
-            default:
-                return {
-                    icon: <span className="text-purple-400 font-bold text-lg">{position}º</span>,
-                    bgGradient: 'from-gray-800/50 to-gray-900/50',
-                    borderColor: 'border-gray-700',
-                    badge: null
-                }
+    const getRankStyle = (pos: number) => {
+        if (pos === 1) return {
+            border: "border-yellow-500",
+            icon: <Trophy className="w-6 h-6 md:w-8 md:h-8 text-yellow-500" />,
+            bg: "bg-yellow-500/5"
+        }
+        if (pos === 2) return {
+            border: "border-slate-400",
+            icon: <Medal className="w-6 h-6 md:w-8 md:h-8 text-slate-400" />,
+            bg: "bg-slate-400/5"
+        }
+        if (pos === 3) return {
+            border: "border-orange-500",
+            icon: <Award className="w-6 h-6 md:w-8 md:h-8 text-orange-500" />,
+            bg: "bg-orange-500/5"
+        }
+        return {
+            border: "border-border/50",
+            icon: <span className="font-display font-black text-xl opacity-50">#{pos}</span>,
+            bg: "bg-card/30"
         }
     }
 
@@ -204,64 +194,65 @@ export default function Ranking() {
 
             <div className="grid gap-4">
                 {topUsers.map((user, index) => {
-                    const style = getPositionStyle(user.position)
+                    const style = getRankStyle(user.position)
 
                     return (
                         <motion.div
                             key={user.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
                             onClick={() => fetchUserDetails(user)}
                             className={`
-                                relative flex items-center gap-4 cursor-pointer
-                                bg-gradient-to-r ${style.bgGradient}
-                                backdrop-blur-lg border-2 ${style.borderColor}
-                                rounded-2xl p-4 md:p-5
-                                hover:scale-[1.01] hover:shadow-xl transition-all duration-300
+                                group relative flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-[2rem] cursor-pointer
+                                border-[1.5px] transition-all duration-300
+                                ${style.border} ${style.bg}
+                                hover:scale-[1.01] hover:brightness-110
                             `}
                         >
-                            <div className="w-12 flex justify-center items-center">
+                            {/* Position Icon */}
+                            <div className="w-8 md:w-12 flex justify-center items-center shrink-0">
                                 {style.icon}
                             </div>
 
-                            <div className="relative">
+                            {/* Avatar/Initials */}
+                            <div className="relative shrink-0">
                                 {user.avatar_url ? (
                                     <img
                                         src={user.avatar_url}
                                         alt={user.name}
-                                        className={`w-12 h-12 rounded-full object-cover border-2 ${style.borderColor}`}
+                                        className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border border-white/10"
                                     />
                                 ) : (
                                     <div className={`
-                    w-12 h-12 rounded-full bg-primary/20 
-                    border-2 ${style.borderColor}
-                    flex items-center justify-center font-bold text-white
-                  `}>
+                                        w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center 
+                                        font-bold text-sm border border-white/10
+                                        bg-background/50
+                                    `}>
                                         {getInitials(user.name)}
                                     </div>
                                 )}
                             </div>
 
-                            <div className="flex-1 min-w-0">
-                                <p className="font-bold text-white truncate italic uppercase text-sm sm:text-base">
+                            {/* Info */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                <h3 className="font-display font-black text-sm md:text-base truncate text-foreground leading-tight uppercase tracking-tight">
                                     {formatName(user.name)}
-                                </p>
-                                <div className="flex items-center gap-2">
-                                    <p className="text-[10px] font-black text-white/50 uppercase tracking-tight">
-                                        {user.completed_days}/7 DIAS CONCLUÍDOS
-                                    </p>
-                                </div>
+                                </h3>
+                                <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-wide truncate">
+                                    {user.completed_days}/7 dias concluídos
+                                </span>
                             </div>
 
-                            <div className="text-right">
+                            {/* Points */}
+                            <div className="text-right shrink-0 pl-2">
                                 <div className="flex items-center gap-1 justify-end">
-                                    <Zap className="text-yellow-500 fill-yellow-500" size={16} />
-                                    <p className="text-xl font-black text-yellow-500">
+                                    <Zap className="w-3 h-3 md:w-4 md:h-4 text-yellow-500 fill-yellow-500" />
+                                    <span className="text-lg md:text-xl font-black font-display text-yellow-500">
                                         {user.total_points.toFixed(2)}
-                                    </p>
+                                    </span>
                                 </div>
-                                <p className="text-[8px] font-black text-white/40 uppercase tracking-widest">
+                                <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mr-0.5">
                                     PONTOS
                                 </p>
                             </div>
