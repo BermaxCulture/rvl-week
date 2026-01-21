@@ -30,6 +30,7 @@ import { Card } from "@/components/ui/CardCustom";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 
 export default function Perfil() {
     const { user, updateProfile } = useAuth();
@@ -43,7 +44,8 @@ export default function Perfil() {
         name: "",
         email: "",
         phone: "",
-        imageUrl: ""
+        imageUrl: "",
+        isMember: false
     });
 
     const [modalData, setModalData] = useState({
@@ -63,7 +65,8 @@ export default function Perfil() {
                 name: user.name,
                 email: user.email,
                 phone: user.phone,
-                imageUrl: user.imageUrl || ""
+                imageUrl: user.imageUrl || "",
+                isMember: user.isMember
             });
             fetchJourneyDetails();
         }
@@ -94,7 +97,8 @@ export default function Perfil() {
         const success = await updateProfile({
             name: formData.name,
             phone: formData.phone,
-            imageUrl: formData.imageUrl
+            imageUrl: formData.imageUrl,
+            isMember: formData.isMember
         });
 
         if (success) {
@@ -108,35 +112,11 @@ export default function Perfil() {
 
     const handleUpdateEmail = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (modalData.newEmail === user.email) {
-            toast.error("O novo email deve ser diferente do atual.");
-            return;
-        }
-        setIsLoading(true);
-        const { updateEmail } = useAuth.getState();
-        const success = await updateEmail(modalData.newEmail);
-        if (success) {
-            setEmailStep("verify");
-        }
-        setIsLoading(false);
+        toast.info("A alteração de e-mail está temporariamente desativada.");
     };
 
     const handleVerifyEmailChange = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (otpCode.length !== 6) {
-            toast.error("O código deve ter 6 dígitos.");
-            return;
-        }
-        setIsLoading(true);
-        const { confirmEmailChange } = useAuth.getState();
-        const success = await confirmEmailChange(modalData.newEmail, otpCode);
-        if (success) {
-            setActiveModal("none");
-            setEmailStep("request");
-            setOtpCode("");
-            setModalData(prev => ({ ...prev, newEmail: "" }));
-        }
-        setIsLoading(false);
     };
 
     const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -273,17 +253,25 @@ export default function Perfil() {
                                 </h3>
                                 <div className="space-y-3">
                                     {user.achievements.length > 0 ? (
-                                        user.achievements.map((id) => (
-                                            <div key={id} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                                                <div className="w-10 h-10 bg-yellow-500/10 rounded-full flex items-center justify-center">
-                                                    <CheckCircle className="w-5 h-5 text-yellow-500" />
+                                        user.achievements.map((id) => {
+                                            const achievementMap: Record<string, string> = {
+                                                'jornada_completa': 'Jornada Completa',
+                                                'conhecedor_palavra': 'Conhecedor da Palavra',
+                                                'sempre_presente': 'Sempre Presente',
+                                                'comprometido': 'Comprometido'
+                                            };
+                                            return (
+                                                <div key={id} className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
+                                                    <div className="w-10 h-10 bg-yellow-500/10 rounded-full flex items-center justify-center">
+                                                        <CheckCircle className="w-5 h-5 text-yellow-500" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-xs font-bold truncate">{achievementMap[id] || id}</p>
+                                                        <p className="text-[10px] text-muted-foreground">Conquista desbloqueada</p>
+                                                    </div>
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-xs font-bold truncate">{id}</p>
-                                                    <p className="text-[10px] text-muted-foreground">Conquista desbloqueada</p>
-                                                </div>
-                                            </div>
-                                        ))
+                                            );
+                                        })
                                     ) : (
                                         <p className="text-sm text-muted-foreground italic text-center py-4">
                                             Continue sua jornada para ganhar badges!
@@ -331,6 +319,40 @@ export default function Perfil() {
                                                 disabled={!isEditing}
                                                 className="w-full bg-muted/30 border-2 border-border rounded-xl px-4 py-2.5 focus:border-primary outline-none transition-all disabled:opacity-70"
                                             />
+                                        </div>
+
+                                        <div className="space-y-2 md:col-span-2">
+                                            <label className="text-sm font-semibold flex items-center gap-2">
+                                                <Church className="w-4 h-4 text-muted-foreground" /> Tipo de Vínculo
+                                            </label>
+                                            <div className="flex bg-muted/30 p-1.5 rounded-2xl border-2 border-border gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    disabled={!isEditing}
+                                                    onClick={() => setFormData({ ...formData, isMember: true })}
+                                                    className={cn(
+                                                        "flex-1 py-3 rounded-xl font-bold text-xs uppercase transition-all",
+                                                        formData.isMember
+                                                            ? "bg-primary text-white shadow-lg"
+                                                            : "text-muted-foreground hover:bg-white/5"
+                                                    )}
+                                                >
+                                                    Membro
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={!isEditing}
+                                                    onClick={() => setFormData({ ...formData, isMember: false })}
+                                                    className={cn(
+                                                        "flex-1 py-3 rounded-xl font-bold text-xs uppercase transition-all",
+                                                        !formData.isMember
+                                                            ? "bg-primary text-white shadow-lg"
+                                                            : "text-muted-foreground hover:bg-white/5"
+                                                    )}
+                                                >
+                                                    Visitante
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -419,33 +441,60 @@ export default function Perfil() {
                                             </div>
                                         ) : (
                                             <div className="grid gap-3">
-                                                {journeyDetails.map((day) => (
-                                                    <div
-                                                        key={day.day_number}
-                                                        className={`
-                                                            flex items-center gap-4 p-4 rounded-2xl border-2 transition-all
-                                                            ${day.completed ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/10 opacity-60"}
-                                                        `}
-                                                    >
-                                                        <div className={`
-                                                            w-10 h-10 rounded-xl flex items-center justify-center font-display font-black flex-shrink-0
-                                                            ${day.completed ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}
-                                                        `}>
-                                                            {day.day_number}
-                                                        </div>
-                                                        <div className="flex-1 text-left">
-                                                            <h4 className="font-bold text-sm leading-tight uppercase font-display">{day.title}</h4>
-                                                            <p className="text-[10px] uppercase font-black tracking-widest mt-1 opacity-60">
-                                                                {day.completed ? `+${day.points_earned} PTS` : "Não concluído"}
-                                                            </p>
-                                                        </div>
-                                                        {day.completed ? (
-                                                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                                                        ) : (
-                                                            <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0 opacity-40" />
-                                                        )}
-                                                    </div>
-                                                ))}
+                                                {journeyDetails
+                                                    .filter((day) => {
+                                                        const now = new Date();
+                                                        const isCompleted = day.completed;
+                                                        const dateStr = day.data_real.toString().split('T')[0];
+                                                        const dayStart = new Date(`${dateStr}T00:00:00-03:00`);
+                                                        return isCompleted || now >= dayStart;
+                                                    })
+                                                    .map((day) => {
+                                                        const now = new Date();
+                                                        const isCompleted = day.completed || (Number(day.points_earned) >= 200);
+                                                        const dateStr = day.data_real.toString().split('T')[0];
+                                                        const unlockTime = day.day_number === 7 ? '10:00:00' : '19:30:00';
+                                                        const unlockDate = new Date(`${dateStr}T${unlockTime}-03:00`);
+
+                                                        const isRevealed = now >= unlockDate || isCompleted;
+                                                        const displayTitle = isRevealed ? day.title : "CONTEÚDO PRIVADO";
+
+                                                        return (
+                                                            <div
+                                                                key={day.day_number}
+                                                                className={`
+                                                                    flex items-center gap-4 p-4 rounded-2xl border-2 transition-all
+                                                                    ${isCompleted
+                                                                        ? "bg-green-500/20 border-green-500/60 shadow-[0_0_20px_rgba(34,197,94,0.2)]"
+                                                                        : isRevealed
+                                                                            ? "bg-red-500/5 border-red-500/10 opacity-60"
+                                                                            : "bg-muted/10 border-border/20 grayscale opacity-40"}
+                                                                `}
+                                                            >
+                                                                <div className={`
+                                                                    w-10 h-10 rounded-xl flex items-center justify-center font-display font-black flex-shrink-0
+                                                                    ${isCompleted ? "bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.6)]" : "bg-muted text-muted-foreground"}
+                                                                `}>
+                                                                    {day.day_number}
+                                                                </div>
+                                                                <div className="flex-1 text-left">
+                                                                    <h4 className={`font-bold text-sm leading-tight uppercase font-display ${isCompleted ? "text-green-400" : ""}`}>
+                                                                        {displayTitle}
+                                                                    </h4>
+                                                                    <p className="text-[10px] uppercase font-black tracking-widest mt-1 opacity-60">
+                                                                        {isCompleted ? `+${day.points_earned} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                    </p>
+                                                                </div>
+                                                                {isCompleted ? (
+                                                                    <div className="bg-green-500 rounded-full p-1 shadow-[0_0_15px_rgba(34,197,94,0.6)] flex-shrink-0">
+                                                                        <CheckCircle className="w-4 h-4 text-white" />
+                                                                    </div>
+                                                                ) : (
+                                                                    <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0 opacity-40" />
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
                                             </div>
                                         )}
                                     </div>

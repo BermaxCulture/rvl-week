@@ -22,8 +22,8 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
   const [showInstructions, setShowInstructions] = useState(false);
 
   const userRole = (user?.role || 'usuario').toLowerCase();
-  const isElevated = userRole !== 'usuario' && userRole !== 'usuário';
   const isAdmin = userRole === 'admin';
+  const isElevated = isAdmin;
 
   const GAMIFIED_DAYS = [1, 2, 3, 4, 5, 6];
   const isGamifiedDay = (dayNumber: number) => GAMIFIED_DAYS.includes(dayNumber);

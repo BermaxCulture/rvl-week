@@ -31,7 +31,16 @@ const AppContent = () => {
 
   useEffect(() => {
     checkAuth();
+  }, [checkAuth]);
 
+  const { fetchDays } = useStore();
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchDays();
+    }
+  }, [isAuthenticated, fetchDays]);
+
+  useEffect(() => {
     // Check for Auth Errors in URL (hash)
     const hash = window.location.hash;
     if (hash.includes("error=access_denied") && hash.includes("otp_expired")) {
@@ -42,9 +51,7 @@ const AppContent = () => {
       // Clean up hash
       window.history.replaceState({}, "", window.location.pathname);
     }
-
-    // Unified visible unlock flow via /unlock page
-  }, [checkAuth, isAuthenticated, setPendingUnlock, unlockDay]);
+  }, []);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {

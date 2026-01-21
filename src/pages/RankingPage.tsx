@@ -12,7 +12,8 @@ import {
     CheckCircle2,
     X,
     Target,
-    User
+    User,
+    Church
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Header } from "@/components/layout/Header";
@@ -30,6 +31,7 @@ interface RankingUser {
     achievements: string[];
     position: number;
     role?: string;
+    is_member: boolean;
 }
 
 interface UserDetail {
@@ -37,6 +39,7 @@ interface UserDetail {
     title: string;
     completed: boolean;
     points_earned: number;
+    data_real: string;
 }
 
 interface UserRank {
@@ -70,7 +73,7 @@ export default function RankingPage() {
             // Busca direta na tabela profiles excluindo admin e pastor
             const { data, error } = await supabase
                 .from('profiles')
-                .select('id, full_name, email, image_url, total_points, completed_days, achievements, role')
+                .select('id, full_name, email, image_url, total_points, completed_days, achievements, role, is_member')
                 .not('role', 'eq', 'admin')
                 .not('role', 'eq', 'pastor')
                 .order('total_points', { ascending: false })
@@ -87,6 +90,7 @@ export default function RankingPage() {
                 total_points: u.total_points || 0,
                 completed_days: u.completed_days || 0,
                 achievements: u.achievements || [],
+                is_member: u.is_member || false,
                 position: index + 1,
                 role: u.role
             }));
@@ -199,7 +203,7 @@ export default function RankingPage() {
                             <div className="flex gap-6">
                                 <div className="text-right">
                                     <p className="text-xl font-black text-yellow-500 flex items-center gap-1">
-                                        <Zap className="w-4 h-4 fill-yellow-500" /> {userRank.user_total_points}
+                                        <Zap className="w-4 h-4 fill-yellow-500" /> {userRank.user_total_points.toFixed(2)}
                                     </p>
                                     <p className="text-[10px] font-black text-muted-foreground uppercase">PONTOS</p>
                                 </div>
@@ -278,7 +282,7 @@ export default function RankingPage() {
                                         <div className="flex items-center gap-2 justify-end">
                                             <Zap className="w-5 h-5 md:w-6 md:h-6 text-yellow-500 fill-yellow-500" />
                                             <span className="text-2xl md:text-3xl font-black font-display text-yellow-500">
-                                                {user.total_points}
+                                                {user.total_points.toFixed(2)}
                                             </span>
                                         </div>
                                         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">PONTOS</span>
@@ -341,11 +345,15 @@ export default function RankingPage() {
                                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                                             <div className="bg-yellow-500/10 text-yellow-500 px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Zap className="w-4 h-4 fill-yellow-500" />
-                                                {selectedUser.total_points} PTS
+                                                {selectedUser.total_points.toFixed(2)} PTS
                                             </div>
                                             <div className="bg-primary/10 text-primary px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Calendar className="w-4 h-4" />
                                                 {selectedUser.completed_days}/7 DIAS
+                                            </div>
+                                            <div className="bg-muted text-muted-foreground px-4 py-1 rounded-full flex items-center gap-2 font-black italic uppercase text-[10px] tracking-widest border border-border/50">
+                                                <Church className="w-3.5 h-3.5" />
+                                                {selectedUser.is_member ? "Membro" : "Visitante"}
                                             </div>
                                         </div>
                                     </div>
@@ -392,29 +400,65 @@ export default function RankingPage() {
                                         </div>
                                     ) : (
                                         <div className="grid gap-3 text-left">
-                                            {userDetails.map((day) => (
-                                                <div
-                                                    key={day.day_number}
-                                                    className={`
-                                                        flex items-center gap-4 p-4 rounded-2xl border-2 transition-all
-                                                        ${day.completed ? "bg-green-500/5 border-green-500/20" : "bg-red-500/5 border-red-500/10 opacity-60"}
-                                                    `}
-                                                >
-                                                    <div className={`
-                                                        w-10 h-10 rounded-xl flex items-center justify-center font-display font-black
-                                                        ${day.completed ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"}
-                                                    `}>
-                                                        {day.day_number}
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-sm leading-tight">{day.title}</h4>
-                                                        <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
-                                                            {day.completed ? `+${day.points_earned} PTS` : "Não concluído"}
-                                                        </p>
-                                                    </div>
-                                                    {day.completed && <CheckCircle2 className="w-6 h-6 text-green-500" />}
-                                                </div>
-                                            ))}
+                                            {userDetails
+                                                .filter((day) => {
+                                                    if (!day.data_real) return day.completed;
+                                                    const now = new Date();
+                                                    const isCompleted = day.completed;
+                                                    const datePart = day.data_real.toString().includes('T')
+                                                        ? day.data_real.toString().split('T')[0]
+                                                        : day.data_real.toString();
+                                                    const dayStart = new Date(`${datePart}T00:00:00-03:00`);
+                                                    return isCompleted || now >= dayStart;
+                                                })
+                                                .map((day) => {
+                                                    const now = new Date();
+                                                    const isCompleted = day.completed || (Number(day.points_earned) >= 200);
+                                                    const datePart = day.data_real.toString().includes('T')
+                                                        ? day.data_real.toString().split('T')[0]
+                                                        : day.data_real.toString();
+                                                    const unlockTime = day.day_number === 7 ? '10:00:00' : '19:30:00';
+                                                    const unlockDate = new Date(`${datePart}T${unlockTime}-03:00`);
+
+                                                    const isRevealed = now >= unlockDate || isCompleted;
+                                                    const displayTitle = isRevealed ? day.title : "CONTEÚDO PRIVADO";
+
+                                                    return (
+                                                        <div
+                                                            key={day.day_number}
+                                                            className={`
+                                                                flex items-center gap-4 p-4 rounded-2xl border-2 transition-all
+                                                                ${isCompleted
+                                                                    ? "bg-green-500/20 border-green-500/60 shadow-[0_0_20px_rgba(34,197,94,0.2)] scale-[1.02]"
+                                                                    : isRevealed
+                                                                        ? "bg-red-500/5 border-red-500/10 opacity-60"
+                                                                        : "bg-muted/10 border-border/20 grayscale opacity-40"}
+                                                            `}
+                                                        >
+                                                            <div className={`
+                                                                w-10 h-10 rounded-xl flex items-center justify-center font-display font-black
+                                                                ${isCompleted ? "bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.6)]" : "bg-muted text-muted-foreground"}
+                                                            `}>
+                                                                {day.day_number}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <h4 className={`font-bold text-sm leading-tight ${isCompleted ? "text-green-400" : ""}`}>{displayTitle}</h4>
+                                                                <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
+                                                                    {isCompleted ? `+${Number(day.points_earned).toFixed(2)} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                </p>
+                                                            </div>
+                                                            {isCompleted ? (
+                                                                <div className="bg-green-500 rounded-full p-1 shadow-[0_0_15px_rgba(34,197,94,0.6)]">
+                                                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                                                </div>
+                                                            ) : !isRevealed && (
+                                                                <div className="w-6 h-6 border-2 border-border/30 rounded-full flex items-center justify-center opacity-30">
+                                                                    <div className="w-1.5 h-1.5 bg-border/50 rounded-full" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                         </div>
                                     )}
                                 </div>

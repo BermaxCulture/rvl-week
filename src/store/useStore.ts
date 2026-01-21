@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { Day, Achievement } from "@/types";
 import { mockDays, mockAchievements } from "@/mocks/days.mock";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { qrcodeService } from "@/services/qrcode.service";
 
@@ -74,6 +75,7 @@ export const useStore = create<StoreState>()(
         const mappedDays: Day[] = jornadas.map(j => {
           const p = progressMap[j.id] || {};
           return {
+            id: j.id,
             dayNumber: j.dia_number,
             date: j.data_real || '',
             pastor: j.preletor,
@@ -279,12 +281,11 @@ export const useStore = create<StoreState>()(
           (day.activities.qrScanned ? 100 : 0) +
           (type === "main" ? currentPoints : (day.activities.pastorVideoWatched ? 0 : 0)) // This logic is getting complex, let's simplify
 
-        // Let's use a cleaner approach: recalculate EVERYTHING
         const points = {
           qr: day.activities.qrScanned ? 100 : 0,
           main: 0,
           pastor: (type === "pastor" || day.activities.pastorVideoWatched) ? 50 : 0,
-          quiz: day.activities.quizCompleted ? Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * (day.content.quizMaxPoints || 100)) : 0,
+          quiz: day.activities.quizCompleted ? day.activities.quizScore : 0,
           completion: 0
         };
 
@@ -320,15 +321,12 @@ export const useStore = create<StoreState>()(
 
         if (!journey) return;
 
-        const totalQuestions = day.content.quiz.length || 1;
-        const newQuizPoints = Math.floor((score / totalQuestions) * (day.content.quizMaxPoints || 100));
+        // score here is already the dynamic points calculated by QuizTimed (0-100)
+        const qrPoints = day.activities.qrScanned ? 100 : 0;
+        const pastorPoints = day.activities.pastorVideoWatched ? 50 : 0;
+        const totalPoints = qrPoints + pastorPoints + score;
 
-        const totalPoints =
-          (day.activities.qrScanned ? 100 : 0) +
-          50 + // Points for pastor video
-          newQuizPoints;
-
-        console.log(`📝 Completando quiz: Dia ${dayNumber}, Score ${score}/${totalQuestions}, Points ${newQuizPoints}, Total ${totalPoints}`);
+        console.log(`📝 Enviando para Supabase: Dia ${dayNumber}, QuizPts: ${score}, QR: ${qrPoints}, Pastor: ${pastorPoints}, Total: ${totalPoints}`);
 
         const { error } = await supabase
           .from('progresso_usuario')
@@ -341,12 +339,15 @@ export const useStore = create<StoreState>()(
           }, { onConflict: 'user_id,jornada_id' });
 
         if (error) {
-          console.error('❌ Erro ao completar quiz:', error);
+          console.error('❌ Erro no upsert do progresso:', error);
+          toast.error("Erro ao salvar progresso no servidor.");
           return;
         }
 
+        console.log('✅ Progresso salvo com sucesso! Atualizando estado local...');
         await get().fetchDays();
         get().checkAchievements();
+        toast.success("Progresso salvo com sucesso!");
       },
 
       markDayComplete: async (dayNumber: number) => {
@@ -367,8 +368,8 @@ export const useStore = create<StoreState>()(
 
         const totalPoints =
           (day.activities.qrScanned ? 100 : 0) +
-          50 + // Pastor video
-          Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * (day.content.quizMaxPoints || 100));
+          (day.activities.pastorVideoWatched ? 50 : 0) +
+          day.activities.quizScore;
 
         const { error } = await supabase
           .from('progresso_usuario')
@@ -407,15 +408,15 @@ export const useStore = create<StoreState>()(
               break;
             case "conhecedor_palavra":
               progress = perfectQuizCount;
-              unlocked = perfectQuizCount >= 3; // Ajustado para 3 para teste mais fácil, ou manter 7
+              unlocked = perfectQuizCount >= 7;
               break;
             case "sempre_presente":
               progress = qrScannedCount;
-              unlocked = qrScannedCount >= 1; // Ajustado para 1 para teste
+              unlocked = qrScannedCount >= 7;
               break;
             case "comprometido":
               progress = completedDaysCount;
-              unlocked = completedDaysCount >= 3; // Ajustado para 3
+              unlocked = completedDaysCount >= 4;
               break;
           }
 

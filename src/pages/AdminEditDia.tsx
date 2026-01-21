@@ -490,17 +490,20 @@ export default function AdminEditDia() {
                                                     className="w-full bg-muted/10 border-2 border-border rounded-xl px-4 py-2 focus:border-purple-500 outline-none transition-all text-sm h-20 resize-none italic"
                                                 />
                                             </div>
-                                        </div>
-                                    ))}
+                                        </div >
+                                    ))
+                                    }
 
-                                    {formData.quiz.length === 0 && (
-                                        <div className="text-center py-10 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
-                                            Nenhuma pergunta cadastrada para este dia.
-                                        </div>
-                                    )}
+                                    {
+                                        formData.quiz.length === 0 && (
+                                            <div className="text-center py-10 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
+                                                Nenhuma pergunta cadastrada para este dia.
+                                            </div>
+                                        )
+                                    }
                                     <div ref={quizEndRef} />
-                                </div>
-                            </Card>
+                                </div >
+                            </Card >
 
                             <div className="flex flex-col sm:flex-row gap-4 pt-6">
                                 <Button
@@ -530,9 +533,9 @@ export default function AdminEditDia() {
                                     As alterações serão salvas diretamente no banco de dados do Supabase e ficarão visíveis para todos os usuários imediatamente.
                                 </p>
                             </div>
-                        </form>
-                    </motion.div>
-                </div>
+                        </form >
+                    </motion.div >
+                </div >
             </main >
 
             {/* Modal de Edição Expandida */}

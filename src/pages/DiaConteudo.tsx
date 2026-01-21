@@ -25,7 +25,7 @@ import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/ButtonCustom";
 import { Card } from "@/components/ui/CardCustom";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Quiz } from "@/components/features/Quiz";
+import { QuizTimed } from "@/components/features/QuizTimed";
 import { useStore } from "@/store/useStore";
 import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
@@ -128,7 +128,7 @@ export default function DiaConteudo() {
     if (!isPreview) {
       completeQuiz(dayNum, score);
     } else {
-      toast.info(`Quiz concluído (Modo Preview). Pontuação: ${score}/3`);
+      toast.info(`Quiz concluído (Modo Preview). Pontuação: ${score.toFixed(2)} pts`);
     }
   };
 
@@ -207,7 +207,7 @@ export default function DiaConteudo() {
                 <span className="font-medium">Voltar</span>
               </Link>
 
-              {(user?.role === 'admin' || user?.role === 'pastor') && (
+              {(user?.role === 'admin') && (
                 <Link
                   to={`/jornada/dia/${dayNumber}/editar`}
                   className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full hover:bg-primary/20 transition-all font-bold text-sm shadow-sm border border-primary/20"
@@ -261,7 +261,7 @@ export default function DiaConteudo() {
           </motion.div>
 
           {/* Admin QR Code Info */}
-          {(user.role === "admin" || user.role === "pastor") && (
+          {(user.role === "admin") && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -462,18 +462,17 @@ export default function DiaConteudo() {
                 <CheckCircle className="w-16 h-16 text-success mx-auto mb-4" />
                 <h3 className="font-display font-bold text-xl mb-2">Quiz Concluído!</h3>
                 <p className="text-muted-foreground">
-                  Você fez {day.activities.quizScore} de {day.content.quiz.length} acertos
+                  Pontuação obtida: {day.activities.quizScore.toFixed(2)} pts
                 </p>
                 <p className="text-success font-semibold mt-2">
-                  +{Math.floor((day.activities.quizScore / (day.content.quiz.length || 1)) * (day.content.quizMaxPoints || 100))} pts conquistados
+                  +{day.activities.quizScore.toFixed(2)} pts conquistados
                 </p>
               </Card>
             ) : (
-              <Quiz
+              <QuizTimed
                 questions={day.content.quiz}
-                timeLimit={day.content.quizTimeLimit}
-                penaltyTime={day.content.quizPenaltyTime}
-                maxPoints={day.content.quizMaxPoints}
+                userId={user.id}
+                jornadaId={day.id}
                 onComplete={handleQuizComplete}
               />
             )}
@@ -531,7 +530,7 @@ export default function DiaConteudo() {
                     </span>
                     <span className="ml-auto text-sm font-semibold">
                       {day.activities.quizCompleted
-                        ? `+${Math.floor((day.activities.quizScore / (day.content.quiz?.length || 1)) * day.points.quiz)} pts`
+                        ? `+${day.activities.quizScore.toFixed(2)} pts`
                         : `0/${day.points.quiz} pts`}
                     </span>
                   </div>
