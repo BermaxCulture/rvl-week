@@ -117,7 +117,7 @@ export default function DiaConteudo() {
     } else {
       setIsLoadingPastorVideo(false);
       if (!alreadyWatched) {
-        toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +50 pts", {
+        toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : `Vídeo assistido! +${day.points.videoPastor} pts`, {
           icon: <Zap className="w-5 h-5 text-primary fill-primary" />
         });
       }
@@ -427,7 +427,7 @@ export default function DiaConteudo() {
 
                 {!day.activities.pastorVideoWatched && (
                   <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold z-10 shadow-lg">
-                    +50 pts
+                    +{day.points.videoPastor} pts
                   </div>
                 )}
               </div>
@@ -439,7 +439,7 @@ export default function DiaConteudo() {
                 </p>
                 {day.activities.pastorVideoWatched && (
                   <span className="text-success text-sm font-bold flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4" /> +50 pts conquistados
+                    <CheckCircle className="w-4 h-4" /> +{day.points.videoPastor} pts conquistados
                   </span>
                 )}
               </div>
@@ -474,6 +474,7 @@ export default function DiaConteudo() {
                 userId={user.id}
                 jornadaId={day.id}
                 onComplete={handleQuizComplete}
+                maxPoints={day.points.quiz}
               />
             )}
           </motion.section>
@@ -499,7 +500,7 @@ export default function DiaConteudo() {
                     QR Code escaneado
                   </span>
                   <span className="ml-auto text-sm font-semibold">
-                    {day.activities.qrScanned ? "+100 pts" : "0/100 pts"}
+                    {day.activities.qrScanned ? `+${day.points.qrcode} pts` : `0/${day.points.qrcode} pts`}
                   </span>
                 </div>
 
@@ -514,7 +515,7 @@ export default function DiaConteudo() {
                     Vídeo do pastor assistido
                   </span>
                   <span className="ml-auto text-sm font-semibold">
-                    {day.activities.pastorVideoWatched ? "+50 pts" : "0/50 pts"}
+                    {day.activities.pastorVideoWatched ? `+${day.points.videoPastor} pts` : `0/${day.points.videoPastor} pts`}
                   </span>
                 </div>
 

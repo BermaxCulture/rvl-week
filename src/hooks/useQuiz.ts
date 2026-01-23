@@ -7,9 +7,10 @@ interface UseQuizProps {
     totalQuestions: number;
     isActive: boolean;
     onComplete: (totalScore: number) => void;
+    maxPoints?: number;
 }
 
-export const useQuiz = ({ userId, jornadaId, totalQuestions, isActive, onComplete }: UseQuizProps) => {
+export const useQuiz = ({ userId, jornadaId, totalQuestions, isActive, onComplete, maxPoints = 100 }: UseQuizProps) => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [timeLeft, setTimeLeft] = useState(60);
     const [isFinished, setIsFinished] = useState(false);
@@ -62,7 +63,8 @@ export const useQuiz = ({ userId, jornadaId, totalQuestions, isActive, onComplet
         if (isFinished || isSaving || isWaitingNext) return;
 
         const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        const score = quizService.calculateScore(Math.min(timeTaken, 60));
+        const maxPointsPerQuestion = maxPoints / totalQuestions;
+        const score = quizService.calculateScore(Math.min(timeTaken, 60), maxPointsPerQuestion);
         const finalScore = answer === '' ? 0 : score;
 
         const newAnswer: QuizAnswer = {

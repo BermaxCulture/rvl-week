@@ -14,9 +14,10 @@ interface QuizTimedProps {
     userId: string;
     jornadaId: string;
     onComplete: (score: number) => void;
+    maxPoints?: number;
 }
 
-export function QuizTimed({ questions, userId, jornadaId, onComplete }: QuizTimedProps) {
+export function QuizTimed({ questions, userId, jornadaId, onComplete, maxPoints = 100 }: QuizTimedProps) {
     const [gameState, setGameState] = useState<"intro" | "playing" | "finished">("intro");
 
     const {
@@ -34,7 +35,8 @@ export function QuizTimed({ questions, userId, jornadaId, onComplete }: QuizTime
         jornadaId,
         totalQuestions: questions?.length || 0,
         isActive: gameState === "playing",
-        onComplete
+        onComplete,
+        maxPoints
     });
 
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -121,7 +123,7 @@ export function QuizTimed({ questions, userId, jornadaId, onComplete }: QuizTime
                         <div className="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center mt-1 shrink-0">
                             <span className="text-xs font-bold text-primary">3</span>
                         </div>
-                        <p className="text-sm text-muted-foreground">Cada acerto vale até <strong>33.33 pontos</strong> de sabedoria.</p>
+                        <p className="text-sm text-muted-foreground">Cada acerto vale até <strong>{(maxPoints / (questions?.length || 1)).toFixed(2)} pontos</strong> de sabedoria.</p>
                     </div>
                 </div>
                 <Button variant="primary" size="lg" onClick={() => setGameState("playing")} fullWidth icon={Zap}>

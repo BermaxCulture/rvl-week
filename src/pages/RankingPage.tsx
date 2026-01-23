@@ -425,7 +425,8 @@ export default function RankingPage() {
                                                 })
                                                 .map((day) => {
                                                     const now = new Date();
-                                                    const isCompleted = day.completed || (Number(day.points_earned) >= 200);
+                                                    const maxDayPoints = day.day_number === 1 ? 200 : 250;
+                                                    const isCompleted = day.completed || (Number(day.points_earned) >= maxDayPoints);
                                                     const datePart = day.data_real.toString().includes('T')
                                                         ? day.data_real.toString().split('T')[0]
                                                         : day.data_real.toString();

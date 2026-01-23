@@ -74,6 +74,12 @@ export const useStore = create<StoreState>()(
 
         const mappedDays: Day[] = jornadas.map(j => {
           const p = progressMap[j.id] || {};
+          const isDayOne = j.dia_number === 1;
+
+          const qrMax = isDayOne ? 75 : 100;
+          const pastorMax = isDayOne ? 25 : 50;
+          const quizMax = j.quiz_max_points || 100;
+
           return {
             id: j.id,
             dayNumber: j.dia_number,
@@ -85,12 +91,12 @@ export const useStore = create<StoreState>()(
             verseReference: j.versiculo_referencia,
             status: p.quiz_concluido ? 'completed' : (p.jornada_id ? 'available' : 'locked'),
             points: {
-              qrcode: 100,
+              qrcode: qrMax,
               videoMain: 0,
-              videoPastor: 50,
-              quiz: j.quiz_max_points || 100,
+              videoPastor: pastorMax,
+              quiz: quizMax,
               completion: 0,
-              total: 100 + 50 + (j.quiz_max_points || 100), // QR + Video + Quiz
+              total: qrMax + pastorMax + quizMax, // QR + Video + Quiz
               earned: p.pontos_acumulados || 0
             },
             activities: {
@@ -177,7 +183,8 @@ export const useStore = create<StoreState>()(
           }
         }
 
-        const points = method === "qrcode" ? 100 : 0;
+        const isDayOne = dayNumber === 1;
+        const points = method === "qrcode" ? (isDayOne ? 75 : 100) : 0;
 
         const { error } = await supabase
           .from('progresso_usuario')
@@ -192,7 +199,7 @@ export const useStore = create<StoreState>()(
         if (!error) {
           await get().fetchDays();
           get().checkAchievements();
-          return { success: true, message: method === "qrcode" ? "Dia desbloqueado com sucesso! +100 pts" : "Dia desbloqueado" };
+          return { success: true, message: method === "qrcode" ? `Dia desbloqueado com sucesso! +${points} pts` : "Dia desbloqueado" };
         } else {
           return { success: false, message: "Erro ao atualizar progresso no banco" };
         }
@@ -275,16 +282,14 @@ export const useStore = create<StoreState>()(
 
         if (!journey) return;
 
-        const currentPoints = day.points.earned || 0;
-        const newTotalPoints =
-          (type === "main" ? 0 : 50) + // Points for current action
-          (day.activities.qrScanned ? 100 : 0) +
-          (type === "main" ? currentPoints : (day.activities.pastorVideoWatched ? 0 : 0)) // This logic is getting complex, let's simplify
+        const isDayOne = dayNumber === 1;
+        const qrMax = isDayOne ? 75 : 100;
+        const pastorMax = isDayOne ? 25 : 50;
 
         const points = {
-          qr: day.activities.qrScanned ? 100 : 0,
+          qr: day.activities.qrScanned ? qrMax : 0,
           main: 0,
-          pastor: (type === "pastor" || day.activities.pastorVideoWatched) ? 50 : 0,
+          pastor: (type === "pastor" || day.activities.pastorVideoWatched) ? pastorMax : 0,
           quiz: day.activities.quizCompleted ? day.activities.quizScore : 0,
           completion: 0
         };
@@ -322,8 +327,9 @@ export const useStore = create<StoreState>()(
         if (!journey) return;
 
         // score here is already the dynamic points calculated by QuizTimed (0-100)
-        const qrPoints = day.activities.qrScanned ? 100 : 0;
-        const pastorPoints = day.activities.pastorVideoWatched ? 50 : 0;
+        const isDayOne = dayNumber === 1;
+        const qrPoints = day.activities.qrScanned ? (isDayOne ? 75 : 100) : 0;
+        const pastorPoints = day.activities.pastorVideoWatched ? (isDayOne ? 25 : 50) : 0;
         const totalPoints = qrPoints + pastorPoints + score;
 
         console.log(`📝 Enviando para Supabase: Dia ${dayNumber}, QuizPts: ${score}, QR: ${qrPoints}, Pastor: ${pastorPoints}, Total: ${totalPoints}`);
@@ -366,9 +372,13 @@ export const useStore = create<StoreState>()(
 
         if (!journey) return;
 
+        const isDayOne = dayNumber === 1;
+        const qrMax = isDayOne ? 75 : 100;
+        const pastorMax = isDayOne ? 25 : 50;
+
         const totalPoints =
-          (day.activities.qrScanned ? 100 : 0) +
-          (day.activities.pastorVideoWatched ? 50 : 0) +
+          (day.activities.qrScanned ? qrMax : 0) +
+          (day.activities.pastorVideoWatched ? pastorMax : 0) +
           day.activities.quizScore;
 
         const { error } = await supabase
