@@ -12,12 +12,12 @@ export const mockDays: Day[] = [
     verseReference: "Provérbios 3:5-6",
     status: "available",
     points: {
-      qrcode: 100,
+      qrcode: 75,
       videoMain: 0,
-      videoPastor: 50,
+      videoPastor: 25,
       quiz: 100,
       completion: 0,
-      total: 250,
+      total: 200,
       earned: 0,
     },
     activities: {
