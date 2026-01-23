@@ -110,7 +110,7 @@ export default function DiaConteudo() {
     if (type === "main") {
       setIsLoadingVideo(false);
       if (!alreadyWatched) {
-        toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido! +30 pts", {
+        toast.success(isPreview ? "Vídeo assistido (Modo Preview)" : "Vídeo assistido!", {
           icon: <Zap className="w-5 h-5 text-secondary fill-secondary" />
         });
       }
@@ -158,7 +158,7 @@ export default function DiaConteudo() {
       origin: { y: 0.6 },
     });
 
-    toast.success("Dia concluído! +50 pts de conclusão", {
+    toast.success("Dia concluído!", {
       icon: <PartyPopper className="w-5 h-5 text-success" />,
     });
 
