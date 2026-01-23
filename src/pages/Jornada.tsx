@@ -349,7 +349,7 @@ export default function Jornada() {
             </h3>
 
             <p className="text-muted-foreground text-center mb-8 leading-relaxed">
-              Você pode desbloquear o conteúdo mesmo sem ter ido ao culto, mas <span className="text-amber-500 font-bold">não ganhará os +100 pontos</span> de presença. Deseja continuar?
+              Você pode desbloquear o conteúdo mesmo sem ter ido ao culto, mas <span className="text-amber-500 font-bold">não ganhará os +{pendingDay === 1 ? '75' : '100'} pontos</span> de presença. Deseja continuar?
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">

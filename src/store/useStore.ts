@@ -184,22 +184,31 @@ export const useStore = create<StoreState>()(
         }
 
         const isDayOne = dayNumber === 1;
-        const points = method === "qrcode" ? (isDayOne ? 75 : 100) : 0;
+        const qrMax = isDayOne ? 75 : 100;
+        const pastorMax = isDayOne ? 25 : 50;
+
+        const points = {
+          qr: method === "qrcode" ? qrMax : (dayToUnlock.activities.qrScanned ? qrMax : 0),
+          pastor: dayToUnlock.activities.pastorVideoWatched ? pastorMax : 0,
+          quiz: dayToUnlock.activities.quizCompleted ? dayToUnlock.activities.quizScore : 0
+        };
+
+        const totalPoints = points.qr + points.pastor + points.quiz;
 
         const { error } = await supabase
           .from('progresso_usuario')
           .upsert({
             user_id: user.id,
             jornada_id: journey.id,
-            qr_code_escaneado: method === "qrcode",
-            metodo_desbloqueio: method === "qrcode" ? "QR Code" : "Manual",
-            pontos_acumulados: points
+            qr_code_escaneado: method === "qrcode" || dayToUnlock.activities.qrScanned,
+            metodo_desbloqueio: method === "qrcode" ? "QR Code" : (dayToUnlock.activities.qrScanned ? "QR Code" : "Manual"),
+            pontos_acumulados: totalPoints
           }, { onConflict: 'user_id,jornada_id' });
 
         if (!error) {
           await get().fetchDays();
           get().checkAchievements();
-          return { success: true, message: method === "qrcode" ? `Dia desbloqueado com sucesso! +${points} pts` : "Dia desbloqueado" };
+          return { success: true, message: method === "qrcode" ? `Dia desbloqueado com sucesso! +${points.qr} pts` : "Dia desbloqueado" };
         } else {
           return { success: false, message: "Erro ao atualizar progresso no banco" };
         }
