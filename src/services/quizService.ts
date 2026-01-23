@@ -15,7 +15,7 @@ export interface QuizResultData {
 }
 
 export const quizService = {
-    calculateScore(timeTaken: number, maxPointsPerQuestion: number = 33.33): number {
+    calculateScore(timeTaken: number, maxPointsPerQuestion: number): number {
         const maxTime = 60; // seconds
         const gracePeriod = 15; // seconds before point reduction starts
 
@@ -26,8 +26,7 @@ export const quizService = {
         const reductionTime = maxTime - gracePeriod; // 45s
         const remainingReductionTime = Math.max(0, maxTime - timeTaken); // 0 to 45
 
-        const score = (remainingReductionTime / reductionTime) * maxPointsPerQuestion;
-        return Math.round(score * 100) / 100; // round to 2 decimals
+        return (remainingReductionTime / reductionTime) * maxPointsPerQuestion;
     },
 
     async saveQuizResult(data: QuizResultData) {

@@ -44,12 +44,12 @@ export const useQuiz = ({ userId, jornadaId, totalQuestions, isActive, onComplet
     const saveResults = useCallback(async (finalAnswers: QuizAnswer[]) => {
         setIsSaving(true);
         try {
-            const totalScore = finalAnswers.reduce((sum, a) => sum + a.score, 0);
+            const totalScore = Math.round(finalAnswers.reduce((sum, a) => sum + a.score, 0));
             await quizService.saveQuizResult({
                 userId,
                 jornadaId,
                 answers: finalAnswers,
-                totalScore: Math.round(totalScore * 100) / 100
+                totalScore: totalScore
             });
             onComplete(totalScore);
         } catch (error) {
@@ -123,6 +123,6 @@ export const useQuiz = ({ userId, jornadaId, totalQuestions, isActive, onComplet
         lastScore,
         handleAnswer,
         goToNextQuestion,
-        totalScore: answers.reduce((sum, a) => sum + a.score, 0)
+        totalScore: Math.round(answers.reduce((sum, a) => sum + a.score, 0))
     };
 };
