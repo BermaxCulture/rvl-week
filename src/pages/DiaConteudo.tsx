@@ -140,9 +140,10 @@ export default function DiaConteudo() {
       return;
     }
     const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
+    const isDaySix = day.dayNumber === 6;
     const allComplete =
       day.activities.qrScanned &&
-      day.activities.pastorVideoWatched &&
+      (isDaySix || day.activities.pastorVideoWatched) &&
       (!hasQuiz || day.activities.quizCompleted);
 
     if (!allComplete) {
@@ -170,9 +171,10 @@ export default function DiaConteudo() {
   const totalEarned = day.points.earned;
   const totalPossible = day.points.total;
   const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
+  const isDaySix = day.dayNumber === 6;
   const allComplete =
     day.activities.qrScanned &&
-    day.activities.pastorVideoWatched &&
+    (isDaySix || day.activities.pastorVideoWatched) &&
     (!hasQuiz || day.activities.quizCompleted);
 
   return (
@@ -354,97 +356,99 @@ export default function DiaConteudo() {
 
 
           {/* Pastor Video */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-8"
-          >
-            <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-primary" />
-              Preparação para o próximo dia
-            </h2>
+          {!isDaySix && (
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mb-8"
+            >
+              <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-primary" />
+                Preparação para o próximo dia
+              </h2>
 
-            <Card className="relative overflow-hidden p-0">
-              <div className="aspect-video bg-muted flex items-center justify-center relative">
-                {isLoadingPastorVideo ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-muted-foreground">Preparando player...</p>
-                  </div>
-                ) : (showPastorVideo) ? (
-                  isDirectVideo(day.content.pastorVideoUrl) ? (
-                    <video
-                      className="w-full h-full object-contain bg-black"
-                      src={day.content.pastorVideoUrl}
-                      controls
-                      autoPlay={showPastorVideo}
-                      playsInline
-                    />
-                  ) : (
-                    <iframe
-                      className="w-full h-full"
-                      src={`https://www.youtube.com/embed/${getYouTubeId(day.content.pastorVideoUrl)}${showPastorVideo ? '?autoplay=1' : ''}`}
-                      title="YouTube video player"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                    ></iframe>
-                  )
-                ) : (
-                  <button
-                    onClick={() => handleWatchVideo("pastor")}
-                    className="relative w-full h-full flex items-center justify-center group overflow-hidden"
-                  >
-                    {isDirectVideo(day.content.pastorVideoUrl) ? (
+              <Card className="relative overflow-hidden p-0">
+                <div className="aspect-video bg-muted flex items-center justify-center relative">
+                  {isLoadingPastorVideo ? (
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="text-muted-foreground">Preparando player...</p>
+                    </div>
+                  ) : (showPastorVideo) ? (
+                    isDirectVideo(day.content.pastorVideoUrl) ? (
                       <video
-                        src={`${day.content.pastorVideoUrl}#t=0.5`}
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                        muted
+                        className="w-full h-full object-contain bg-black"
+                        src={day.content.pastorVideoUrl}
+                        controls
+                        autoPlay={showPastorVideo}
                         playsInline
-                        preload="metadata"
                       />
                     ) : (
-                      <img
-                        src={`https://img.youtube.com/vi/${getYouTubeId(day.content.pastorVideoUrl)}/maxresdefault.jpg`}
-                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
-                        alt="Thumbnail"
-                        onError={(e) => {
-                          e.currentTarget.src = `https://img.youtube.com/vi/${getYouTubeId(day.content.pastorVideoUrl)}/hqdefault.jpg`;
-                        }}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                      <iframe
+                        className="w-full h-full"
+                        src={`https://www.youtube.com/embed/${getYouTubeId(day.content.pastorVideoUrl)}${showPastorVideo ? '?autoplay=1' : ''}`}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      ></iframe>
+                    )
+                  ) : (
+                    <button
+                      onClick={() => handleWatchVideo("pastor")}
+                      className="relative w-full h-full flex items-center justify-center group overflow-hidden"
+                    >
+                      {isDirectVideo(day.content.pastorVideoUrl) ? (
+                        <video
+                          src={`${day.content.pastorVideoUrl}#t=0.5`}
+                          className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img
+                          src={`https://img.youtube.com/vi/${getYouTubeId(day.content.pastorVideoUrl)}/maxresdefault.jpg`}
+                          className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                          alt="Thumbnail"
+                          onError={(e) => {
+                            e.currentTarget.src = `https://img.youtube.com/vi/${getYouTubeId(day.content.pastorVideoUrl)}/hqdefault.jpg`;
+                          }}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
 
-                    <div className="relative flex flex-col items-center gap-3 z-10">
-                      <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-cartoon group-hover:scale-110 transition-transform">
-                        <Play className="w-10 h-10 text-primary-foreground ml-1" />
+                      <div className="relative flex flex-col items-center gap-3 z-10">
+                        <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center shadow-cartoon group-hover:scale-110 transition-transform">
+                          <Play className="w-10 h-10 text-primary-foreground ml-1" />
+                        </div>
+                        <p className="font-semibold text-white drop-shadow-md">Clique para assistir</p>
                       </div>
-                      <p className="font-semibold text-white drop-shadow-md">Clique para assistir</p>
+                    </button>
+                  )}
+
+                  {!day.activities.pastorVideoWatched && (
+                    <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold z-10 shadow-lg">
+                      +{day.points.videoPastor} pts
                     </div>
-                  </button>
-                )}
+                  )}
+                </div>
 
-                {!day.activities.pastorVideoWatched && (
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold z-10 shadow-lg">
-                    +{day.points.videoPastor} pts
-                  </div>
-                )}
-              </div>
-
-              <div className="p-4 flex items-center justify-between bg-card/50 border-t border-border/5">
-                <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary"></span>
-                  Duração: ~2 min
-                </p>
-                {day.activities.pastorVideoWatched && (
-                  <span className="text-success text-sm font-bold flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4" /> +{day.points.videoPastor} pts conquistados
-                  </span>
-                )}
-              </div>
-            </Card>
-          </motion.section>
+                <div className="p-4 flex items-center justify-between bg-card/50 border-t border-border/5">
+                  <p className="text-sm text-muted-foreground font-medium flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>
+                    Duração: ~2 min
+                  </p>
+                  {day.activities.pastorVideoWatched && (
+                    <span className="text-success text-sm font-bold flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" /> +{day.points.videoPastor} pts conquistados
+                    </span>
+                  )}
+                </div>
+              </Card>
+            </motion.section>
+          )}
 
           {/* Quiz */}
           <motion.section
@@ -505,19 +509,21 @@ export default function DiaConteudo() {
                 </div>
 
 
-                <div className="flex items-center gap-3">
-                  {day.activities.pastorVideoWatched ? (
-                    <CheckCircle className="w-5 h-5 text-success" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border-2 border-border" />
-                  )}
-                  <span className={day.activities.pastorVideoWatched ? "text-foreground" : "text-muted-foreground"}>
-                    Vídeo do pastor assistido
-                  </span>
-                  <span className="ml-auto text-sm font-semibold">
-                    {day.activities.pastorVideoWatched ? `+${day.points.videoPastor} pts` : `0/${day.points.videoPastor} pts`}
-                  </span>
-                </div>
+                {!isDaySix && (
+                  <div className="flex items-center gap-3">
+                    {day.activities.pastorVideoWatched ? (
+                      <CheckCircle className="w-5 h-5 text-success" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full border-2 border-border" />
+                    )}
+                    <span className={day.activities.pastorVideoWatched ? "text-foreground" : "text-muted-foreground"}>
+                      Vídeo do pastor assistido
+                    </span>
+                    <span className="ml-auto text-sm font-semibold">
+                      {day.activities.pastorVideoWatched ? `+${day.points.videoPastor} pts` : `0/${day.points.videoPastor} pts`}
+                    </span>
+                  </div>
+                )}
 
                 {hasQuiz && (
                   <div className="flex items-center gap-3">

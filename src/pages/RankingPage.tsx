@@ -282,7 +282,7 @@ export default function RankingPage() {
                                                 {user.name}
                                             </h3>
                                             <span className="text-[9px] md:text-xs font-bold text-muted-foreground uppercase tracking-wide">
-                                                {user.completed_days}/7 dias concluídos
+                                                {user.completed_days}/6 dias concluídos
                                             </span>
                                         </div>
 
@@ -361,7 +361,7 @@ export default function RankingPage() {
                                             </div>
                                             <div className="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1.5 font-black italic text-xs md:text-base">
                                                 <Calendar className="w-3.5 h-3.5" />
-                                                {selectedUser.completed_days}/7 DIAS
+                                                {selectedUser.completed_days}/6 DIAS
                                             </div>
                                             <div className="bg-muted text-muted-foreground px-3 py-1 rounded-full flex items-center gap-1.5 font-black italic uppercase text-[9px] md:text-[10px] tracking-widest border border-border/50">
                                                 <Church className="w-3 h-3" />
@@ -414,6 +414,7 @@ export default function RankingPage() {
                                         <div className="grid gap-3 text-left">
                                             {userDetails
                                                 .filter((day) => {
+                                                    if (day.day_number === 7) return false;
                                                     if (!day.data_real) return day.completed;
                                                     const now = new Date();
                                                     const isCompleted = day.completed;

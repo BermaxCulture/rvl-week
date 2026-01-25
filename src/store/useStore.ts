@@ -75,9 +75,10 @@ export const useStore = create<StoreState>()(
         const mappedDays: Day[] = jornadas.map(j => {
           const p = progressMap[j.id] || {};
           const isDayOne = j.dia_number === 1;
+          const isDaySix = j.dia_number === 6;
 
           const qrMax = isDayOne ? 75 : 100;
-          const pastorMax = isDayOne ? 25 : 50;
+          const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
           const quizMax = j.quiz_max_points || 100;
 
           return {
@@ -184,8 +185,9 @@ export const useStore = create<StoreState>()(
         }
 
         const isDayOne = dayNumber === 1;
+        const isDaySix = dayNumber === 6;
         const qrMax = isDayOne ? 75 : 100;
-        const pastorMax = isDayOne ? 25 : 50;
+        const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
 
         const points = {
           qr: method === "qrcode" ? qrMax : (dayToUnlock.activities.qrScanned ? qrMax : 0),
@@ -292,8 +294,9 @@ export const useStore = create<StoreState>()(
         if (!journey) return;
 
         const isDayOne = dayNumber === 1;
+        const isDaySix = dayNumber === 6;
         const qrMax = isDayOne ? 75 : 100;
-        const pastorMax = isDayOne ? 25 : 50;
+        const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
 
         const points = {
           qr: day.activities.qrScanned ? qrMax : 0,
@@ -337,8 +340,9 @@ export const useStore = create<StoreState>()(
 
         // score here is already the dynamic points calculated by QuizTimed (0-100)
         const isDayOne = dayNumber === 1;
+        const isDaySix = dayNumber === 6;
         const qrPoints = day.activities.qrScanned ? (isDayOne ? 75 : 100) : 0;
-        const pastorPoints = day.activities.pastorVideoWatched ? (isDayOne ? 25 : 50) : 0;
+        const pastorPoints = day.activities.pastorVideoWatched ? (isDayOne ? 25 : (isDaySix ? 0 : 50)) : 0;
         const totalPoints = qrPoints + pastorPoints + score;
 
         console.log(`📝 Enviando para Supabase: Dia ${dayNumber}, QuizPts: ${score}, QR: ${qrPoints}, Pastor: ${pastorPoints}, Total: ${totalPoints}`);
@@ -382,8 +386,9 @@ export const useStore = create<StoreState>()(
         if (!journey) return;
 
         const isDayOne = dayNumber === 1;
+        const isDaySix = dayNumber === 6;
         const qrMax = isDayOne ? 75 : 100;
-        const pastorMax = isDayOne ? 25 : 50;
+        const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
 
         const totalPoints =
           (day.activities.qrScanned ? qrMax : 0) +
@@ -423,15 +428,15 @@ export const useStore = create<StoreState>()(
           switch (achievement.id) {
             case "jornada_completa":
               progress = completedDaysCount;
-              unlocked = completedDaysCount >= 7;
+              unlocked = completedDaysCount >= 6;
               break;
             case "conhecedor_palavra":
               progress = perfectQuizCount;
-              unlocked = perfectQuizCount >= 7;
+              unlocked = perfectQuizCount >= 6;
               break;
             case "sempre_presente":
               progress = qrScannedCount;
-              unlocked = qrScannedCount >= 7;
+              unlocked = qrScannedCount >= 6;
               break;
             case "comprometido":
               progress = completedDaysCount;

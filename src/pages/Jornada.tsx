@@ -116,11 +116,11 @@ export default function Jornada() {
 
                 <div className="max-w-md">
                   <p className="text-sm text-foreground/80 mb-2">
-                    Progresso: {completedDaysCount}/7 dias concluídos
+                    Progresso: {completedDaysCount}/6 dias concluídos
                   </p>
                   <ProgressBar
                     current={completedDaysCount}
-                    total={7}
+                    total={6}
                     color="purple"
                     size="lg"
                   />
@@ -147,21 +147,23 @@ export default function Jornada() {
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {days.map((day, index) => (
-                <motion.div
-                  key={day.dayNumber}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <DayCard
-                    day={day}
-                    onScanQR={() => { }} // Não mais usado, o modal abre dentro do card
-                    onManualUnlock={() => handleManualUnlock(day.dayNumber)}
-                    onViewDay={() => handleViewDay(day.dayNumber)}
-                  />
-                </motion.div>
-              ))}
+              {days
+                .filter(day => day.dayNumber !== 7)
+                .map((day, index) => (
+                  <motion.div
+                    key={day.dayNumber}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <DayCard
+                      day={day}
+                      onScanQR={() => { }} // Não mais usado, o modal abre dentro do card
+                      onManualUnlock={() => handleManualUnlock(day.dayNumber)}
+                      onViewDay={() => handleViewDay(day.dayNumber)}
+                    />
+                  </motion.div>
+                ))}
             </div>
           </section>
 
@@ -188,22 +190,22 @@ export default function Jornada() {
                   {
                     id: 'jornada_completa',
                     name: 'Jornada Completa',
-                    description: 'Completou os 7 dias da RVL Week',
+                    description: 'Completou os 6 dias da RVL Week',
                     icon: Trophy,
                     color: 'yellow',
                     progress: completed,
-                    total: totalDays,
-                    unlocked: completed === totalDays
+                    total: 6,
+                    unlocked: completed === 6
                   },
                   {
                     id: 'conhecedor_palavra',
                     name: 'Conhecedor da Palavra',
-                    description: '100% de acerto em todos os 7 quiz',
+                    description: '100% de acerto em todos os 6 quiz',
                     icon: BookOpen,
                     color: 'purple',
                     progress: perfectQuizzes,
-                    total: totalDays,
-                    unlocked: perfectQuizzes === totalDays
+                    total: 6,
+                    unlocked: perfectQuizzes === 6
                   },
                   {
                     id: 'sempre_presente',
@@ -212,8 +214,8 @@ export default function Jornada() {
                     icon: Flame,
                     color: 'orange',
                     progress: qrScans,
-                    total: totalDays,
-                    unlocked: qrScans === totalDays
+                    total: 6,
+                    unlocked: qrScans === 6
                   },
                   {
                     id: 'comprometido',
