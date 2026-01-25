@@ -145,9 +145,10 @@ export default function DiaConteudo() {
     }
     const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
     const isDaySeven = day.dayNumber === 7;
+    const isDaySix = day.dayNumber === 6;
     const allComplete =
       day.activities.qrScanned &&
-      (isDaySeven || day.activities.pastorVideoWatched) &&
+      (isDaySeven || isDaySix || day.activities.pastorVideoWatched) &&
       (!hasQuiz || day.activities.quizCompleted);
 
     if (!allComplete) {
@@ -175,9 +176,10 @@ export default function DiaConteudo() {
   const totalPossible = day.points.total;
   const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
   const isDaySeven = day.dayNumber === 7;
+  const isDaySix = day.dayNumber === 6;
   const allComplete =
     day.activities.qrScanned &&
-    (isDaySeven || day.activities.pastorVideoWatched) &&
+    (isDaySeven || isDaySix || day.activities.pastorVideoWatched) &&
     (!hasQuiz || day.activities.quizCompleted);
 
   return (
@@ -356,7 +358,7 @@ export default function DiaConteudo() {
           </motion.section>
 
           {/* Pastor Video */}
-          {!isDaySeven && (
+          {!isDaySix && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -428,7 +430,7 @@ export default function DiaConteudo() {
                     </button>
                   )}
 
-                  {!day.activities.pastorVideoWatched && (
+                  {!day.activities.pastorVideoWatched && day.points.videoPastor > 0 && (
                     <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-bold z-10 shadow-lg">
                       +{day.points.videoPastor} pts
                     </div>
@@ -440,7 +442,7 @@ export default function DiaConteudo() {
                     <span className="w-2 h-2 rounded-full bg-primary"></span>
                     Duração: ~2 min
                   </p>
-                  {day.activities.pastorVideoWatched && (
+                  {day.activities.pastorVideoWatched && day.points.videoPastor > 0 && (
                     <span className="text-success text-sm font-bold flex items-center gap-1">
                       <CheckCircle className="w-4 h-4" /> +{day.points.videoPastor} pts conquistados
                     </span>
@@ -509,7 +511,7 @@ export default function DiaConteudo() {
                 </div>
 
 
-                {!isDaySeven && (
+                {!isDaySix && (
                   <div className="flex items-center gap-3">
                     {day.activities.pastorVideoWatched ? (
                       <CheckCircle className="w-5 h-5 text-success" />
