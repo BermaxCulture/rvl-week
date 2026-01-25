@@ -349,11 +349,11 @@ export const mockDays: Day[] = [
     id: "7",
     dayNumber: 7,
     date: "2026-01-25",
-    pastor: "Pr. Helvécio Neto",
-    church: "Pastor na Zion Vale do Ribeira - SP | Líder Dunamis Farm",
-    theme: "Uma Vida Sábia Estabelece o Reino",
-    verse: "O que segue a justiça e a bondade achará a vida, a justiça e a honra.",
-    verseReference: "Provérbios 21:21",
+    pastor: "Pr. Vitor Ledo",
+    church: "Link Church",
+    theme: "A BONDADE ENCARNADA",
+    verse: "No princípio era o Verbo, e o Verbo estava com Deus, e o Verbo era Deus. Ele estava no princípio com Deus. Todas as coisas foram feitas por intermédio dele, e, sem ele, nada do que foi feito se fez. A vida estava nele e a vida era a luz dos homens. A luz resplandece nas trevas, e as trevas não prevaleceram contra ela.",
+    verseReference: "João 1:1-5",
     status: "locked",
     points: {
       qrcode: 100,
@@ -373,9 +373,9 @@ export const mockDays: Day[] = [
     },
     content: {
       mainPoints: [
-        "A bondade de Deus deve ser experimentada",
-        "Provar é ter experiência pessoal",
-        "Bem-aventurado é quem confia no Senhor",
+        "Jesus não veio corrigir o Pai, veio revelá-lo",
+        "A cruz define a bondade de Deus, não o sofrimento",
+        "Jesus é a luz que revela a bondade do Pai",
       ],
       videoUrl: "https://www.youtube.com/watch?v=R-NkZJB0r3Y",
       videoThumbnail: "/placeholder.svg",
@@ -383,22 +383,34 @@ export const mockDays: Day[] = [
       pastorVideoThumbnail: "/placeholder.svg",
       quiz: [
         {
-          question: "O que encontra quem segue a justiça e a bondade?",
-          options: ["Riquezas", "A vida, justiça e honra", "Poder", "Fama"],
-          correct: 1,
-          explanation: "Quem segue justiça e bondade acha vida, justiça e honra.",
+          question: "Qual é a forma correta de conhecer como Deus realmente é?",
+          options: [
+            "Observando as circunstâncias difíceis da vida",
+            "Interpretando Deus a partir do sofrimento humano",
+            "Olhando para a vida e as atitudes de Jesus"
+          ],
+          correct: 2,
+          explanation: "Jesus é a exata expressão do ser de Deus e a única forma perfeita de conhecê-Lo.",
         },
         {
-          question: "Bondade e justiça são:",
-          options: ["Opostos", "Complementares", "Independentes", "Contraditórios"],
+          question: "O que define a bondade de Deus?",
+          options: [
+            "O sofrimento, que revela o quanto Deus nos prova",
+            "A cruz, que revela o amor e o caráter de Deus",
+            "Ambos, pois sofrimento e cruz revelam igualmente Deus"
+          ],
           correct: 1,
-          explanation: "Bondade e justiça são complementares e caminham juntas.",
+          explanation: "A cruz é a demonstração definitiva e final do caráter bondoso e amoroso de Deus.",
         },
         {
-          question: "A honra vem de:",
-          options: ["Status social", "Uma vida íntegra", "Dinheiro", "Popularidade"],
-          correct: 1,
-          explanation: "A honra é fruto de uma vida íntegra.",
+          question: "Quando a Bíblia afirma que Jesus é a Luz do mundo, o que isso significa na prática?",
+          options: [
+            "Que a luz de Jesus expulsa as trevas e revela a verdade sobre Deus",
+            "Que Jesus apenas consola em momentos difíceis",
+            "Que a luz serve apenas para quem já crê"
+          ],
+          correct: 0,
+          explanation: "Como Luz do mundo, Jesus dissipa as trevas da ignorância e revela a verdade sobre quem Deus é.",
         },
       ],
     },
