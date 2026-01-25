@@ -13,6 +13,7 @@ import AdminEditDia from "./pages/AdminEditDia";
 import Perfil from "./pages/Perfil";
 import RankingPage from "./pages/RankingPage";
 import UnlockPage from "./pages/UnlockPage";
+import JornadaConclusao from "./pages/JornadaConclusao";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/utils/ScrollToTop";
 
@@ -117,6 +118,14 @@ const AppContent = () => {
           }
         />
 
+        <Route
+          path="/jornada/conclusao"
+          element={
+            <ProtectedRoute>
+              <JornadaConclusao />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

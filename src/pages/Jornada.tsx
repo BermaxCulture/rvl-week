@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import {
   Calendar,
   AlertTriangle,
   ChevronRight,
+  ArrowRight,
   User,
   PartyPopper,
   Camera,
@@ -20,6 +21,8 @@ import {
   Star,
   Lock,
   ShieldCheck,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { DayCard } from "@/components/features/DayCard";
@@ -36,8 +39,12 @@ import { qrcodeService } from "@/services/qrcode.service";
 
 export default function Jornada() {
   const navigate = useNavigate();
-  const { days, achievements, unlockDay } = useStore();
+  const { days, achievements, unlockDay, showClosingCard, toggleClosingCard, fetchDays } = useStore();
   const { user } = useAuth();
+
+  useEffect(() => {
+    fetchDays();
+  }, []);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingDay, setPendingDay] = useState<number | null>(null);
@@ -46,7 +53,7 @@ export default function Jornada() {
   const completedDaysCount = days.filter((d) => d.status === "completed").length;
 
 
-  const handleManualUnlock = (dayNumber: number) => {
+  const handleManualUnlock = async (dayNumber: number) => {
     setPendingDay(dayNumber);
     setShowConfirmModal(true);
   };
@@ -116,11 +123,11 @@ export default function Jornada() {
 
                 <div className="max-w-md">
                   <p className="text-sm text-foreground/80 mb-2">
-                    Progresso: {completedDaysCount}/6 dias concluídos
+                    Progresso: {completedDaysCount}/7 dias concluídos
                   </p>
                   <ProgressBar
                     current={completedDaysCount}
-                    total={6}
+                    total={7}
                     color="purple"
                     size="lg"
                   />
@@ -136,19 +143,37 @@ export default function Jornada() {
                 Sua Jornada
               </h2>
 
-              {isElevated && (
-                <div className="self-start md:self-auto px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-yellow-500 animate-pulse" />
-                  <p className="text-sm font-black text-yellow-500 uppercase tracking-widest">
-                    Modo {isAdmin ? 'Admin' : 'Pastor'} Ativado
-                  </p>
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <div className="hidden sm:flex px-3 py-1.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-yellow-500 animate-pulse" />
+                    <p className="text-[10px] font-black text-yellow-500 uppercase tracking-widest leading-none">
+                      ADMIN
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleClosingCard();
+                    }}
+                    className={cn(
+                      "flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 transition-all duration-300 font-black text-[10px] uppercase tracking-widest shadow-lg",
+                      showClosingCard
+                        ? "bg-purple-600 border-purple-600 text-white shadow-purple-600/30 active:scale-95"
+                        : "bg-background border-border text-muted-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {showClosingCard ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    CELEBRAÇÃO: {showClosingCard ? "VISÍVEL" : "OCULTO"}
+                  </button>
                 </div>
               )}
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {days
-                .filter(day => day.dayNumber !== 7)
                 .map((day, index) => (
                   <motion.div
                     key={day.dayNumber}
@@ -164,6 +189,60 @@ export default function Jornada() {
                     />
                   </motion.div>
                 ))}
+
+              {(showClosingCard || isAdmin) && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  className={cn(
+                    "relative overflow-hidden group min-h-[340px]",
+                    !showClosingCard && isAdmin && "opacity-60 grayscale"
+                  )}
+                >
+                  <div className={cn(
+                    "h-full rounded-2xl p-6 flex flex-col justify-center items-center text-center shadow-cartoon relative transition-all duration-300 border-3",
+                    showClosingCard || !isAdmin
+                      ? "bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] border-purple-600"
+                      : "bg-[#111] border-dashed border-white/10"
+                  )}>
+                    <div className="absolute inset-0 bg-[url('/grid-bg.png')] opacity-10 pointer-events-none" />
+
+                    <div className="relative z-10 w-full flex flex-col h-full">
+                      <div className="flex-1 flex flex-col items-center justify-center space-y-4">
+                        <div className="w-16 h-16 bg-purple-600/20 rounded-3xl flex items-center justify-center mx-auto mb-2 border border-purple-500/30 group-hover:scale-110 transition-transform duration-500">
+                          <PartyPopper className="w-8 h-8 text-purple-500" />
+                        </div>
+
+                        <h3 className="font-display font-black text-xl leading-tight uppercase tracking-tighter">
+                          Finalizou a <br />
+                          <span className="text-purple-500">Jornada?</span>
+                        </h3>
+
+                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+                          Os próximos passos <br /> estão aqui
+                        </p>
+                      </div>
+
+                      <div className="pt-6">
+                        <Button
+                          onClick={() => navigate('/jornada/conclusao')}
+                          className="w-full bg-purple-600 hover:bg-purple-700 text-white border-none h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] group-hover:shadow-lg group-hover:shadow-purple-900/40 transition-all flex items-center justify-center gap-2"
+                        >
+                          ACESSAR CELEBRAÇÃO <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {!showClosingCard && isAdmin && (
+                      <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                        <p className="px-3 py-1 bg-black/80 backdrop-blur-md rounded-full text-[8px] font-black uppercase tracking-widest text-white/50 border border-white/10 flex items-center gap-1">
+                          <EyeOff className="w-2 h-2" /> Oculto (Admin)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
             </div>
           </section>
 
@@ -190,22 +269,22 @@ export default function Jornada() {
                   {
                     id: 'jornada_completa',
                     name: 'Jornada Completa',
-                    description: 'Completou os 6 dias da RVL Week',
+                    description: 'Completou os 7 dias da RVL Week',
                     icon: Trophy,
                     color: 'yellow',
                     progress: completed,
-                    total: 6,
-                    unlocked: completed === 6
+                    total: 7,
+                    unlocked: completed === 7
                   },
                   {
                     id: 'conhecedor_palavra',
                     name: 'Conhecedor da Palavra',
-                    description: '100% de acerto em todos os 6 quiz',
+                    description: '100% de acerto em todos os 7 quiz',
                     icon: BookOpen,
                     color: 'purple',
                     progress: perfectQuizzes,
-                    total: 6,
-                    unlocked: perfectQuizzes === 6
+                    total: 7,
+                    unlocked: perfectQuizzes === 7
                   },
                   {
                     id: 'sempre_presente',
@@ -214,8 +293,8 @@ export default function Jornada() {
                     icon: Flame,
                     color: 'orange',
                     progress: qrScans,
-                    total: 6,
-                    unlocked: qrScans === 6
+                    total: 7,
+                    unlocked: qrScans === 7
                   },
                   {
                     id: 'comprometido',

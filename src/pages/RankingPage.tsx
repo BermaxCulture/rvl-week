@@ -282,7 +282,7 @@ export default function RankingPage() {
                                                 {user.name}
                                             </h3>
                                             <span className="text-[9px] md:text-xs font-bold text-muted-foreground uppercase tracking-wide">
-                                                {user.completed_days}/6 dias concluídos
+                                                {user.completed_days}/7 dias concluídos
                                             </span>
                                         </div>
 
@@ -361,7 +361,7 @@ export default function RankingPage() {
                                             </div>
                                             <div className="bg-primary/10 text-primary px-3 py-1 rounded-full flex items-center gap-1.5 font-black italic text-xs md:text-base">
                                                 <Calendar className="w-3.5 h-3.5" />
-                                                {selectedUser.completed_days}/6 DIAS
+                                                {selectedUser.completed_days}/7 DIAS
                                             </div>
                                             <div className="bg-muted text-muted-foreground px-3 py-1 rounded-full flex items-center gap-1.5 font-black italic uppercase text-[9px] md:text-[10px] tracking-widest border border-border/50">
                                                 <Church className="w-3 h-3" />
@@ -414,7 +414,6 @@ export default function RankingPage() {
                                         <div className="grid gap-3 text-left">
                                             {userDetails
                                                 .filter((day) => {
-                                                    if (day.day_number === 7) return false;
                                                     if (!day.data_real) return day.completed;
                                                     const now = new Date();
                                                     const isCompleted = day.completed;
@@ -431,7 +430,7 @@ export default function RankingPage() {
                                                     const datePart = day.data_real.toString().includes('T')
                                                         ? day.data_real.toString().split('T')[0]
                                                         : day.data_real.toString();
-                                                    const unlockTime = day.day_number === 7 ? '10:00:00' : '19:30:00';
+                                                    const unlockTime = day.day_number === 7 ? '17:00:00' : '19:30:00';
                                                     const unlockDate = new Date(`${datePart}T${unlockTime}-03:00`);
 
                                                     const isRevealed = now >= unlockDate || isCompleted;
@@ -458,7 +457,7 @@ export default function RankingPage() {
                                                             <div className="flex-1">
                                                                 <h4 className={`font-bold text-sm leading-tight ${isCompleted ? "text-green-400" : ""}`}>{displayTitle}</h4>
                                                                 <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
-                                                                    {isCompleted ? `+${Number(day.points_earned).toFixed(2)} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                    {isCompleted ? `+${Number(day.points_earned).toFixed(2)} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "17h" : "19:30")}
                                                                 </p>
                                                             </div>
                                                             {isCompleted ? (

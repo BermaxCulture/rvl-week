@@ -53,7 +53,7 @@ export function Header() {
 
                 <div className="flex items-center gap-2 px-4 py-2 bg-black/10 rounded-full">
                   <span className="text-purple-900 font-bold text-sm flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5 fill-purple-900" /> {user?.totalPoints || 0}
+                    <Zap className="w-3.5 h-3.5 fill-purple-900" /> {Number(user?.totalPoints || 0).toFixed(2)}
                   </span>
                 </div>
 
@@ -133,7 +133,7 @@ export function Header() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-black truncate">{user?.name}</p>
-                        <p className="text-xs text-black/60 font-bold uppercase tracking-wider">{user?.totalPoints} pontos</p>
+                        <p className="text-xs text-black/60 font-bold uppercase tracking-wider">{Number(user?.totalPoints || 0).toFixed(2)} pontos</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-black/40" />
                     </Link>

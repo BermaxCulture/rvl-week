@@ -240,7 +240,7 @@ export default function Ranking() {
                                     {formatName(user.name)}
                                 </h3>
                                 <span className="text-[9px] md:text-[10px] font-bold text-muted-foreground uppercase tracking-wide truncate">
-                                    {user.completed_days}/6 dias concluídos
+                                    {user.completed_days}/7 dias concluídos
                                 </span>
                             </div>
 
@@ -302,7 +302,7 @@ export default function Ranking() {
                         <div className="h-10 w-px bg-border/50" />
                         <div className="text-center">
                             <p className="text-2xl font-black text-primary flex items-center gap-2">
-                                <Calendar className="w-5 h-5" /> {userRank.user_completed_days}/6
+                                <Calendar className="w-5 h-5" /> {userRank.user_completed_days}/7
                             </p>
                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-1">DIAS</p>
                         </div>
@@ -357,7 +357,7 @@ export default function Ranking() {
                                             </div>
                                             <div className="bg-primary/10 text-primary px-4 py-1 rounded-full flex items-center gap-2 font-black italic">
                                                 <Calendar className="w-4 h-4" />
-                                                {selectedUser.completed_days}/6 DIAS
+                                                {selectedUser.completed_days}/7 DIAS
                                             </div>
                                             <div className="bg-muted text-muted-foreground px-4 py-1 rounded-full flex items-center gap-2 font-black italic uppercase text-[10px] tracking-widest border border-border/50">
                                                 <Church className="w-3.5 h-3.5" />
@@ -407,7 +407,6 @@ export default function Ranking() {
                                         <div className="grid gap-3 text-left">
                                             {userDetails
                                                 .filter((day) => {
-                                                    if (day.day_number === 7) return false;
                                                     const now = new Date();
                                                     const isCompleted = day.completed;
                                                     const datePart = day.data_real.toString().includes('T')
@@ -425,7 +424,7 @@ export default function Ranking() {
                                                     const datePart = day.data_real.toString().includes('T')
                                                         ? day.data_real.toString().split('T')[0]
                                                         : day.data_real.toString();
-                                                    const unlockTime = day.day_number === 7 ? '10:00:00' : '19:30:00';
+                                                    const unlockTime = day.day_number === 7 ? '17:00:00' : '19:30:00';
                                                     const unlockDate = new Date(`${datePart}T${unlockTime}-03:00`);
 
                                                     const isRevealed = now >= unlockDate || isCompleted;
@@ -452,7 +451,7 @@ export default function Ranking() {
                                                             <div className="flex-1">
                                                                 <h4 className={`font-bold text-sm leading-tight ${isCompleted ? "text-green-400" : ""}`}>{displayTitle}</h4>
                                                                 <p className="text-[10px] uppercase font-black tracking-widest mt-0.5 opacity-60">
-                                                                    {isCompleted ? `+${Number(day.points_earned).toFixed(2)} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                    {isCompleted ? `+${Number(day.points_earned).toFixed(2)} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "17h" : "19:30")}
                                                                 </p>
                                                             </div>
                                                             {isCompleted ? (

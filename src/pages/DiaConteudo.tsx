@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom"
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
+  ArrowRight,
   Play,
   CheckCircle,
   BookOpen,
@@ -14,10 +15,13 @@ import {
   PartyPopper,
   Zap,
   Sparkles,
+  Medal,
   Save,
   Copy,
   ExternalLink,
-  Quote
+  Quote,
+  Trophy,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -140,10 +144,10 @@ export default function DiaConteudo() {
       return;
     }
     const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
-    const isDaySix = day.dayNumber === 6;
+    const isDaySeven = day.dayNumber === 7;
     const allComplete =
       day.activities.qrScanned &&
-      (isDaySix || day.activities.pastorVideoWatched) &&
+      (isDaySeven || day.activities.pastorVideoWatched) &&
       (!hasQuiz || day.activities.quizCompleted);
 
     if (!allComplete) {
@@ -167,14 +171,13 @@ export default function DiaConteudo() {
     navigate("/jornada");
   };
 
-
   const totalEarned = day.points.earned;
   const totalPossible = day.points.total;
   const hasQuiz = day.content.quiz && day.content.quiz.length > 0;
-  const isDaySix = day.dayNumber === 6;
+  const isDaySeven = day.dayNumber === 7;
   const allComplete =
     day.activities.qrScanned &&
-    (isDaySix || day.activities.pastorVideoWatched) &&
+    (isDaySeven || day.activities.pastorVideoWatched) &&
     (!hasQuiz || day.activities.quizCompleted);
 
   return (
@@ -211,7 +214,7 @@ export default function DiaConteudo() {
 
               {(user?.role === 'admin') && (
                 <Link
-                  to={`/jornada/dia/${dayNumber}/editar`}
+                  to={`/jornada/dia/${dayNum}/editar`}
                   className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full hover:bg-primary/20 transition-all font-bold text-sm shadow-sm border border-primary/20"
                 >
                   <Save className="w-4 h-4" />
@@ -287,9 +290,7 @@ export default function DiaConteudo() {
 
                   <div className="flex flex-1 max-w-xl items-center gap-2 bg-black/20 rounded-xl p-2 border border-white/5 overflow-hidden">
                     <code className="flex-1 text-[10px] md:text-xs font-mono text-amber-200/70 truncate px-2">
-                      {(() => {
-                        return `${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2026D${day.dayNumber}`;
-                      })()}
+                      {`${qrcodeService.baseUrl}/unlock?day=${day.dayNumber}&token=RVL2026D${day.dayNumber}`}
                     </code>
                     <Button
                       variant="primary"
@@ -354,9 +355,8 @@ export default function DiaConteudo() {
             </div>
           </motion.section>
 
-
           {/* Pastor Video */}
-          {!isDaySix && (
+          {!isDaySeven && (
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -365,7 +365,7 @@ export default function DiaConteudo() {
             >
               <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-primary" />
-                Preparação para o próximo dia
+                {dayNum === 7 ? "Vídeo de encerramento" : "Preparação para o próximo dia"}
               </h2>
 
               <Card className="relative overflow-hidden p-0">
@@ -509,7 +509,7 @@ export default function DiaConteudo() {
                 </div>
 
 
-                {!isDaySix && (
+                {!isDaySeven && (
                   <div className="flex items-center gap-3">
                     {day.activities.pastorVideoWatched ? (
                       <CheckCircle className="w-5 h-5 text-success" />
@@ -517,7 +517,7 @@ export default function DiaConteudo() {
                       <div className="w-5 h-5 rounded-full border-2 border-border" />
                     )}
                     <span className={day.activities.pastorVideoWatched ? "text-foreground" : "text-muted-foreground"}>
-                      Vídeo do pastor assistido
+                      Vídeo assistido
                     </span>
                     <span className="ml-auto text-sm font-semibold">
                       {day.activities.pastorVideoWatched ? `+${day.points.videoPastor} pts` : `0/${day.points.videoPastor} pts`}
@@ -562,7 +562,11 @@ export default function DiaConteudo() {
                     )}
                   </Button>
                 )}
-
+                {day.status === "completed" && !isPreview && (
+                  <div className="w-full p-4 bg-success/10 border-2 border-success/30 rounded-2xl flex items-center justify-center gap-3 text-success font-black uppercase text-sm">
+                    <CheckCircle className="w-6 h-6" /> JORNADA DO DIA CONCLUÍDA!
+                  </div>
+                )}
               </div>
             </Card>
           </motion.section>

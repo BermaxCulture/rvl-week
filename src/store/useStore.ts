@@ -25,6 +25,10 @@ interface StoreState {
   markDayComplete: (dayNumber: number) => void;
   checkAchievements: () => void;
   unlockAchievement: (achievementId: string) => void;
+
+  // App Settings (Admin controlled)
+  showClosingCard: boolean;
+  toggleClosingCard: () => void;
 }
 
 export const useStore = create<StoreState>()(
@@ -34,6 +38,27 @@ export const useStore = create<StoreState>()(
       days: mockDays,
       achievements: mockAchievements,
       pendingUnlockDay: null,
+      showClosingCard: false,
+
+      toggleClosingCard: async () => {
+        const newValue = !get().showClosingCard;
+        set({ showClosingCard: newValue });
+
+        const { user } = useAuth.getState();
+        if (user?.role === 'admin') {
+          const { error } = await supabase
+            .from('app_settings')
+            .update({ show_closing_card: newValue, updated_at: new Date().toISOString() })
+            .eq('id', 'global');
+
+          if (error) {
+            console.error('❌ Erro ao salvar configuração:', error);
+            toast.error("Erro ao salvar no banco de dados.");
+          } else {
+            toast.success(`Celebração agora está ${newValue ? 'VISÍVEL' : 'OCULTA'} para todos.`);
+          }
+        }
+      },
 
       fetchDays: async () => {
         const { user } = useAuth.getState();
@@ -47,6 +72,17 @@ export const useStore = create<StoreState>()(
           .order('dia_number', { ascending: true });
 
         if (error || !jornadas) return;
+
+        // Buscar configurações globais
+        const { data: settings } = await supabase
+          .from('app_settings')
+          .select('show_closing_card')
+          .eq('id', 'global')
+          .single();
+
+        if (settings) {
+          set({ showClosingCard: settings.show_closing_card });
+        }
 
         console.log(`🗓️ Dias buscados: ${jornadas.length}`);
 
@@ -75,10 +111,10 @@ export const useStore = create<StoreState>()(
         const mappedDays: Day[] = jornadas.map(j => {
           const p = progressMap[j.id] || {};
           const isDayOne = j.dia_number === 1;
-          const isDaySix = j.dia_number === 6;
+          const isDaySeven = j.dia_number === 7;
 
           const qrMax = isDayOne ? 75 : 100;
-          const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
+          const pastorMax = isDayOne ? 25 : (isDaySeven ? 0 : 50);
           const quizMax = j.quiz_max_points || 100;
 
           return {
@@ -172,22 +208,22 @@ export const useStore = create<StoreState>()(
 
           if (!isElevated) {
             const now = new Date();
-            const unlockTime = dayNumber === 7 ? '10:00:00' : '19:30:00';
+            const unlockTime = dayNumber === 7 ? '17:00:00' : '19:30:00';
             const unlockDate = new Date(`${dayToUnlock.date}T${unlockTime}-03:00`);
 
             if (now < unlockDate) {
               return {
                 success: false,
-                message: `O desbloqueio manual só é permitido após as ${dayNumber === 7 ? '10h' : '19:30'} do dia do evento.`
+                message: `O desbloqueio manual só é permitido após as ${dayNumber === 7 ? '17h' : '19:30'} do dia do evento.`
               };
             }
           }
         }
 
         const isDayOne = dayNumber === 1;
-        const isDaySix = dayNumber === 6;
+        const isDaySeven = dayNumber === 7;
         const qrMax = isDayOne ? 75 : 100;
-        const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
+        const pastorMax = isDayOne ? 25 : (isDaySeven ? 0 : 50);
 
         const points = {
           qr: method === "qrcode" ? qrMax : (dayToUnlock.activities.qrScanned ? qrMax : 0),
@@ -294,9 +330,9 @@ export const useStore = create<StoreState>()(
         if (!journey) return;
 
         const isDayOne = dayNumber === 1;
-        const isDaySix = dayNumber === 6;
+        const isDaySeven = dayNumber === 7;
         const qrMax = isDayOne ? 75 : 100;
-        const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
+        const pastorMax = isDayOne ? 25 : (isDaySeven ? 0 : 50);
 
         const points = {
           qr: day.activities.qrScanned ? qrMax : 0,
@@ -340,9 +376,9 @@ export const useStore = create<StoreState>()(
 
         // score here is already the dynamic points calculated by QuizTimed (0-100)
         const isDayOne = dayNumber === 1;
-        const isDaySix = dayNumber === 6;
+        const isDaySeven = dayNumber === 7;
         const qrPoints = day.activities.qrScanned ? (isDayOne ? 75 : 100) : 0;
-        const pastorPoints = day.activities.pastorVideoWatched ? (isDayOne ? 25 : (isDaySix ? 0 : 50)) : 0;
+        const pastorPoints = day.activities.pastorVideoWatched ? (isDayOne ? 25 : (isDaySeven ? 0 : 50)) : 0;
         const totalPoints = qrPoints + pastorPoints + score;
 
         console.log(`📝 Enviando para Supabase: Dia ${dayNumber}, QuizPts: ${score}, QR: ${qrPoints}, Pastor: ${pastorPoints}, Total: ${totalPoints}`);
@@ -386,9 +422,9 @@ export const useStore = create<StoreState>()(
         if (!journey) return;
 
         const isDayOne = dayNumber === 1;
-        const isDaySix = dayNumber === 6;
+        const isDaySeven = dayNumber === 7;
         const qrMax = isDayOne ? 75 : 100;
-        const pastorMax = isDayOne ? 25 : (isDaySix ? 0 : 50);
+        const pastorMax = isDayOne ? 25 : (isDaySeven ? 0 : 50);
 
         const totalPoints =
           (day.activities.qrScanned ? qrMax : 0) +
@@ -428,15 +464,15 @@ export const useStore = create<StoreState>()(
           switch (achievement.id) {
             case "jornada_completa":
               progress = completedDaysCount;
-              unlocked = completedDaysCount >= 6;
+              unlocked = completedDaysCount >= 7;
               break;
             case "conhecedor_palavra":
               progress = perfectQuizCount;
-              unlocked = perfectQuizCount >= 6;
+              unlocked = perfectQuizCount >= 7;
               break;
             case "sempre_presente":
               progress = qrScannedCount;
-              unlocked = qrScannedCount >= 6;
+              unlocked = qrScannedCount >= 7;
               break;
             case "comprometido":
               progress = completedDaysCount;
@@ -492,6 +528,7 @@ export const useStore = create<StoreState>()(
         days: state.days,
         achievements: state.achievements,
         pendingUnlockDay: state.pendingUnlockDay,
+        showClosingCard: state.showClosingCard,
       }),
     }
   )

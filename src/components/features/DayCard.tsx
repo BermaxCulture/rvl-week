@@ -42,7 +42,7 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
     // 2. Trava de Horário (Apenas para MANUAL)
     if (method === 'manual') {
       const now = new Date();
-      const unlockTime = day.dayNumber === 7 ? '10:00:00' : '19:30:00';
+      const unlockTime = day.dayNumber === 7 ? '17:00:00' : '19:30:00';
       const unlockDate = new Date(`${day.date}T${unlockTime}-03:00`);
       if (now < unlockDate) {
         return "time";
@@ -87,7 +87,7 @@ export function DayCard({ day, onScanQR, onManualUnlock, onViewDay }: DayCardPro
                 )}
                 {!sequenceBlocked && manualTimeBlocked && (
                   <p className="text-[9px] text-red-500/80 font-bold uppercase">
-                    Manual liberado em {formatDate(day.date)} às {day.dayNumber === 7 ? '10:00' : '19:30'}
+                    Manual liberado em {formatDate(day.date)} às {day.dayNumber === 7 ? '17:00' : '19:30'}
                   </p>
                 )}
               </div>

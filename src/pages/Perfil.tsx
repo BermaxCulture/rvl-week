@@ -234,7 +234,7 @@ export default function Perfil() {
                                     <div className="text-center">
                                         <p className="text-2xl font-display font-bold text-secondary">
                                             <Zap className="w-5 h-5 inline mr-1 fill-secondary" />
-                                            {user.totalPoints}
+                                            {Number(user.totalPoints || 0).toFixed(2)}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Pontos</p>
                                     </div>
@@ -453,7 +453,7 @@ export default function Perfil() {
                                                         const now = new Date();
                                                         const isCompleted = day.completed || (Number(day.points_earned) >= 200);
                                                         const dateStr = day.data_real.toString().split('T')[0];
-                                                        const unlockTime = day.day_number === 7 ? '10:00:00' : '19:30:00';
+                                                        const unlockTime = day.day_number === 7 ? '17:00:00' : '19:30:00';
                                                         const unlockDate = new Date(`${dateStr}T${unlockTime}-03:00`);
 
                                                         const isRevealed = now >= unlockDate || isCompleted;
@@ -482,7 +482,7 @@ export default function Perfil() {
                                                                         {displayTitle}
                                                                     </h4>
                                                                     <p className="text-[10px] uppercase font-black tracking-widest mt-1 opacity-60">
-                                                                        {isCompleted ? `+${day.points_earned} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "10h" : "19:30")}
+                                                                        {isCompleted ? `+${day.points_earned} PTS` : isRevealed ? "Não concluído" : "Liberação às " + (day.day_number === 7 ? "17h" : "19:30")}
                                                                     </p>
                                                                 </div>
                                                                 {isCompleted ? (
