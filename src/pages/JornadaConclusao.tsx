@@ -152,30 +152,37 @@ export default function JornadaConclusao() {
                         transition={{ delay: 0.6 }}
                         className="mb-12"
                     >
-                        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] rounded-[2rem] border-2 border-white/5 p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
+                        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] rounded-[2rem] border-2 border-white/5 p-8 md:p-16 flex flex-col items-center">
                             <div className="flex-1 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 text-blue-500 font-black uppercase text-xs tracking-widest mb-4">
-                                    <BookOpen className="w-4 h-4" /> Formação de Líderes
-                                </div>
-                                <h3 className="text-3xl font-black mb-4 uppercase tracking-tighter leading-none">
+                                <h3 className="text-3xl md:text-5xl font-black mb-6 uppercase tracking-tighter leading-none">
                                     Link <span className="text-blue-500">School</span>
                                 </h3>
-                                <p className="text-white/60 mb-8 leading-relaxed max-w-md">
+                                <p className="text-white/60 mb-10 leading-relaxed max-w-2xl mx-auto">
                                     Crescimento espiritual também passa por formação. A Link School existe para te ajudar a transformar revelação em prática, fé em fundamento e chamado em responsabilidade.
                                 </p>
+
+                                {/* Vídeo da Link School */}
+                                <div className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-blue-500/20 shadow-2xl mb-10 relative group">
+                                    <iframe
+                                        className="w-full h-full"
+                                        src="https://www.youtube.com/embed/coMdxKbqyjg"
+                                        title="Link School Video"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen
+                                    ></iframe>
+                                </div>
+
                                 <a
                                     href="https://www.linkschoolbr.com"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    className="block w-full max-w-xl mx-auto"
                                 >
-                                    <Button variant="outline" size="lg" className="w-full md:w-auto h-14 px-8 border-white/10 hover:border-blue-500 hover:text-blue-500 transition-all font-bold uppercase tracking-widest text-sm">
-                                        ACESSAR LINK SCHOOL <ArrowRight className="w-5 h-5 ml-2" />
+                                    <Button variant="primary" size="xl" className="w-full h-20 px-16 shadow-2xl transition-all font-black uppercase tracking-widest text-xl group">
+                                        ACESSAR LINK SCHOOL <ArrowRight className="w-8 h-8 ml-3 group-hover:translate-x-2 transition-transform" />
                                     </Button>
                                 </a>
-                            </div>
-                            <div className="md:w-2/5 aspect-square rounded-3xl bg-blue-600/10 border-2 border-blue-500/20 flex items-center justify-center relative group">
-                                <div className="absolute inset-4 rounded-2xl border border-blue-500/40 opacity-20 group-hover:opacity-100 transition-opacity animate-pulse" />
-                                <BookOpen className="w-24 h-24 text-blue-500/60" />
                             </div>
                         </div>
                     </motion.section>
