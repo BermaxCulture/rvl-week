@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
@@ -12,7 +13,8 @@ import {
     Trophy,
     Loader2,
     Medal,
-    ArrowRight
+    ArrowRight,
+    Play
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/ButtonCustom";
@@ -150,14 +152,38 @@ export default function JornadaConclusao() {
 
                                 {/* Vídeo em destaque maior */}
                                 <div className="mb-10 rounded-[2rem] overflow-hidden aspect-video bg-black/40 border-2 border-white/5 shadow-2xl relative group">
-                                    <iframe
-                                        className="w-full h-full"
-                                        src="https://www.youtube.com/embed/s8iw2i01evU"
-                                        title="RVL Conference Video"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                    ></iframe>
+                                    {showVideo1 ? (
+                                        <iframe
+                                            className="w-full h-full"
+                                            src="https://www.youtube.com/embed/s8iw2i01evU?autoplay=1"
+                                            title="RVL Conference Video"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowFullScreen
+                                        ></iframe>
+                                    ) : (
+                                        <button
+                                            onClick={() => setShowVideo1(true)}
+                                            className="relative w-full h-full flex items-center justify-center group overflow-hidden"
+                                        >
+                                            <img
+                                                src={`https://img.youtube.com/vi/s8iw2i01evU/maxresdefault.jpg`}
+                                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                                                alt="Thumbnail"
+                                                onError={(e) => {
+                                                    e.currentTarget.src = `https://img.youtube.com/vi/s8iw2i01evU/hqdefault.jpg`;
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+                                            <div className="relative flex flex-col items-center gap-3 z-10">
+                                                <div className="w-16 h-16 md:w-20 md:h-20 bg-purple-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                                                    <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-1" />
+                                                </div>
+                                                <p className="font-bold text-white text-sm md:text-base drop-shadow-md">Clique para assistir</p>
+                                            </div>
+                                        </button>
+                                    )}
                                 </div>
 
                                 <a
@@ -165,8 +191,8 @@ export default function JornadaConclusao() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <Button variant="primary" size="lg" className="w-full h-16 bg-purple-600 hover:bg-purple-700 shadow-2xl shadow-purple-900/40 border-none transition-all hover:scale-[1.02] active:scale-95 text-lg font-black tracking-widest">
-                                        GARANTA SUA VAGA NO TIKETO <ArrowRight className="w-6 h-6 ml-2" />
+                                    <Button variant="primary" size="lg" className="w-full h-16 bg-purple-600 hover:bg-purple-700 shadow-2xl shadow-purple-900/40 border-none transition-all hover:scale-[1.02] active:scale-95 text-sm md:text-lg font-black tracking-widest text-wrap md:text-nowrap px-4 leading-tight">
+                                        GARANTA SUA VAGA NO TIKETO <ArrowRight className="w-5 h-5 md:w-6 md:h-6 ml-2 shrink-0" />
                                     </Button>
                                 </a>
                             </div>
@@ -190,15 +216,39 @@ export default function JornadaConclusao() {
                                 </p>
 
                                 {/* Vídeo da Link School */}
-                                <div className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-blue-500/20 shadow-2xl mb-10 relative group">
-                                    <iframe
-                                        className="w-full h-full"
-                                        src="https://www.youtube.com/embed/coMdxKbqyjg"
-                                        title="Link School Video"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                    ></iframe>
+                                <div className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-blue-500/20 shadow-2xl mb-10 relative group bg-black/40">
+                                    {showVideo2 ? (
+                                        <iframe
+                                            className="w-full h-full"
+                                            src="https://www.youtube.com/embed/coMdxKbqyjg?autoplay=1"
+                                            title="Link School Video"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowFullScreen
+                                        ></iframe>
+                                    ) : (
+                                        <button
+                                            onClick={() => setShowVideo2(true)}
+                                            className="relative w-full h-full flex items-center justify-center group overflow-hidden"
+                                        >
+                                            <img
+                                                src={`https://img.youtube.com/vi/coMdxKbqyjg/maxresdefault.jpg`}
+                                                className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                                                alt="Thumbnail"
+                                                onError={(e) => {
+                                                    e.currentTarget.src = `https://img.youtube.com/vi/coMdxKbqyjg/hqdefault.jpg`;
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+                                            <div className="relative flex flex-col items-center gap-3 z-10">
+                                                <div className="w-16 h-16 md:w-20 md:h-20 bg-blue-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                                                    <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-1" />
+                                                </div>
+                                                <p className="font-bold text-white text-sm md:text-base drop-shadow-md">Clique para assistir</p>
+                                            </div>
+                                        </button>
+                                    )}
                                 </div>
 
                                 <a
@@ -207,8 +257,8 @@ export default function JornadaConclusao() {
                                     rel="noopener noreferrer"
                                     className="block w-full max-w-xl mx-auto"
                                 >
-                                    <Button variant="primary" size="xl" className="w-full h-20 px-16 shadow-2xl transition-all font-black uppercase tracking-widest text-xl group">
-                                        ACESSAR LINK SCHOOL <ArrowRight className="w-8 h-8 ml-3 group-hover:translate-x-2 transition-transform" />
+                                    <Button variant="primary" size="xl" className="w-full h-16 md:h-20 px-4 md:px-16 shadow-2xl transition-all font-black uppercase tracking-widest text-base md:text-xl group leading-tight">
+                                        ACESSAR LINK SCHOOL <ArrowRight className="w-6 h-6 md:w-8 md:h-8 ml-3 group-hover:translate-x-2 transition-transform shrink-0" />
                                     </Button>
                                 </a>
                             </div>
