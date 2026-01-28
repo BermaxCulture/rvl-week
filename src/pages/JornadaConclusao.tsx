@@ -249,50 +249,64 @@ export default function JornadaConclusao() {
                                 Confira o que os campeões da RVL Week ganharão em descontos para o novo curso <span className="text-amber-500 font-bold">BIBLE PROJECT</span>:
                             </p>
 
-                            <div className="w-full space-y-3 mb-8">
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <div className="flex flex-col items-start">
-                                        <span className="flex items-center gap-2 font-bold text-xs uppercase opacity-60"><Medal className="w-3 h-3 text-yellow-500" /> 1º LUGAR</span>
-                                        <span className="font-black text-sm text-white uppercase tracking-tight">
+                            <div className="w-full space-y-2 mb-8">
+                                {/* 1º Lugar */}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                                    <div className="flex flex-col items-start text-left min-w-0 flex-1 mr-3">
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <Medal className="w-3 h-3 text-yellow-500" />
+                                            <span className="font-black text-[9px] uppercase tracking-wider text-yellow-500/60">1º LUGAR</span>
+                                        </div>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight leading-none break-words">
                                             {loadingWinners ? "..." : (winners[0]?.full_name?.trim() || "---")}
                                         </span>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="font-black text-yellow-500 block leading-none">100% OFF</span>
+                                    <div className="text-right shrink-0">
+                                        <span className="font-black text-lg text-yellow-500 block leading-none">100% OFF</span>
                                         {!loadingWinners && winners[0] && (
-                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">
                                                 {winners[0].total_points} PTS
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <div className="flex flex-col items-start">
-                                        <span className="flex items-center gap-2 font-bold text-xs uppercase opacity-60"><Medal className="w-3 h-3 text-slate-400" /> 2º LUGAR</span>
-                                        <span className="font-black text-sm text-white uppercase tracking-tight">
+
+                                {/* 2º Lugar */}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                                    <div className="flex flex-col items-start text-left min-w-0 flex-1 mr-3">
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <Medal className="w-3 h-3 text-slate-400" />
+                                            <span className="font-black text-[9px] uppercase tracking-wider text-slate-400/60">2º LUGAR</span>
+                                        </div>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight leading-none break-words">
                                             {loadingWinners ? "..." : (winners[1]?.full_name?.trim() || "---")}
                                         </span>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="font-black text-slate-400 block leading-none">50% OFF</span>
+                                    <div className="text-right shrink-0">
+                                        <span className="font-black text-lg text-slate-400 block leading-none">50% OFF</span>
                                         {!loadingWinners && winners[1] && (
-                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">
                                                 {winners[1].total_points} PTS
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <div className="flex flex-col items-start">
-                                        <span className="flex items-center gap-2 font-bold text-xs uppercase opacity-60"><Medal className="w-3 h-3 text-amber-700" /> 3º LUGAR</span>
-                                        <span className="font-black text-sm text-white uppercase tracking-tight">
+
+                                {/* 3º Lugar */}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                                    <div className="flex flex-col items-start text-left min-w-0 flex-1 mr-3">
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <Medal className="w-3 h-3 text-amber-700" />
+                                            <span className="font-black text-[9px] uppercase tracking-wider text-amber-700/60">3º LUGAR</span>
+                                        </div>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight leading-none break-words">
                                             {loadingWinners ? "..." : (winners[2]?.full_name?.trim() || "---")}
                                         </span>
                                     </div>
-                                    <div className="text-right">
-                                        <span className="font-black text-amber-700 block leading-none">25% OFF</span>
+                                    <div className="text-right shrink-0">
+                                        <span className="font-black text-lg text-amber-700 block leading-none">25% OFF</span>
                                         {!loadingWinners && winners[2] && (
-                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">
                                                 {winners[2].total_points} PTS
                                             </span>
                                         )}
