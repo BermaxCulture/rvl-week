@@ -1,17 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import {
     CheckCircle,
-    BookOpen,
     MessageCircle,
     PartyPopper,
     Zap,
     Sparkles,
     Trophy,
-    Loader2,
     Medal,
     ArrowRight,
     Play
@@ -23,8 +20,14 @@ import rvlTiketoLogo from "@/assets/RVL26_Tiketo.png";
 
 export default function JornadaConclusao() {
     const navigate = useNavigate();
+
+    // Estados para os Ganhadores
     const [winners, setWinners] = useState<{ full_name: string, total_points: number }[]>([]);
     const [loadingWinners, setLoadingWinners] = useState(true);
+
+    // Estados para os Vídeos
+    const [showVideo1, setShowVideo1] = useState(false);
+    const [showVideo2, setShowVideo2] = useState(false);
 
     useEffect(() => {
         const fetchWinners = async () => {
