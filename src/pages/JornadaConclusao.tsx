@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import {
     CheckCircle,
     BookOpen,
@@ -21,15 +23,32 @@ import rvlTiketoLogo from "@/assets/RVL26_Tiketo.png";
 
 export default function JornadaConclusao() {
     const navigate = useNavigate();
-    const [showVideo1, setShowVideo1] = useState(false);
-    const [showVideo2, setShowVideo2] = useState(false);
+    const [winners, setWinners] = useState<{ full_name: string, total_points: number }[]>([]);
+    const [loadingWinners, setLoadingWinners] = useState(true);
 
-    const getYouTubeId = (url: string) => {
-        if (!url) return "";
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[2].length === 11) ? match[2] : "";
-    };
+    useEffect(() => {
+        const fetchWinners = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('full_name, total_points')
+                    .not('role', 'eq', 'admin')
+                    .not('role', 'eq', 'pastor')
+                    .order('total_points', { ascending: false })
+                    .order('full_name', { ascending: true })
+                    .limit(3);
+
+                if (error) throw error;
+                setWinners(data || []);
+            } catch (err) {
+                console.error("Erro ao buscar ganhadores:", err);
+            } finally {
+                setLoadingWinners(false);
+            }
+        };
+
+        fetchWinners();
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -280,24 +299,71 @@ export default function JornadaConclusao() {
                                 Confira o que os campeões da RVL Week ganharão em descontos para o novo curso <span className="text-amber-500 font-bold">BIBLE PROJECT</span>:
                             </p>
 
-                            <div className="w-full space-y-3 mb-8">
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <span className="flex items-center gap-2 font-bold"><Medal className="w-4 h-4 text-yellow-500" /> 1º LUGAR</span>
-                                    <span className="font-black text-yellow-500">100% OFF</span>
+                            <div className="w-full space-y-2 mb-8">
+                                {/* 1º Lugar */}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                                    <div className="flex flex-col items-start text-left min-w-0 flex-1 mr-3">
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <Medal className="w-3 h-3 text-yellow-500" />
+                                            <span className="font-black text-[9px] uppercase tracking-wider text-yellow-500/60">1º LUGAR</span>
+                                        </div>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight leading-none break-words">
+                                            {loadingWinners ? "..." : (winners[0]?.full_name?.trim() || "---")}
+                                        </span>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <span className="font-black text-lg text-yellow-500 block leading-none">100% OFF</span>
+                                        {!loadingWinners && winners[0] && (
+                                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">
+                                                {winners[0].total_points} PTS
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <span className="flex items-center gap-2 font-bold"><Medal className="w-4 h-4 text-slate-400" /> 2º LUGAR</span>
-                                    <span className="font-black text-slate-400">50% OFF</span>
+
+                                {/* 2º Lugar */}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                                    <div className="flex flex-col items-start text-left min-w-0 flex-1 mr-3">
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <Medal className="w-3 h-3 text-slate-400" />
+                                            <span className="font-black text-[9px] uppercase tracking-wider text-slate-400/60">2º LUGAR</span>
+                                        </div>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight leading-none break-words">
+                                            {loadingWinners ? "..." : (winners[1]?.full_name?.trim() || "---")}
+                                        </span>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <span className="font-black text-lg text-slate-400 block leading-none">50% OFF</span>
+                                        {!loadingWinners && winners[1] && (
+                                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">
+                                                {winners[1].total_points} PTS
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <span className="flex items-center gap-2 font-bold"><Medal className="w-4 h-4 text-amber-700" /> 3º LUGAR</span>
-                                    <span className="font-black text-amber-700">25% OFF</span>
+
+                                {/* 3º Lugar */}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/[0.08] transition-colors">
+                                    <div className="flex flex-col items-start text-left min-w-0 flex-1 mr-3">
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <Medal className="w-3 h-3 text-amber-700" />
+                                            <span className="font-black text-[9px] uppercase tracking-wider text-amber-700/60">3º LUGAR</span>
+                                        </div>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight leading-none break-words">
+                                            {loadingWinners ? "..." : (winners[2]?.full_name?.trim() || "---")}
+                                        </span>
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <span className="font-black text-lg text-amber-700 block leading-none">25% OFF</span>
+                                        {!loadingWinners && winners[2] && (
+                                            <span className="text-[9px] font-bold text-white/20 uppercase tracking-tighter">
+                                                {winners[2].total_points} PTS
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 text-amber-500 font-bold text-[10px] uppercase tracking-widest bg-amber-500/10 px-4 py-2 rounded-full">
-                                <Loader2 className="w-3 h-3 animate-spin" /> Resultado amanhã
-                            </div>
                         </div>
                     </motion.section>
 
