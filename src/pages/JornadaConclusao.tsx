@@ -21,8 +21,21 @@ import rvlTiketoLogo from "@/assets/RVL26_Tiketo.png";
 
 export default function JornadaConclusao() {
     const navigate = useNavigate();
+
+    // Estados para os Ganhadores
     const [winners, setWinners] = useState<{ full_name: string, total_points: number }[]>([]);
     const [loadingWinners, setLoadingWinners] = useState(true);
+
+    // Estados para os Vídeos (Recuperados do merge conflict)
+    const [showVideo1, setShowVideo1] = useState(false);
+    const [showVideo2, setShowVideo2] = useState(false);
+
+    const getYouTubeId = (url: string) => {
+        if (!url) return "";
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : "";
+    };
 
     useEffect(() => {
         const fetchWinners = async () => {
@@ -150,14 +163,30 @@ export default function JornadaConclusao() {
 
                                 {/* Vídeo em destaque maior */}
                                 <div className="mb-10 rounded-[2rem] overflow-hidden aspect-video bg-black/40 border-2 border-white/5 shadow-2xl relative group">
-                                    <iframe
-                                        className="w-full h-full"
-                                        src="https://www.youtube.com/embed/s8iw2i01evU"
-                                        title="RVL Conference Video"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                    ></iframe>
+                                    {showVideo1 ? (
+                                        <iframe
+                                            className="w-full h-full"
+                                            src="https://www.youtube.com/embed/s8iw2i01evU?autoplay=1"
+                                            title="RVL Conference Video"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowFullScreen
+                                        ></iframe>
+                                    ) : (
+                                        <button
+                                            onClick={() => setShowVideo1(true)}
+                                            className="w-full h-full flex items-center justify-center group/btn"
+                                        >
+                                            <img
+                                                src={`https://img.youtube.com/vi/s8iw2i01evU/maxresdefault.jpg`}
+                                                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700"
+                                                alt="Video Thumbnail"
+                                            />
+                                            <div className="relative z-10 w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center shadow-2xl group-hover/btn:scale-110 transition-transform">
+                                                <Zap className="w-10 h-10 text-white fill-white" />
+                                            </div>
+                                        </button>
+                                    )}
                                 </div>
 
                                 <a
@@ -191,14 +220,30 @@ export default function JornadaConclusao() {
 
                                 {/* Vídeo da Link School */}
                                 <div className="aspect-video w-full max-w-2xl mx-auto rounded-3xl overflow-hidden border-2 border-blue-500/20 shadow-2xl mb-10 relative group">
-                                    <iframe
-                                        className="w-full h-full"
-                                        src="https://www.youtube.com/embed/coMdxKbqyjg"
-                                        title="Link School Video"
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                    ></iframe>
+                                    {showVideo2 ? (
+                                        <iframe
+                                            className="w-full h-full"
+                                            src="https://www.youtube.com/embed/coMdxKbqyjg?autoplay=1"
+                                            title="Link School Video"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allowFullScreen
+                                        ></iframe>
+                                    ) : (
+                                        <button
+                                            onClick={() => setShowVideo2(true)}
+                                            className="w-full h-full flex items-center justify-center group/btn"
+                                        >
+                                            <img
+                                                src={`https://img.youtube.com/vi/coMdxKbqyjg/maxresdefault.jpg`}
+                                                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition-transform duration-700"
+                                                alt="Video Thumbnail"
+                                            />
+                                            <div className="relative z-10 w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center shadow-2xl group-hover/btn:scale-110 transition-transform">
+                                                <MessageCircle className="w-10 h-10 text-white fill-white" />
+                                            </div>
+                                        </button>
+                                    )}
                                 </div>
 
                                 <a
