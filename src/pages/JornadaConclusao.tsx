@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import {
     CheckCircle,
     BookOpen,
@@ -19,6 +21,32 @@ import rvlTiketoLogo from "@/assets/RVL26_Tiketo.png";
 
 export default function JornadaConclusao() {
     const navigate = useNavigate();
+    const [winners, setWinners] = useState<{ full_name: string, total_points: number }[]>([]);
+    const [loadingWinners, setLoadingWinners] = useState(true);
+
+    useEffect(() => {
+        const fetchWinners = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('full_name, total_points')
+                    .not('role', 'eq', 'admin')
+                    .not('role', 'eq', 'pastor')
+                    .order('total_points', { ascending: false })
+                    .order('full_name', { ascending: true })
+                    .limit(3);
+
+                if (error) throw error;
+                setWinners(data || []);
+            } catch (err) {
+                console.error("Erro ao buscar ganhadores:", err);
+            } finally {
+                setLoadingWinners(false);
+            }
+        };
+
+        fetchWinners();
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -223,22 +251,55 @@ export default function JornadaConclusao() {
 
                             <div className="w-full space-y-3 mb-8">
                                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <span className="flex items-center gap-2 font-bold"><Medal className="w-4 h-4 text-yellow-500" /> 1º LUGAR</span>
-                                    <span className="font-black text-yellow-500">100% OFF</span>
+                                    <div className="flex flex-col items-start">
+                                        <span className="flex items-center gap-2 font-bold text-xs uppercase opacity-60"><Medal className="w-3 h-3 text-yellow-500" /> 1º LUGAR</span>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight">
+                                            {loadingWinners ? "..." : (winners[0]?.full_name?.trim() || "---")}
+                                        </span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="font-black text-yellow-500 block leading-none">100% OFF</span>
+                                        {!loadingWinners && winners[0] && (
+                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                                                {winners[0].total_points} PTS
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <span className="flex items-center gap-2 font-bold"><Medal className="w-4 h-4 text-slate-400" /> 2º LUGAR</span>
-                                    <span className="font-black text-slate-400">50% OFF</span>
+                                    <div className="flex flex-col items-start">
+                                        <span className="flex items-center gap-2 font-bold text-xs uppercase opacity-60"><Medal className="w-3 h-3 text-slate-400" /> 2º LUGAR</span>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight">
+                                            {loadingWinners ? "..." : (winners[1]?.full_name?.trim() || "---")}
+                                        </span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="font-black text-slate-400 block leading-none">50% OFF</span>
+                                        {!loadingWinners && winners[1] && (
+                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                                                {winners[1].total_points} PTS
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-                                    <span className="flex items-center gap-2 font-bold"><Medal className="w-4 h-4 text-amber-700" /> 3º LUGAR</span>
-                                    <span className="font-black text-amber-700">25% OFF</span>
+                                    <div className="flex flex-col items-start">
+                                        <span className="flex items-center gap-2 font-bold text-xs uppercase opacity-60"><Medal className="w-3 h-3 text-amber-700" /> 3º LUGAR</span>
+                                        <span className="font-black text-sm text-white uppercase tracking-tight">
+                                            {loadingWinners ? "..." : (winners[2]?.full_name?.trim() || "---")}
+                                        </span>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className="font-black text-amber-700 block leading-none">25% OFF</span>
+                                        {!loadingWinners && winners[2] && (
+                                            <span className="text-[10px] font-bold text-white/30 uppercase tracking-tighter">
+                                                {winners[2].total_points} PTS
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 text-amber-500 font-bold text-[10px] uppercase tracking-widest bg-amber-500/10 px-4 py-2 rounded-full">
-                                <Loader2 className="w-3 h-3 animate-spin" /> Resultado amanhã
-                            </div>
                         </div>
                     </motion.section>
 
